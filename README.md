@@ -16,7 +16,7 @@ Install:
 * Git
   * Linux: sudo apt-get install git
   * Windows & Mac: https://git-scm.com/downloads
-    * For windows Make sure C:\Program Files\Git\usr\bin [is in your path variable](http://www.computerhope.com/issues/ch000549.htm)
+    * For windows make sure C:\Program Files\Git\usr\bin [is in your path variable](http://www.computerhope.com/issues/ch000549.htm)
 
 
 Then run:
