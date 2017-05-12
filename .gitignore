@@ -1,0 +1,18 @@
+workspace/
+eclipse/
+*~
+~*
+*.swp
+*.bak
+*.pyc
+*.sqlite3
+python/
+media/
+collected_static/
+local_settings.py
+
+# Vagrant stuff
+.vagrant
+*.log
+
+.coverage
