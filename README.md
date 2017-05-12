@@ -17,8 +17,6 @@ Install:
   * Linux: sudo apt-get install git
   * Windows & Mac: https://git-scm.com/downloads
     * For windows Make sure C:\Program Files\Git\usr\bin [is in your path variable](http://www.computerhope.com/issues/ch000549.htm)
-* A copy of this repo
-  * git clone https://github.com/CSnap/rpi_csdt_community.git
 
 
 Then run:
