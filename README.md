@@ -20,7 +20,7 @@ Install:
 * Vagrant
   * Linux: sudo apt-get install vagrant
   * Windows & Mac: https://www.vagrantup.com/downloads.html
-* libffi-dev (For Misaka to mimick GitHub markdown)
+* libffi-dev (For Misaka)
   * Linux: sudo apt-get install libffi-dev
 * Git
   * Linux: sudo apt-get install git
@@ -34,6 +34,7 @@ git clone https://github.com/CSnap/django_git_tinymce
 cd django_git_tinymce
 vagrant up
 vagrant ssh
+sudo apt-get install libffi-dev
 cd /vagrant
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
