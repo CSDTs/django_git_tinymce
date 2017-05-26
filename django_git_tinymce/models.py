@@ -13,7 +13,6 @@ class Repo(models.Model):
     description = models.TextField(null=True)
     description_html = models.TextField(null=True, editable=False)
 
-
     def __str__(self):
         return self.description
 
@@ -22,7 +21,7 @@ class Repo(models.Model):
         self.description_html = misaka.html(self.description)
         super().save(*args, **kwargs)
 
-    #def get_absolute_url(self):
+    # def get_absolute_url(self):
     #    return reverse(
     #        "posts:single",
     #        kwargs={
@@ -37,11 +36,9 @@ class Repo(models.Model):
         verbose_name_plural = "repos"
 
 
-
 class Document(models.Model):
     repo = models.ForeignKey(Repo)
     url = models.CharField(max_length=255, null=True, blank=True)
-
 
 
 MEMBERSHIP_CHOICES = (

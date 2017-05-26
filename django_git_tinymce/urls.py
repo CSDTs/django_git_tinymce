@@ -30,5 +30,5 @@ urlpatterns = [
     url(r'^newdoc/(?P<path>.*)$', DocumentCreate.as_view(), name='docs-create'),
     url(r'^editdoc/(?P<path>.*)$', DocumentUpdate.as_view(), name='docs-update'),
     url(r'^deldoc/(?P<path>.*)$', DocumentDelete.as_view(), name='docs-delete'),
-    url(r'^(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_URL + 'git',}),
+    url(r'^(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_URL + 'git', }),
 ]
