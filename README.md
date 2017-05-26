@@ -37,7 +37,7 @@ vagrant ssh
 sudo apt-get install libffi-dev
 cd /vagrant
 python manage.py migrate
-python manage.py runserver 0.0.0.0:8000
+python manage.py runserver 0.0.0.0:8001
 ```
 
 The site should now be accessible at via web browser at localhost:8001
