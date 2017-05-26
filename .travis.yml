@@ -16,19 +16,19 @@ before_install:
 install:
   - sudo $(type -P npm) install -g less
   - sudo $(type -P npm) install -g yuglify
-  - sudo pip install setuptools --upgrade
-  - sudo pip install --upgrade -r requirements.txt
-  - sudo pip install coveralls
-  - sudo pip install flake8
+  - sudo pip3 install setuptools --upgrade
+  - sudo pip3 install --upgrade -r requirements.txt
+  - sudo pip3 install coveralls
+  - sudo pip3 install flake8
   
 before_script:
   - psql -c "CREATE DATABASE travisci;" -U postgres
 
 script:
   - flake8 .
-  - python manage.py migrate
+  - python3 manage.py migrate
   - coverage run --source=django_git_tinymce manage.py test
 
 after_success:
-  - pip freeze
+  - pip3 freeze
   - echo Uploading code coverage data ...; coveralls
