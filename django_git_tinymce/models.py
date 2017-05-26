@@ -6,7 +6,7 @@ from django.utils.text import slugify
 
 
 class Repo(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=settings.AUTH_USER_MODEL, related_name="repo")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1, blank=True, related_name="repo_user")
     name = models.CharField(max_length=255, unique=True, null=False, default='repo-name')
     slug = models.SlugField(allow_unicode=True, unique=True, default='repo-name')
     created_at = models.DateTimeField(auto_now=True)
@@ -15,11 +15,11 @@ class Repo(models.Model):
 
 
     def __str__(self):
-        return self.message
+        return self.description
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
-        self.description_html = misaka.html(self.message)
+        self.description_html = misaka.html(self.description)
         super().save(*args, **kwargs)
 
     #def get_absolute_url(self):
