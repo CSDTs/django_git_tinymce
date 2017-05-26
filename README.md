@@ -3,6 +3,11 @@ This is the main repo for controlling teacher contributions to the CSDT communit
 
 It is designed to act as a private git server, from which teachers can add new content or change old content using the tinymce wiziwig to fit their classroom and needs, while simultaneously sharing that content to help other teachers with their work.
 
+# Requirements
+```
+sudo apt-get install libffi-dev
+```
+
 # Setup
 
 
@@ -13,6 +18,8 @@ Install:
 * Vagrant
   * Linux: sudo apt-get install vagrant
   * Windows & Mac: https://www.vagrantup.com/downloads.html
+* libffi-dev (For Misaka to mimick GitHub markdown)
+  * Linux: sudo apt-get install libffi-dev
 * Git
   * Linux: sudo apt-get install git
   * Windows & Mac: https://git-scm.com/downloads
