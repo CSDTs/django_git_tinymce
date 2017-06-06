@@ -10,25 +10,19 @@ env:
 
 before_install:
   - export DJANGO_SETTINGS_MODULE="django_git_tinymce.settings"
-  - export PYTHONPATH="/usr/local/lib/python3.6/dist-packages"
-  - export PIP_USE_MIRRORS=true
 
 install:
-  - sudo $(type -P npm) install -g less
-  - sudo $(type -P npm) install -g yuglify
-  - sudo pip install setuptools --upgrade
   - sudo pip install --upgrade -r requirements.txt
   - sudo pip install coveralls
   - sudo pip install flake8
   
 before_script:
   - psql -c "CREATE DATABASE travisci;" -U postgres
+  - pip freeze
 
 script:
   - flake8 .
-  - python manage.py migrate
   - coverage run --source=django_git_tinymce manage.py test
 
 after_success:
-  - pip freeze
   - echo Uploading code coverage data ...; coveralls

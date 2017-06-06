@@ -1,4 +1,5 @@
-from django.views.generic import ListView
+from django.db.models import Q
+from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from extra_views import SortableListMixin, SearchableListMixin
 from django_git_tinymce.models import Document, Repo
@@ -6,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import redirect
 from django_git_tinymce.forms import DocumentForm
+from django.contrib.auth.models import User
 
 
 class RepoList(SearchableListMixin, SortableListMixin, ListView):
@@ -14,8 +16,23 @@ class RepoList(SearchableListMixin, SortableListMixin, ListView):
     search_split = False
     model = Repo
     paginate_by = 20
-    ordering = ["-when"]
+    ordering = ["-created_at"]
     template_name = "repo_list.html"
+
+
+class RepoDetail(DetailView):
+    model = Repo
+    template_name = "django_git_tinymce/repo_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(RepoDetail, self).get_context_data(**kwargs)
+        repo = Repo.objects.get(
+            Q(user=User.objects.get(
+                username=self.kwargs.get(
+                    'user', '')).pk) & Q(
+                slug=self.kwargs.get('slug', '')))
+        context['repo'] = repo
+        return context
 
 
 class DocumentList(SearchableListMixin, SortableListMixin, ListView):

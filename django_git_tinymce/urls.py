@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
-from django_git_tinymce.views import RepoList, DocumentList, DocumentCreate, DocumentUpdate, DocumentDelete
+from django_git_tinymce.views import RepoDetail, DocumentList, DocumentCreate, DocumentUpdate, DocumentDelete
 from django.views import static
 from django.views.generic import TemplateView
 
@@ -25,10 +25,11 @@ urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name="home.html"), name='home'),
     url(r'^admin/', admin.site.urls),
     url(r'^tinymce/', include('tinymce.urls')),
-    url(r'^repos/(?P<path>.*)$', RepoList.as_view(), name='repo-list'),
+    url(r'^repos/(?P<user>[-\w]+)/(?P<slug>[-\w]+)/$', RepoDetail.as_view(), name="repo-detail"),
+    # url(r'^repos/', RepoList.as_view(), name='repo-list'),
     url(r'^docs/(?P<path>.*)$', DocumentList.as_view(), name='docs-list'),
     url(r'^newdoc/(?P<path>.*)$', DocumentCreate.as_view(), name='docs-create'),
     url(r'^editdoc/(?P<path>.*)$', DocumentUpdate.as_view(), name='docs-update'),
     url(r'^deldoc/(?P<path>.*)$', DocumentDelete.as_view(), name='docs-delete'),
-    url(r'^(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_URL + 'git',}),
+    url(r'^(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_URL + 'git', }),
 ]
