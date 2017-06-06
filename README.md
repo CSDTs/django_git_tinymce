@@ -1,43 +1,42 @@
-[![Build Status](https://travis-ci.org/CSnap/django_git_tinymce.svg?branch=master)](https://travis-ci.org/CSnap/django_git_tinymce)
 
-# django_git_tinymce
-This is the main repo for controlling teacher contributions to the CSDT community website. It is still in development.
-
-It is designed to act as a private git server, from which teachers can add new content or change old content using the tinymce wiziwig to fit their classroom and needs, while simultaneously sharing that content to help other teachers with their work.
-
-# Requirements
-```
-sudo apt-get install libffi-dev
-```
-
-# Setup
+     ,-----.,--.                  ,--. ,---.   ,--.,------.  ,------.
+    '  .--./|  | ,---. ,--.,--. ,-|  || o   \  |  ||  .-.  \ |  .---'
+    |  |    |  || .-. ||  ||  |' .-. |`..'  |  |  ||  |  \  :|  `--, 
+    '  '--'\|  |' '-' ''  ''  '\ `-' | .'  /   |  ||  '--'  /|  `---.
+     `-----'`--' `---'  `----'  `---'  `--'    `--'`-------' `------'
+    ----------------------------------------------------------------- 
 
 
-Install:
-* VirtualBox
-  * Linux: sudo apt-get install virtualbox
-  * Windows & Mac: https://www.virtualbox.org/wiki/Downloads
-* Vagrant
-  * Linux: sudo apt-get install vagrant
-  * Windows & Mac: https://www.vagrantup.com/downloads.html
-* libffi-dev (For Misaka)
-  * Linux: sudo apt-get install libffi-dev
-* Git
-  * Linux: sudo apt-get install git
-  * Windows & Mac: https://git-scm.com/downloads
-    * For windows make sure C:\Program Files\Git\usr\bin [is in your path variable](http://www.computerhope.com/issues/ch000549.htm)
+Welcome to your Django project on Cloud9 IDE!
 
+Your Django project is already fully setup. Just click the "Run" button to start
+the application. On first run you will be asked to create an admin user. You can
+access your application from 'https://django-git-slinv-vic.c9users.io/' and the admin page from 
+'https://django-git-slinv-vic.c9users.io/admin'.
 
-Then run:
-```bash
-git clone https://github.com/CSnap/django_git_tinymce
-cd django_git_tinymce
-vagrant up
-vagrant ssh
-sudo apt-get install libffi-dev
-cd /vagrant
-python manage.py migrate
-python manage.py runserver 0.0.0.0:8001
-```
+## Starting from the Terminal
 
-The site should now be accessible at via web browser at localhost:8001
+In case you want to run your Django application from the terminal just run:
+
+1) Run syncdb command to sync models to database and create Django's default superuser and auth system
+
+    $ python manage.py migrate
+
+2) Run Django
+
+    $ python manage.py runserver $IP:$PORT
+    
+## Configuration
+
+You can configure your Python version and `PYTHONPATH` used in
+Cloud9 > Preferences > Project Settings > Language Support.
+
+## Support & Documentation
+
+Django docs can be found at https://www.djangoproject.com/
+
+You may also want to follow the Django tutorial to create your first application:
+https://docs.djangoproject.com/en/1.9/intro/tutorial01/
+
+Visit http://docs.c9.io for support, or to learn more about using Cloud9 IDE.
+To watch some training videos, visit http://www.youtube.com/user/c9ide

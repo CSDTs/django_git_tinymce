@@ -1,0 +1,10 @@
+{% if repos %}
+	<ul>
+	{% for repo in repos %}
+		<li><a href="{% url 'repos:detail' repo.name %}">{{repo.name}}</a></li>
+	{% endfor %}
+	</ul>
+
+{% else %}
+	<p> No repos yet.</p>
+{% endif %}
