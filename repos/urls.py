@@ -19,6 +19,7 @@ from . import views
 
 app_name = "repos"
 urlpatterns = [
-	url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'^(?P<pk>\w+)/$', views.RepositoryDetailView.as_view(), name='detail'),
+    url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^create/$', views.createRepo, name='create'),
+    url(r'^(?P<pk>.*)/$', views.RepositoryDetailView.as_view(), name='detail'),
 ]

@@ -1,9 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Repository{% endblock %}
+
+{% block content %}
+
+<h1>Create Repository</h1>
+{% comment "Optional note" %}
 {% block content %}
     <form method="post" action="">
         {% csrf_token %}
-        {{ createf.as_p }}
+        {{ form.as_p }}
         <input type="submit" value="Create">
     </form>
 
 <br><br>
 <b>{{ response|safe }}</b>
+{% endblock %}
+{% endcomment %}
+
+{% if error_message %}
+	{{ error_message }}
+	<p><a href="{% url 'repos:create' %}">Go back</a></p>
+	
+{% else %}
+	<form action="" method="post">
+	    {% csrf_token %}
+	    {{ form.as_p }}
+	    <input type="submit" value="Create" />
+	</form>
+{% endif %}
+
+{% endblock %}

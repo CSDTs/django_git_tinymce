@@ -1,3 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ repository.name }}{% endblock %}
+
+{% block content %}
+
 <h1>{{ repository.name }}</h1>
 <h2>{{ repository.description }}</h2>
 
@@ -7,22 +13,21 @@
 
 
 <div class="object-list">
-	{% comment "Optional note" %}
+    {% comment "Optional note" %}
         <table>
-		{% for obj in tree %}
-			<tr><td>
-			<a href="/{{ repoName }}/{{ obj.type }}/{{ obj.name }}">{{ obj.name }}{% if obj.type == 'tree' %}/{% endif %}</a>
+        {% for obj in tree %}
+            <tr><td>
+            <a href="{{ obj.type }}/{{ obj.name }}">{{ obj.name }}{% if obj.type == 'tree' %}/{% endif %}</a>
             </td></tr>
-		{% endfor %}
-		</table>
-	{% endcomment %}
+        {% endfor %}
+        </table>
+    {% endcomment %}
     
     <ul>
-	{% for obj in tree %}
-		<li><a href="/{{ repoName }}/{{ obj.type }}/{{ obj.name }}">{{ obj.name }}{% if obj.type == 'tree' %}/{% endif %}</a></li>
-	{% endfor %}
-	</ul>
-	
+       {% for obj in tree %}
+        <li><a href="{{ obj.type }}/{{ obj.name }}">{{ obj.name }}{% if obj.type == 'tree' %}/{% endif %}</a></li>
+       {% endfor %}
+    </ul>
 </div>
 
 
@@ -32,9 +37,11 @@
             {{ readme.data }}
         </div>
     {% else %}
-        {% if empty == 1 %}
+        {% if empty %}
             <div class="file-head">This repository is empty.</div>
         {% else %}
             <div class="file-head">README does not exists.</div>
         {% endif %}
     {% endif %}
+
+{% endblock %}
