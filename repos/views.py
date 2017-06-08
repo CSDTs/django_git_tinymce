@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 
 from .models import Repository
-from .forms import CreateRepo
+from .forms import CreateRepo, DeleteRepo
 from .utils import check_repo_name
 from django_git.settings import REPO_DIR
 
@@ -118,14 +118,59 @@ def createRepo(request):
 		else:
 			context['error_message'] = 'Form invalid'
 	else:
+		'''
+		If we arrive at this view with a GET request, it will create an empty form 
+		instance and place it in the template context to be rendered. This is what 
+		we can expect to happen the first time we visit the URL.
+		If the form is submitted using a POST request, the view will once again create 
+		a form instance and populate it with data from the request: 
+		form = NameForm(request.POST) 
+		This is called “binding data to the form” (it is now a bound form).
+		'''
 		form = CreateRepo()
 
 	context['form'] = form
 	return render(request, template_name, context)
 
-'''
-def deleteRepo(request):
-'''
+
+def deleteRepo(request, pk):
+	template_name = 'repos/delete.html'
+	context = {}
+
+	if request.method == 'POST':
+		# create a form instance and populate it with data from the request:
+		form = DeleteRepo(request.POST)
+
+		if form.is_valid():
+			# process the data in form.cleaned_data as required
+			name = form.cleaned_data['repositoryName']
+			if name == pk:
+				try:
+					repo_to_delete = Repository.objects.get(name=name)
+					repo_to_delete.delete()
+					return HttpResponseRedirect(reverse('repos:index'))
+				except:
+					context['error_message'] = "Repo does not exist"
+					return render(request, template_name, context)
+			else:
+				context['error_message'] = 'Incorrect name'
+
+		else:
+			context['error_message'] = 'Invalid Input'
+	else:
+		# like in createRepo
+		form = DeleteRepo()
+
+	context['form'] = form
+	return render(request, template_name, context)
+
+def repoSetting(request, pk):
+	template_name = 'repos/setting.html'
+	context = {}
+
+	
+
+	return render(request, template_name, context)
 
 class TestView(ListView):
 	template_name = 'repos/test.html'
