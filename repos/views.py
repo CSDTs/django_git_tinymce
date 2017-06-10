@@ -1,13 +1,15 @@
 from os import path
+from shutil import move
 
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.db.models import Q
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from .models import Repository
-from .forms import CreateRepo, DeleteRepo
+from .forms import CreateRepo, DeleteRepo, RepoSettings
 from .utils import check_repo_name
 from django_git.settings import REPO_DIR
 
@@ -145,6 +147,7 @@ def deleteRepo(request, pk):
 			# process the data in form.cleaned_data as required
 			name = form.cleaned_data['repositoryName']
 			if name == pk:
+				'''
 				try:
 					repo_to_delete = Repository.objects.get(name=name)
 					repo_to_delete.delete()
@@ -152,6 +155,10 @@ def deleteRepo(request, pk):
 				except:
 					context['error_message'] = "Repo does not exist"
 					return render(request, template_name, context)
+				'''
+				repo_to_delete = get_object_or_404(Repository, pk=name)
+				repo_to_delete.delete()
+				return HttpResponseRedirect(reverse('repos:index'))
 			else:
 				context['error_message'] = 'Incorrect name'
 
@@ -164,23 +171,38 @@ def deleteRepo(request, pk):
 	context['form'] = form
 	return render(request, template_name, context)
 
+'''
+Need more rigorous model design before proceeding to furthur coding this function.
+'''
 def repoSetting(request, pk):
 	template_name = 'repos/setting.html'
 	context = {}
 
-	
+	repo = get_object_or_404(Question, pk=question_id)
+	if request.method == 'POST':
+		form = RepoSettings(request.POST)
+
+		if form.is_valid():
+			new_name = form.cleaned_data['repositoryName']
+			new_desc = form.cleaned_data['repositoryDesc']
+
+		if new_name:
+			new_name = check_repo_name(new_name)
+			'''
+			TODO:
+				- name restriction, os directory name restriction
+			'''
+			move(path.join(REPO_DIR, repo.name), path.join(REPO_DIR, new_name))
+			repo.name = name
+			repo.save()
+			
+		if new_desc:
+			repo.description = new_desc
+			repo.save()
+
+		return HttpResponseRedirect(reverse('repos:detail', args=(new_name,)))
+
+	else:
+		form = RepoSettings()
 
 	return render(request, template_name, context)
-
-class TestView(ListView):
-	template_name = 'repos/test.html'
-	context_object_name = 'repos'
-
-	def get_queryset(self):
-		"""
-		Return the last five published questions (not including those set to be
-		published in the future).
-		"""
-		# __lte --> less than or equal
-		filtered_repos = Repository.objects.all()
-		return filtered_repos

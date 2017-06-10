@@ -21,5 +21,8 @@ app_name = "repos"
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),
     url(r'^create/$', views.createRepo, name='create'),
+    url(r'^(?P<pk>.*)/change/$', views.deleteRepo, name='change'),
+    url(r'^(?P<pk>.*)/delete/$', views.deleteRepo, name='delete'),
+    url(r'^(?P<pk>.*)/setting/$', views.repoSetting, name='setting'),
     url(r'^(?P<pk>.*)/$', views.RepositoryDetailView.as_view(), name='detail'),
 ]

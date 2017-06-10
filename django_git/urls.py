@@ -17,7 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-	url(r'', include('repos.urls')),
-	url(r'^repos/', include('repos.urls')),
+    url(r'', include('repos.urls')),
+    #url(r'^repos/', include('repos.urls')),
     url(r'^admin/', admin.site.urls),
 ]
