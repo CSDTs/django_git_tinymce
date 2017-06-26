@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'repos.apps.ReposConfig',
+    'gitusers.apps.GitusersConfig',
+    'tags.apps.TagsConfig',
     'bootstrap3',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,7 +59,7 @@ ROOT_URLCONF = 'django_git.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,9 +124,19 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static", "project_static"),
+    # '/var/www/static/',
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static", "static_cdn")
+STATIC_ROOT = os.path.join(BASE_DIR, "media", "media_cdn")
+
 # Pygit2 settings
-REPO_DIR = os.path.join(BASE_DIR, 'git_repos')
+REPO_DIR = os.path.join(BASE_DIR, "git_repos")
 '''
 if not path.exists(GITS_DIR):
     os.makedirs(GITS_DIR)
 '''
+
+LOGIN_URL = 'login'
