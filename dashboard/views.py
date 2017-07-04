@@ -1,20 +1,31 @@
+from django.views import View
 from django.shortcuts import render
-from django.views.generic.list import ListView
-#from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 
+from analytics.models import TagAnalytics
 from repos.models import Repository
 
-# using generic views -- ListView and DetailView
-class IndexView(LoginRequiredMixin, ListView):
-	template_name = 'index.html'
-	context_object_name = 'repos'
+class DashboardView(View):
+	template = 'dashboard/index.html'
 
-	def get_queryset(self):
-		"""
-		Return the last five published questions (not including those set to be
-		published in the future).
-		"""
-		# __lte --> less than or equal
-		filtered_repos = Repository.objects.all()
-		return filtered_repos
+	def get(self, request, *args, **kwargs):
+		tag_analytics = None
+		repos = None
+		top_tags = None
+		
+		try:
+			# this requires login
+			# tag_analytics = request.user.taganalytics_set.all().order_by("-count")
+			tag_analytics = TagAnalytics.objects.all().order_by("-count")
+		except:
+			pass
+		
+		# repos associated to theses tags
+		if tag_analytics:
+			top_tags = [x.tag for x in tag_analytics]
+			repos = Repository.objects.filter(tag__in=top_tags).distinct()
+
+		context = {
+			"repos": repos,
+			"top_tags": top_tags
+		}
+		return render(request, self.template, context)

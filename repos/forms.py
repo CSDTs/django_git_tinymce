@@ -1,8 +1,9 @@
 from django import forms 
 
-from repos.models import Repository
+from .models import Repository
 
 class RepositoryModelForm(forms.ModelForm):
+	tags = forms.CharField(label='Related tags', required=False)
 	class Meta:
 		model = Repository
 		fields = ['name', 'description']

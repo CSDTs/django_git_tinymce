@@ -27,7 +27,8 @@ class Repository(models.Model):
 		return self.name
 
 	def get_absolute_url(self):
-		return reverse('owner:repo_detail', kwargs={"slug": self.slug})
+		return reverse('gitusers:repo_detail', 
+			kwargs={"username": self.owner, "slug": self.slug})
 
 # class Owner(models.Model):
 #     repo = models.ManyToManyField(Repository)
@@ -57,7 +58,8 @@ def repository_pre_save(sender, instance, **kwargs):
 @receiver(post_save, sender=Repository)
 def repository_post_init(sender, instance, **kwargs):
 	path = join(settings.REPO_DIR, instance.slug)
-	init_repository(path, bare=True)
+	repo = init_repository(path)
+	print(repo.is_empty)
 
 
 @receiver(post_delete, sender=Repository)

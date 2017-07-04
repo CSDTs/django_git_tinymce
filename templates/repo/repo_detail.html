@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object.name }}{% endblock %}
+
+{% block git_layout %}
+	<h1>{{ object.name }}</h1>
+	<h2>{{ object.description }}</h2>
+	{% include "repo/git_layout.html" %}
+{% endblock %}
+
+{% block content %}
+
+
+
+{% if empty %}
+	<div class="file-head">This repository is empty.</div>
+{% endif %}
+
+
+<!-- git file tree -->
+{% if tree %}
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th width="150">Filename</th>
+			<th width="150">Last Change</th>
+			<th>Last commit</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for entry in tree %}
+		<tr>
+			<td>
+				<i class="glyphicon glyphicon-{% if entry.filemode == 16384 %}folder-close{% else %}list-alt{% endif %}"></i>
+				<a href="blob/{{ entry.name }}">
+			  {{ entry.name }}
+			</a>
+			</td>
+			<td> TODO </td>
+			<td><a href="commit/{{ entry.hex }}"> {{ entry.hex }} </a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endif %}
+
+
+{% endblock %}
+
+{% block js %}
+{% endblock %}

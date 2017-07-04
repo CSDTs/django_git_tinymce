@@ -19,27 +19,21 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from . import views
+from dashboard.views import DashboardView
+from gitusers.views import IndexView
 
 urlpatterns = [
+    url(r'^$', DashboardView.as_view(), name='index'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
-    url(r'^password_change/$', auth_views.PasswordChangeView.as_view(), name='password_change'),
-    url(r'^password_change_done/$', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
-    url(r'^password_reset/$', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    url(r'^password_reset_done/$', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    url(r'^password_reset_confirm/$', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    url(r'^password_reset_complete/$', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
+    url(r'^tinymce/', include('tinymce.urls')),
 
     url(r'^tags/', include('tags.urls', namespace='tags')),
-    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls', namespace='owner')),
+    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls', namespace='gitusers')),
 
-    # url(r'^$', views.IndexView.as_view(), name='index'),
-    # url(r'^create/$', views.RepositoryCreateView.as_view(), name='create'),
-    # url(r'^(?P<slug>[-\w]+)/$', views.RepositoryDetailView.as_view(), name='detail'),
-    # url(r'^(?P<slug>[-\w]+)/delete/$', views.RepositoryDeleteView.as_view(), name='delete'),
-    # url(r'^(?P<slug>[-\w]+)/setting/$', views.RepositoryUpdateView.as_view(), name='setting'),
+    
 ]
 # use custom template name by providing the template_name argument
 # https://docs.djangoproject.com/en/1.11/topics/auth/default/#all-authentication-views

@@ -34,7 +34,9 @@ INSTALLED_APPS = [
     'repos.apps.ReposConfig',
     'gitusers.apps.GitusersConfig',
     'tags.apps.TagsConfig',
+    'analytics.apps.AnalyticsConfig',
     'bootstrap3',
+    'tinymce',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -140,3 +142,5 @@ if not path.exists(GITS_DIR):
 '''
 
 LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
