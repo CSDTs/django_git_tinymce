@@ -1,0 +1,22 @@
+<head>
+	{{ form.media }}
+</head>
+
+<body>
+
+<h1>Edit {{ filename }}</h1>
+
+{% if is_binary %}
+	{{ content }}
+	<p><a href="{% url 'create' %}">Go back</a></p>
+{% elif  form %}
+	<form action="" method="post">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<input type="submit" value="Submit" />
+	</form>
+{% else %}
+	{{ content }}
+{% endif %}
+
+</body>

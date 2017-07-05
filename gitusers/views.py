@@ -11,7 +11,7 @@ from django.shortcuts import render
 from analytics.models import TagAnalytics
 from django_git.mixins import MultiSlugMixin, OwnerRequiredMix
 from django_git.utils import check_repo_name
-from repos.forms import RepositoryModelForm
+from repos.forms import RepositoryModelForm, TinyMCEFileEditForm
 from repos.models import Repository
 from tags.models import Tag
 
@@ -189,6 +189,41 @@ class BlobView(View):
 class CommitView(View):
 	pass
 
+
+class EditView(View):
+	template_name = 'repo/file_edit.html'
+
+	def get(self, request, *args, **kwargs):
+		context = {}
+		filename = kwargs.get('filename')
+		if kwargs.get('extension') is not None:
+			filename += kwargs.get('extension')
+		context['filename'] = filename
+
+		# open repo dir and display repo files
+		try:
+			repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
+			
+			if repo_obj.is_empty:
+				raise Http404
+
+			commit = repo_obj.revparse_single('HEAD')
+			tree = commit.tree
+			file = repo_obj[find_file_oid_in_tree(filename, tree)]
+
+			if file.is_binary:
+				context['is_binary'] = True
+				context['content'] = 'This is a binary file'
+			elif isinstance(file, pygit2.Blob):
+				form = TinyMCEFileEditForm(initial={'content': file.data})
+				context['form'] = form
+			else:
+				context['content'] = 'error'
+
+		except IOError:
+			raise Http404("Repository does not exist")
+
+		return render(request, self.template_name, context)
 
 def find_file_oid_in_tree(filename, tree):
 	for entry in tree:
