@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.views import View
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.views.generic.list import ListView
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import render
@@ -50,6 +50,11 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 	template_name = 'repo/create.html'
 	form_class = RepositoryModelForm
 	# success_url is default to model's get_absolute_url.
+
+	def get_form_kwargs(self):
+		kwargs = super(RepositoryCreateView, self).get_form_kwargs()
+		kwargs['request'] = self.request
+		return kwargs
 
 	def form_valid(self, form):
 		user = self.request.user
@@ -151,79 +156,51 @@ class RepositoryDeleteView(OwnerRequiredMix, MultiSlugMixin, DeleteView):
 	success_url = reverse_lazy('index')
 
 
-class BlobView(View):
-	template_name = 'repo/blob.html'
-
-	def get(self, request, *args, **kwargs):
-		filename = kwargs.get('filename')
-		if kwargs.get('extension') is not None:
-			filename += kwargs.get('extension')
-		context = {}
-		print(filename)
-		
-		# open repo dir and display repo files
-		try:
-			repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
-			
-			if repo_obj.is_empty:
-				raise Http404
-
-			commit = repo_obj.revparse_single('HEAD')
-			tree = commit.tree
-			file = repo_obj[find_file_oid_in_tree(filename, tree)]
-
-			if file.is_binary:
-				context['content'] = 'This is a binary file'
-			elif isinstance(file, pygit2.Blob):
-				context['content'] = file.data
-			else:
-				context['content'] = 'error'
-
-		except IOError:
-			raise Http404("Repository does not exist")
-
-		return render(request, self.template_name, context)
-
-
-
 class CommitView(View):
 	pass
 
 
-class EditView(View):
+class BlobEditView(OwnerRequiredMix, MultiSlugMixin, FormView):
 	template_name = 'repo/file_edit.html'
+	form_class = TinyMCEFileEditForm
+	success_url = '/'
+	blob = None
 
-	def get(self, request, *args, **kwargs):
-		context = {}
-		filename = kwargs.get('filename')
-		if kwargs.get('extension') is not None:
-			filename += kwargs.get('extension')
-		context['filename'] = filename
+	def get_initial(self, **kwargs):
+		initial = super(BlobEditView, self).get_initial()
 
-		# open repo dir and display repo files
+		filename = self.kwargs.get('filename')
+		if self.kwargs.get('extension'):
+			filename += self.kwargs.get('extension')
+		
 		try:
 			repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
-			
+
 			if repo_obj.is_empty:
 				raise Http404
 
 			commit = repo_obj.revparse_single('HEAD')
 			tree = commit.tree
-			file = repo_obj[find_file_oid_in_tree(filename, tree)]
+			blob = repo_obj[find_file_oid_in_tree(filename, tree)]
 
-			if file.is_binary:
-				context['is_binary'] = True
-				context['content'] = 'This is a binary file'
-			elif isinstance(file, pygit2.Blob):
-				form = TinyMCEFileEditForm(initial={'content': file.data})
-				context['form'] = form
-			else:
-				context['content'] = 'error'
+			if not blob.is_binary and isinstance(blob, pygit2.Blob):
+				initial['content'] = blob.data
 
 		except IOError:
 			raise Http404("Repository does not exist")
+		return initial
 
-		return render(request, self.template_name, context)
+	def form_valid(self, form):
+		# This method is called when valid form data has been POSTed.
+		# It should return an HttpResponse.
+		
+		# Base object is immutable and Blob doesn't have a constructor
+		# Have to directly change the actually file in file system
+
+
+		return super(BlobEditView, self).form_valid(form)
+
+
 
 def find_file_oid_in_tree(filename, tree):
 	for entry in tree:
