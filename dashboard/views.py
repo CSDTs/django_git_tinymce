@@ -13,9 +13,10 @@ class DashboardView(View):
 		top_tags = None
 		
 		try:
-			# this requires login
-			# tag_analytics = request.user.taganalytics_set.all().order_by("-count")
-			tag_analytics = TagAnalytics.objects.all().order_by("-count")
+			if request.user.is_authenticated():
+				tag_analytics = request.user.taganalytics_set.all().order_by("-count")
+			else:
+				tag_analytics = TagAnalytics.objects.all().order_by("-count")
 		except:
 			pass
 		

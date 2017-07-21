@@ -196,7 +196,22 @@ class BlobEditView(OwnerRequiredMix, MultiSlugMixin, FormView):
 		
 		# Base object is immutable and Blob doesn't have a constructor
 		# Have to directly change the actually file in file system
+		filename = self.kwargs.get('filename')
+		if self.kwargs.get('extension'):
+			filename += self.kwargs.get('extension')
 
+		try:
+			file = open(path.join(settings.REPO_DIR, self.kwargs['slug'], filename), 'w')
+
+			file.truncate()
+			file.write(form.cleaned_data['content'])
+
+			file.close()
+
+			# create_commit(user, commiter, tree, repo)
+
+		except OSError:
+			raise form.ValidationError("Save error, please check the file.")
 
 		return super(BlobEditView, self).form_valid(form)
 
@@ -208,3 +223,21 @@ def find_file_oid_in_tree(filename, tree):
 			return entry.id
 		else:
 			return 404
+
+def create_commit(user, commiter, tree, repo):
+	from pygit2 import Signature
+	# example:
+	'''
+	author = Signature('Alice Author', 'alice@authors.tld')
+	committer = Signature('Cecil Committer', 'cecil@committers.tld')
+	tree = repo.TreeBuilder().write()
+	repo.create_commit(
+		'refs/heads/master', # the name of the reference to update
+		author, committer, 'one line commit message\n\ndetailed commit message',
+		tree, # binary string representing the tree object ID
+		[] # list of binary strings representing parents of the new commit
+	)
+	'''
+	# author = Signature(user.name, user.email)
+	# sha = repo.create_commit(None, author, committer, message, tree_prefix, parents)
+	#return sha
