@@ -12,6 +12,7 @@ class TagAnalyticsManager(models.Manager):
 		return obj
 		
 
+
 class TagAnalytics(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
 	tag = models.ForeignKey(Tag)
