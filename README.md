@@ -41,3 +41,9 @@ python manage.py runserver 0.0.0.0:8001
 ```
 
 The site should now be accessible at via web browser at localhost:8001
+
+To access site admin:
+
+- To set up admin for site: ```python manage.py createsuperuser```
+- Visit ```/admin```
+

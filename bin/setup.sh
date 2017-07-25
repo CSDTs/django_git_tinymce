@@ -6,10 +6,25 @@ sudo bash nodesource_setup.sh
 rm nodesource_setup.sh
 
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get upgrade -y
 
 # Install python
 sudo apt-get install -y python3-pip python3-dev
+
+# Install cmake
+sudo apt install -y cmake
+
+# Install the latest version of libgit2 system wide
+wget https://github.com/libgit2/libgit2/archive/v0.26.0.tar.gz
+tar xzf v0.26.0.tar.gz
+cd libgit2-0.26.0/
+cmake .
+make
+sudo make install
+
+# Install pygit2
+pip install pygit2
+sudo ldconfig
 
 # Install the database
 sudo apt-get install -y postgresql postgresql-contrib
