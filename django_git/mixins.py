@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
-class OwnerRequiredMix(LoginRequiredMixin, object):
+class OwnerRequiredMixin(LoginRequiredMixin, object):
 	def get_object(self, **kwargs):
 		user = self.request.user
 		obj = super(OwnerRequiredMix, self).get_object(**kwargs)

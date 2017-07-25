@@ -10,8 +10,7 @@ from django.urls import reverse, reverse_lazy
 from django.shortcuts import render
 
 from analytics.models import TagAnalytics
-from django_git.mixins import OwnerRequiredMix
-from django_git.utils import check_repo_name
+from django_git.mixins import OwnerRequiredMixin
 from repos.forms import RepositoryModelForm, TinyMCEFileEditForm
 from repos.models import Repository
 from tags.models import Tag
@@ -118,7 +117,7 @@ class RepositoryDetailView(DetailView):
 		return context
 			
 
-class RepositoryUpdateView(OwnerRequiredMix, UpdateView):
+class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	model = Repository
 	template_name = 'repo/setting.html'
 	form_class = RepositoryModelForm
@@ -151,13 +150,13 @@ class RepositoryUpdateView(OwnerRequiredMix, UpdateView):
 		
 		return valid_data
 
-class RepositoryDeleteView(OwnerRequiredMix, DeleteView):
+class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
 	template_name = 'repo/delete.html'
 	success_url = reverse_lazy('index')
 
 
-class BlobEditView(OwnerRequiredMix, FormView):
+class BlobEditView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/file_edit.html'
 	form_class = TinyMCEFileEditForm
 	blob = None
