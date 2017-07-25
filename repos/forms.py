@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django import forms
 
 from tinymce.widgets import TinyMCE
@@ -33,3 +35,4 @@ class RepositoryModelForm(forms.ModelForm):
 
 class TinyMCEFileEditForm(forms.Form):
     content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
+    commit_message = forms.CharField(required=False, empty_value="Edited on {}".format(datetime.now().strftime("%A, %d. %B %Y %I:%M%p")))

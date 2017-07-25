@@ -10,6 +10,7 @@ class TagAnalyticsManager(models.Manager):
 		obj.count += 1
 		obj.save()
 		return obj
+		
 
 class TagAnalytics(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)

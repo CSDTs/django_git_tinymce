@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.http import HttpResponse
 from django.views import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
@@ -9,7 +10,7 @@ from django.urls import reverse, reverse_lazy
 from django.shortcuts import render
 
 from analytics.models import TagAnalytics
-from django_git.mixins import MultiSlugMixin, OwnerRequiredMix
+from django_git.mixins import OwnerRequiredMix
 from django_git.utils import check_repo_name
 from repos.forms import RepositoryModelForm, TinyMCEFileEditForm
 from repos.models import Repository
@@ -76,7 +77,7 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 		return valid_data
 
 
-class RepositoryDetailView(MultiSlugMixin, DetailView):
+class RepositoryDetailView(DetailView):
 	model = Repository
 	template_name = 'repo/repo_detail.html'
 	#template_name = 'layout_test/repo.html'
@@ -117,7 +118,7 @@ class RepositoryDetailView(MultiSlugMixin, DetailView):
 		return context
 			
 
-class RepositoryUpdateView(OwnerRequiredMix, MultiSlugMixin, UpdateView):
+class RepositoryUpdateView(OwnerRequiredMix, UpdateView):
 	model = Repository
 	template_name = 'repo/setting.html'
 	form_class = RepositoryModelForm
@@ -150,23 +151,21 @@ class RepositoryUpdateView(OwnerRequiredMix, MultiSlugMixin, UpdateView):
 		
 		return valid_data
 
-class RepositoryDeleteView(OwnerRequiredMix, MultiSlugMixin, DeleteView):
+class RepositoryDeleteView(OwnerRequiredMix, DeleteView):
 	model = Repository
 	template_name = 'repo/delete.html'
 	success_url = reverse_lazy('index')
 
 
-class CommitView(View):
-	pass
-
-
-class BlobEditView(OwnerRequiredMix, MultiSlugMixin, FormView):
+class BlobEditView(OwnerRequiredMix, FormView):
 	template_name = 'repo/file_edit.html'
 	form_class = TinyMCEFileEditForm
-	success_url = '/'
 	blob = None
+	repo_obj = None
 
 	def get_initial(self, **kwargs):
+		self.success_url = '/{}/{}'.format(self.request.user, self.kwargs['slug'])
+
 		initial = super(BlobEditView, self).get_initial()
 
 		filename = self.kwargs.get('filename')
@@ -174,14 +173,14 @@ class BlobEditView(OwnerRequiredMix, MultiSlugMixin, FormView):
 			filename += self.kwargs.get('extension')
 		
 		try:
-			repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
+			self.repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
 
-			if repo_obj.is_empty:
+			if self.repo_obj.is_empty:
 				raise Http404
 
-			commit = repo_obj.revparse_single('HEAD')
+			commit = self.repo_obj.revparse_single('HEAD')
 			tree = commit.tree
-			blob = repo_obj[find_file_oid_in_tree(filename, tree)]
+			blob = self.repo_obj[find_file_oid_in_tree(filename, tree)]
 
 			if not blob.is_binary and isinstance(blob, pygit2.Blob):
 				initial['content'] = blob.data
@@ -196,10 +195,53 @@ class BlobEditView(OwnerRequiredMix, MultiSlugMixin, FormView):
 		
 		# Base object is immutable and Blob doesn't have a constructor
 		# Have to directly change the actually file in file system
+		filename = self.kwargs.get('filename')
+		if self.kwargs.get('extension'):
+			filename += self.kwargs.get('extension')
 
+		try:
+			file = open(path.join(settings.REPO_DIR, self.kwargs['slug'], filename), 'w')
+
+			file.truncate()
+			file.write(form.cleaned_data['content'])
+
+			file.close()
+
+			user = self.request.user
+			commit_message = form.cleaned_data['commit_message']
+			sha = create_commit(user, self.repo_obj, commit_message, filename)
+
+		except OSError:
+			raise form.ValidationError("Save error, please check the file.")
 
 		return super(BlobEditView, self).form_valid(form)
 
+class BlobRawView(View):
+	def get(self, request, **kwargs):
+
+		filename = self.kwargs.get('filename')
+		if self.kwargs.get('extension'):
+			filename += self.kwargs.get('extension')
+
+		try:
+			self.repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
+
+			if self.repo_obj.is_empty:
+				raise Http404("The repository is empty")
+
+		except:
+			raise Http404("Failed to open repository")
+
+
+		try:
+			file = open(path.join(settings.REPO_DIR, self.kwargs['slug'], filename), 'r')
+			file_raw = file.read()
+			file.close()
+
+			return HttpResponse(file_raw)
+
+		except OSError:
+			raise Http404("Failed to open or read file")
 
 
 def find_file_oid_in_tree(filename, tree):
@@ -208,3 +250,36 @@ def find_file_oid_in_tree(filename, tree):
 			return entry.id
 		else:
 			return 404
+
+def create_commit(user, repo, message, filename):
+	from pygit2 import Signature
+	# example:
+	'''
+	author = Signature('Alice Author', 'alice@authors.tld')
+	committer = Signature('Cecil Committer', 'cecil@committers.tld')
+	tree = repo.TreeBuilder().write()
+	repo.create_commit(
+		'refs/heads/master', # the name of the reference to update
+		author, committer, 'one line commit message\n\ndetailed commit message',
+		tree, # binary string representing the tree object ID
+		[] # list of binary strings representing parents of the new commit
+	)
+	'''
+	ref = 'refs/heads/master'
+	author = Signature(user.username, user.email)
+	committer = Signature(user.username, user.email)
+	repo.index.add(filename)
+	repo.index.write()
+	tree = repo.index.write_tree()
+	parent = None
+	try:
+		parent = repo.revparse_single('HEAD')
+	except KeyError:
+		pass
+
+	parents = []
+	if parent:
+		parents.append(parent.oid.hex)
+			
+	sha = repo.create_commit(ref, author, committer, message, tree, parents)
+	return sha
