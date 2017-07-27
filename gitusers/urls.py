@@ -4,12 +4,12 @@ from .views import (
 	IndexView,
 	BlobEditView,
 	BlobRawView,
-	#CommitView,
+	# CommitView,
 	RepositoryCreateView,
-	RepositoryDetailView, 
-	RepositoryDeleteView, 
+	RepositoryDetailView,
+	RepositoryDeleteView,
 	RepositoryUpdateView
-	)
+)
 
 app_name = "gitusers"
 urlpatterns = [
@@ -18,7 +18,7 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/$', RepositoryDetailView.as_view(), name='repo_detail'),
 	url(r'^(?P<slug>[-\w]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/edit/$', BlobEditView.as_view(), name='blob_edit'),
 	url(r'^(?P<slug>[-\w]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),
-	#url(r'^(?P<slug>[-\w]+)/commit/(?P<commit>[-\w]+)', CommitView.as_view(), name='commit'),
+	# url(r'^(?P<slug>[-\w]+)/commit/(?P<commit>[-\w]+)', CommitView.as_view(), name='commit'),
 	url(r'^(?P<slug>[-\w]+)/delete/$', RepositoryDeleteView.as_view(), name='delete'),
 	url(r'^(?P<slug>[-\w]+)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
 ]

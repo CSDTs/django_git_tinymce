@@ -4,6 +4,7 @@ from django.shortcuts import render
 from analytics.models import TagAnalytics
 from repos.models import Repository
 
+
 class DashboardView(View):
 	template = 'dashboard/index.html'
 
@@ -11,7 +12,7 @@ class DashboardView(View):
 		tag_analytics = None
 		repos = None
 		top_tags = None
-		
+
 		try:
 			if request.user.is_authenticated():
 				tag_analytics = request.user.taganalytics_set.all().order_by("-count")
@@ -19,7 +20,7 @@ class DashboardView(View):
 				tag_analytics = TagAnalytics.objects.all().order_by("-count")
 		except:
 			pass
-		
+
 		# repos associated to theses tags
 		if tag_analytics:
 			top_tags = [x.tag for x in tag_analytics]
@@ -29,4 +30,5 @@ class DashboardView(View):
 			"repos": repos,
 			"top_tags": top_tags
 		}
+
 		return render(request, self.template, context)

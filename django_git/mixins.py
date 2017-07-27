@@ -2,7 +2,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
-class OwnerRequiredMixin(LoginRequiredMixin, object):
+
+class OwnerRequiredMix(LoginRequiredMixin, object):
 	def get_object(self, **kwargs):
 		user = self.request.user
 		obj = super(OwnerRequiredMix, self).get_object(**kwargs)
@@ -20,7 +21,7 @@ class MultiSlugMixin(object):
 		# slug from the url
 		slug = self.kwargs.get("slug")
 		ModelClass = self.model
-		
+
 		if slug is not None:
 			try:
 				obj = get_object_or_404(ModelClass, slug=slug)

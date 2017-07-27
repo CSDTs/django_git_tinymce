@@ -6,8 +6,10 @@ from tinymce.widgets import TinyMCE
 
 from .models import Repository
 
+
 class RepositoryModelForm(forms.ModelForm):
 	tags = forms.CharField(label='Related tags', required=False)
+
 	class Meta:
 		model = Repository
 		fields = ['name', 'description']
@@ -21,7 +23,6 @@ class RepositoryModelForm(forms.ModelForm):
 		self.request = kwargs.pop('request')
 		super(RepositoryModelForm, self).__init__(*args, **kwargs)
 
-
 	def clean_name(self):
 		name = self.cleaned_data.get('name')
 		query_set = Repository.objects.filter(name=name, owner=self.request.user)
@@ -32,7 +33,9 @@ class RepositoryModelForm(forms.ModelForm):
 		return name
 
 
-
 class TinyMCEFileEditForm(forms.Form):
-    content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
-    commit_message = forms.CharField(required=False, empty_value="Edited on {}".format(datetime.now().strftime("%A, %d. %B %Y %I:%M%p")))
+	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
+	commit_message = forms.CharField(
+		required=False,
+		empty_value="Edited on {}".format(datetime.now().strftime("%A, %d. %B %Y %I:%M%p"))
+	)
