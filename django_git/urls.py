@@ -19,21 +19,21 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from dashboard.views import DashboardView
+from dashboard.views import DashboardView, DashboardAllRepoIndexView
 # from gitusers.views import IndexView
 
 
 urlpatterns = [
-    url(r'^$', DashboardView.as_view(), name='index'),
+    # url(r'^$', DashboardView.as_view(), name='index'),
+    url(r'^$', DashboardAllRepoIndexView.as_view(), name='index'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
-    url(r'^password_reset/$', auth_views.PasswordResetView.as_view(), name='password_reset'),
 
     url(r'^tinymce/', include('tinymce.urls')),
 
     url(r'^tags/', include('tags.urls', namespace='tags')),
-    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls', namespace='gitusers')),
+    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
 
 
 ]

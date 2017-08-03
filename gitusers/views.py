@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.db.models import Q
-from django.http import HttpResponse, Http404
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 from django.views import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (
@@ -11,10 +13,10 @@ from django.views.generic.edit import (
 	FormView
 )
 from django.views.generic.list import ListView
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 
 from analytics.models import TagAnalytics
-from django_git.mixins import OwnerRequiredMix
+from django_git.mixins import OwnerRequiredMixin
 from repos.forms import RepositoryModelForm, TinyMCEFileEditForm
 from repos.models import Repository
 from tags.models import Tag
@@ -84,7 +86,11 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 class RepositoryDetailView(DetailView):
 	model = Repository
 	template_name = 'repo/repo_detail.html'
-	# template_name = 'layout_test/repo.html'
+
+	def get_queryset(self):
+		queryset = super(RepositoryDetailView, self).get_queryset()
+
+		return queryset.filter(owner__username=self.kwargs.get('username'))
 
 	def get_context_data(self, **kwargs):
 		context = super(RepositoryDetailView, self).get_context_data(**kwargs)
@@ -100,19 +106,28 @@ class RepositoryDetailView(DetailView):
 
 		# open repo dir and display repo files
 		try:
-			repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
+			git_repo = pygit2.Repository(
+				path.join(
+					settings.REPO_DIR,
+					repo_obj.owner.username,
+					self.kwargs['slug']
+				)
+			)
 
-			if repo_obj.is_empty:
+			context['is_owner'] = True if repo_obj.owner == user else False
+
+			if git_repo.is_empty:
 				context['empty'] = True
+
 				return context
 			else:
 				# get last commit
-				commit = repo_obj.revparse_single('HEAD')
+				commit = git_repo.revparse_single('HEAD')
 				tree = commit.tree
 				tree = sorted(tree, key=lambda entry: entry.filemode)
 
 				context['tree'] = tree
-				context['branches'] = list(repo_obj.branches)
+				context['branches'] = list(git_repo.branches)
 				context['last_commit'] = commit
 				context['branch_name'] = "master"
 				context['tab'] = "files"
@@ -123,10 +138,54 @@ class RepositoryDetailView(DetailView):
 		return context
 
 
-class RepositoryUpdateView(OwnerRequiredMix, UpdateView):
+class RepositoryForkView(LoginRequiredMixin, View):
+	template = 'repo/fork.html'
+
+	def get(self, request, *args, **kwargs):
+		username_in_url = self.kwargs.get("username")
+		origin_user = User.objects.get(username=username_in_url)
+		origin_repo = self.kwargs.get("slug")
+		origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+
+		context = {}
+
+		try:
+			obj = Repository.objects.get(
+				slug=origin_repo.name,
+				owner=request.user
+			)
+
+			context['message'] = "You already have a repo with the same name"
+
+		except Repository.DoesNotExist:
+			obj = Repository.objects.create(
+				name=origin_repo,
+				description=origin_repo.description,
+				owner=request.user
+			)
+
+			return HttpResponseRedirect(reverse(
+				'gitusers:repo_detail',
+				args=(request.user.username, obj.name))
+			)
+
+		return render(request, self.template, context)
+
+
+class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	model = Repository
 	template_name = 'repo/setting.html'
 	form_class = RepositoryModelForm
+
+	def get_object(self):
+		queryset = super(RepositoryUpdateView, self).get_queryset()
+		queryset = queryset.filter(owner__username=self.kwargs.get('username'))
+		return queryset.first()
+
+	def get_form_kwargs(self):
+		kwargs = super(RepositoryUpdateView, self).get_form_kwargs()
+		kwargs.update({'request': self.request})
+		return kwargs
 
 	def get_initial(self):
 		initial = super(RepositoryUpdateView, self).get_initial()
@@ -157,13 +216,18 @@ class RepositoryUpdateView(OwnerRequiredMix, UpdateView):
 		return valid_data
 
 
-class RepositoryDeleteView(OwnerRequiredMix, DeleteView):
+class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
 	template_name = 'repo/delete.html'
 	success_url = reverse_lazy('index')
 
+	def get_queryset(self):
+		queryset = super(RepositoryDeleteView, self).get_queryset()
 
-class BlobEditView(OwnerRequiredMix, FormView):
+		return queryset.filter(owner__username=self.kwargs.get('username'))
+
+
+class BlobEditView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/file_edit.html'
 	form_class = TinyMCEFileEditForm
 	blob = None
@@ -179,7 +243,15 @@ class BlobEditView(OwnerRequiredMix, FormView):
 			filename += self.kwargs.get('extension')
 
 		try:
-			self.repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
+			self.repo_obj = pygit2.Repository(
+				path.join(
+					settings.REPO_DIR,
+					# because OwnerRequiredMixin insures logged in user is
+					# the owner. So no need to get() object.
+					self.request.user.username,
+					self.kwargs['slug']
+				)
+			)
 
 			if self.repo_obj.is_empty:
 				raise Http404
@@ -205,15 +277,22 @@ class BlobEditView(OwnerRequiredMix, FormView):
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
 
+		user = self.request.user
+
 		try:
-			file = open(path.join(settings.REPO_DIR, self.kwargs['slug'], filename), 'w')
+			file = open(
+				path.join(
+					settings.REPO_DIR,
+					user.username,
+					self.kwargs['slug'], filename
+				), 'w'
+			)
 
 			file.truncate()
 			file.write(form.cleaned_data['content'])
 
 			file.close()
 
-			user = self.request.user
 			commit_message = form.cleaned_data['commit_message']
 			# sha = create_commit(user, self.repo_obj, commit_message, filename)
 			create_commit(user, self.repo_obj, commit_message, filename)
@@ -232,7 +311,13 @@ class BlobRawView(View):
 			filename += self.kwargs.get('extension')
 
 		try:
-			self.repo_obj = pygit2.Repository(path.join(settings.REPO_DIR, self.kwargs['slug']))
+			self.repo_obj = pygit2.Repository(
+				path.join(
+					settings.REPO_DIR,
+					self.kwargs.get('username'),
+					self.kwargs['slug']
+				)
+			)
 
 			if self.repo_obj.is_empty:
 				raise Http404("The repository is empty")
@@ -241,7 +326,14 @@ class BlobRawView(View):
 			raise Http404("Failed to open repository")
 
 		try:
-			file = open(path.join(settings.REPO_DIR, self.kwargs['slug'], filename), 'r')
+			file = open(
+				path.join(
+					settings.REPO_DIR,
+					self.kwargs.get('username'),
+					self.kwargs['slug'],
+					filename
+				), 'r'
+			)
 			file_raw = file.read()
 			file.close()
 

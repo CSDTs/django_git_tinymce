@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+
+</br>
+<h1>All Repositories</h1>
+<ul>
+	{% for repo in repository_list %}
+	<li><a href="{{ repo.get_absolute_url }}">{{ repo.name }} - {{ repo.owner }}</a></li>
+	{% endfor %}
+</ul>
+
+{% endblock %}

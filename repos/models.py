@@ -18,7 +18,7 @@ class RepositoryManager(models.Manager):
 class Repository(models.Model):
 	name = models.CharField(max_length=100, blank=False, null=False)
 	description = models.CharField(max_length=200, blank=True, null=False)
-	slug = models.SlugField()  # default max_length=50
+	slug = models.SlugField(max_length=100)  # default max_length=50
 	timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
 	owner = models.ForeignKey(settings.AUTH_USER_MODEL)
 	editors = models.ManyToManyField(
@@ -32,13 +32,6 @@ class Repository(models.Model):
 			'gitusers:repo_detail',
 			kwargs={"username": self.owner, "slug": self.slug})
 
-# class Owner(models.Model):
-#     repo = models.ManyToManyField(Repository)
-#     name = models.CharField(max_length=100)
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-
-#     def __str__(self):
-#         return self.name
 
 # Django Signals
 # https://docs.djangoproject.com/en/1.11/ref/signals/#post-save
@@ -57,14 +50,14 @@ def repository_pre_save(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Repository)
 def repository_post_init(sender, instance, **kwargs):
-	path = join(settings.REPO_DIR, instance.slug)
+	path = join(settings.REPO_DIR, instance.owner.username, instance.slug)
 	repo = init_repository(path)
 	print(repo.is_empty)
 
 
 @receiver(post_delete, sender=Repository)
 def repository_post_delete(sender, instance, **kwargs):
-	path = join(settings.REPO_DIR, instance.name)
+	path = join(settings.REPO_DIR, instance.owner.username, instance.name)
 	try:
 		rmtree(path)
 	except:

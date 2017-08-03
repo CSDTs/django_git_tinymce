@@ -1,4 +1,6 @@
+from django.db.models import Q
 from django.views import View
+from django.views.generic.list import ListView
 from django.shortcuts import render
 
 from analytics.models import TagAnalytics
@@ -32,3 +34,20 @@ class DashboardView(View):
 		}
 
 		return render(request, self.template, context)
+
+
+class DashboardAllRepoIndexView(ListView):
+	model = Repository
+	template_name = "dashboard/index2.html"
+
+	def get_queryset(self):
+		queryset = Repository.objects.all()
+		print(queryset)
+
+		search_query = self.request.GET.get('search')
+		if search_query:
+			queryset = queryset.filter(
+				Q(name__icontains=search_query) |
+				Q(description__icontains=search_query)
+			).order_by('name')
+		return queryset

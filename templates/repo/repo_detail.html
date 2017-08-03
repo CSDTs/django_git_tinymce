@@ -25,6 +25,9 @@
 			<th width="150">Filename</th>
 			<th width="150">Last Change</th>
 			<th>Last commit</th>
+			{% if is_owner %}
+			<th></th>
+			{% endif %}
 		</tr>
 	</thead>
 	<tbody>
@@ -38,6 +41,9 @@
 			</td>
 			<td> TODO </td>
 			<td><a href="commit/{{ entry.hex }}"> {{ entry.hex }} </a></td>
+			{% if is_owner %}
+			<td><a href="blob/{{ entry.name }}/edit"> edit </a></td>
+			{% endif %}
 		</tr>
 		{% endfor %}
 	</tbody>
