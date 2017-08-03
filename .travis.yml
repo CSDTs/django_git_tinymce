@@ -1,15 +1,10 @@
 language: python
 
-python:
-  - 3.6
+python: 3.6
 
-services: postgresql
-
-env:
-  - DJANGO=1.10.6
+env: "DJANGO=1.11.2 DB=sqlite",
 
 before_install:
-  - export DJANGO_SETTINGS_MODULE="django_git_tinymce.settings"
   # install libgit2
   - wget https://github.com/libgit2/libgit2/archive/v0.26.0.tar.gz
   - tar xzf v0.26.0.tar.gz
@@ -19,19 +14,15 @@ before_install:
   - sudo make install
 
 install:
-  - sudo pip install --upgrade -r requirements.txt
-  - sudo pip install coveralls
+  - sudo pip install -r requirements.txt
   - sudo pip install flake8
   # dynamic linker for libgit2 library
   - sudo ldconfig
   
 before_script:
-  - psql -c "CREATE DATABASE travisci;" -U postgres
-  - pip freeze
+  # W191: indentation contains tabs
+  
+  - flake8 --exclude=migrations --ignore=W191 --max-line-length=123 .
 
 script:
-  - flake8 .
-  - coverage run --source=django_git_tinymce manage.py test
-
-after_success:
-  - echo Uploading code coverage data ...; coveralls
+  - python manage.py test
