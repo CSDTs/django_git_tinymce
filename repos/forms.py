@@ -48,3 +48,7 @@ class TinyMCEFileEditForm(forms.Form):
 			datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
 		)
 	)
+
+
+class FileCreateForm(forms.Form):
+	pass

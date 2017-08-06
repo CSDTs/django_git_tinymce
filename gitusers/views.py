@@ -10,20 +10,25 @@ from django.views.generic.edit import (
 	CreateView,
 	UpdateView,
 	DeleteView,
-	FormView
+	FormView,
 )
 from django.views.generic.list import ListView
 from django.urls import reverse, reverse_lazy
 
+from .utils import find_file_oid_in_tree, create_commit
 from analytics.models import TagAnalytics
 from django_git.mixins import OwnerRequiredMixin
-from repos.forms import RepositoryModelForm, TinyMCEFileEditForm
+from repos.forms import (
+	RepositoryModelForm,
+	TinyMCEFileEditForm,
+	FileCreateForm,
+)
 from repos.models import Repository
 from tags.models import Tag
 
 import pygit2
 from os import path
-# from shutil import move
+from shutil import copytree
 
 
 class IndexView(LoginRequiredMixin, ListView):
@@ -80,6 +85,9 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 				new_tag, created = Tag.objects.get_or_create(title=tag)
 				new_tag.repos.add(form.instance)
 
+		# init repo after model object created
+		pygit2.init_repository(form.instance.get_repo_path())
+
 		return valid_data
 
 
@@ -106,13 +114,14 @@ class RepositoryDetailView(DetailView):
 
 		# open repo dir and display repo files
 		try:
-			git_repo = pygit2.Repository(
-				path.join(
-					settings.REPO_DIR,
-					repo_obj.owner.username,
-					self.kwargs['slug']
-				)
-			)
+			# git_repo = pygit2.Repository(
+			# 	path.join(
+			# 		settings.REPO_DIR,
+			# 		repo_obj.owner.username,
+			# 		self.kwargs['slug']
+			# 	)
+			# )
+			git_repo = pygit2.Repository(repo_obj.get_repo_path())
 
 			context['is_owner'] = True if repo_obj.owner == user else False
 
@@ -159,14 +168,16 @@ class RepositoryForkView(LoginRequiredMixin, View):
 
 		except Repository.DoesNotExist:
 			obj = Repository.objects.create(
-				name=origin_repo,
+				name=origin_repo.name,
 				description=origin_repo.description,
 				owner=request.user
 			)
+			
+			copytree(origin_repo.get_repo_path(), obj.get_repo_path())
 
 			return HttpResponseRedirect(reverse(
 				'gitusers:repo_detail',
-				args=(request.user.username, obj.name))
+				args=(request.user.username, obj.slug))
 			)
 
 		return render(request, self.template, context)
@@ -227,6 +238,27 @@ class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 		return queryset.filter(owner__username=self.kwargs.get('username'))
 
 
+class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
+	template_name = 'contact.html'
+	form_class = FileCreateForm
+	
+	def form_valid(self, form):
+		
+		# form.cleaned_data['filename']
+		pass
+
+	def get_success_url(self):
+		return reverse(
+			"gitusers:repo_detail",
+			kwargs={
+				'username': self.request.user.username,
+				'slug': self.kwargs.get('slug')
+			}
+		)
+	
+	
+
+
 class BlobEditView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/file_edit.html'
 	form_class = TinyMCEFileEditForm
@@ -243,15 +275,22 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			filename += self.kwargs.get('extension')
 
 		try:
-			self.repo_obj = pygit2.Repository(
-				path.join(
-					settings.REPO_DIR,
-					# because OwnerRequiredMixin insures logged in user is
-					# the owner. So no need to get() object.
-					self.request.user.username,
-					self.kwargs['slug']
-				)
+			# self.repo_obj = pygit2.Repository(
+			# 	path.join(
+			# 		settings.REPO_DIR,
+			# 		# because OwnerRequiredMixin insures logged in user is
+			# 		# the owner. So no need to get() object.
+			# 		self.request.user.username,
+			# 		self.kwargs['slug']
+			# 	)
+			# )
+			
+			repo = Repository.objects.get(
+				owner=self.request.user,
+				slug=self.kwargs['slug']
 			)
+			
+			self.repo_obj = pygit2.Repository(repo.get_repo_path())
 
 			if self.repo_obj.is_empty:
 				raise Http404
@@ -280,13 +319,14 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		user = self.request.user
 
 		try:
-			file = open(
-				path.join(
-					settings.REPO_DIR,
-					user.username,
-					self.kwargs['slug'], filename
-				), 'w'
-			)
+			# file = open(
+			# 	path.join(
+			# 		settings.REPO_DIR,
+			# 		user.username,
+			# 		self.kwargs['slug'], filename
+			# 	), 'w'
+			# )
+			file = open(self.repo_obj.get_repo_path)
 
 			file.truncate()
 			file.write(form.cleaned_data['content'])
@@ -309,31 +349,41 @@ class BlobRawView(View):
 		filename = self.kwargs.get('filename')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
-
+		
+		repo = None
+		
 		try:
-			self.repo_obj = pygit2.Repository(
-				path.join(
-					settings.REPO_DIR,
-					self.kwargs.get('username'),
-					self.kwargs['slug']
-				)
+			# self.repo_obj = pygit2.Repository(
+			# 	path.join(
+			# 		settings.REPO_DIR,
+			# 		self.kwargs.get('username'),
+			# 		self.kwargs['slug']
+			# 	)
+			# )
+			
+			repo = Repository.objects.get(
+				owner__username=self.kwargs.get('username'),
+				slug=self.kwargs['slug']
 			)
+			
+			repo_obj = pygit2.Repository(repo.get_repo_path())
 
 			if self.repo_obj.is_empty:
 				raise Http404("The repository is empty")
 
 		except:
 			raise Http404("Failed to open repository")
-
+		
 		try:
-			file = open(
-				path.join(
-					settings.REPO_DIR,
-					self.kwargs.get('username'),
-					self.kwargs['slug'],
-					filename
-				), 'r'
-			)
+			# file = open(
+			# 	path.join(
+			# 		settings.REPO_DIR,
+			# 		self.kwargs.get('username'),
+			# 		self.kwargs['slug'],
+			# 		filename
+			# 	), 'r'
+			# )
+			file = open(repo.get_repo_path())
 			file_raw = file.read()
 			file.close()
 
@@ -341,45 +391,3 @@ class BlobRawView(View):
 
 		except OSError:
 			raise Http404("Failed to open or read file")
-
-
-def find_file_oid_in_tree(filename, tree):
-	for entry in tree:
-		if entry.name == filename:
-			return entry.id
-		else:
-			return 404
-
-
-def create_commit(user, repo, message, filename):
-	from pygit2 import Signature
-	# example:
-	'''
-	author = Signature('Alice Author', 'alice@authors.tld')
-	committer = Signature('Cecil Committer', 'cecil@committers.tld')
-	tree = repo.TreeBuilder().write()
-	repo.create_commit(
-		'refs/heads/master', # the name of the reference to update
-		author, committer, 'one line commit message\n\ndetailed commit message',
-		tree, # binary string representing the tree object ID
-		[] # list of binary strings representing parents of the new commit
-	)
-	'''
-	ref = 'refs/heads/master'
-	author = Signature(user.username, user.email)
-	committer = Signature(user.username, user.email)
-	repo.index.add(filename)
-	repo.index.write()
-	tree = repo.index.write_tree()
-	parent = None
-	try:
-		parent = repo.revparse_single('HEAD')
-	except KeyError:
-		pass
-
-	parents = []
-	if parent:
-		parents.append(parent.oid.hex)
-
-	sha = repo.create_commit(ref, author, committer, message, tree, parents)
-	return sha

@@ -25,12 +25,15 @@ class Repository(models.Model):
 		settings.AUTH_USER_MODEL, related_name='editors', blank=True)
 
 	def __str__(self):
-		return self.name
+		return "{} - {}".format(self.name, self.owner.username)
 
 	def get_absolute_url(self):
 		return reverse(
 			'gitusers:repo_detail',
 			kwargs={"username": self.owner, "slug": self.slug})
+	
+	def get_repo_path(self):
+		return join(settings.REPO_DIR, self.owner.username, str(self.pk))
 
 
 # Django Signals
@@ -48,16 +51,10 @@ def repository_pre_save(sender, instance, **kwargs):
 		instance.slug = slug
 
 
-@receiver(post_save, sender=Repository)
-def repository_post_init(sender, instance, **kwargs):
-	path = join(settings.REPO_DIR, instance.owner.username, instance.slug)
-	repo = init_repository(path)
-	print(repo.is_empty)
-
-
 @receiver(post_delete, sender=Repository)
 def repository_post_delete(sender, instance, **kwargs):
-	path = join(settings.REPO_DIR, instance.owner.username, instance.name)
+	# path = join(settings.REPO_DIR, instance.owner.username, instance.name)
+	path = instance.get_repo_path()
 	try:
 		rmtree(path)
 	except:
