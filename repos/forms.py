@@ -26,7 +26,8 @@ class RepositoryModelForm(forms.ModelForm):
 		super(RepositoryModelForm, self).__init__(*args, **kwargs)
 
 	def clean_name(self):
-		name = self.cleaned_data.get('name')
+		# name = self.cleaned_data.get('name')
+		name = self.clean_data['name']
 		query_set = Repository.objects.filter(
 			name=name,
 			owner=self.request.user
@@ -51,4 +52,20 @@ class TinyMCEFileEditForm(forms.Form):
 
 
 class FileCreateForm(forms.Form):
-	pass
+	filename = forms.CharField(label='File name', required=True)
+	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
+	commit_message = forms.CharField(
+		required=False,
+		empty_value="Created on {}".format(
+			datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+		)
+	)
+	
+	def clean_filename(self):
+		filename = self.clean_data['filename']
+		if filename == ('.html'.strip()):
+			raise forms.ValidationError(
+				'Please enter file name, i.e. "example.html"'
+			)
+		
+		return filename

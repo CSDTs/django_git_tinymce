@@ -27,7 +27,7 @@ from repos.models import Repository
 from tags.models import Tag
 
 import pygit2
-from os import path
+from os import path, remove
 from shutil import copytree
 
 
@@ -242,10 +242,41 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 	template_name = 'contact.html'
 	form_class = FileCreateForm
 	
+	def get_initial(self, **kwargs):
+		initial = super(RepositoryCreateFileView, self).get_initial()
+		initial['filename'] = '.html'
+		return initial
+
 	def form_valid(self, form):
 		
-		# form.cleaned_data['filename']
-		pass
+		filename = form.cleaned_data['filename']
+		filecontent = form.cleaned_data['content']
+		commit_message = form.cleaned_data['commit_message']
+
+		repo = Repository.objects.get(
+			owner=self.request.user,
+			slug=self.kwargs['slug']
+		)
+		
+		if not repo.is_empty():
+			commit = self.repo_obj.revparse_single('HEAD')
+			tree = commit.tree
+			
+			if find_file_oid_in_tree(filename, tree) != 404:
+				form.add_error(None, "File named {} already exists")
+				return self.form_invalid(form)
+		else:
+			file = open(filename, 'w')
+			file.write(filecontent)
+			file.close()
+			
+		try:
+			repo.create_commit(repo, self.request.user, commit_message, filename)
+		except:
+			self.add_error(None, "Failed to create blob")
+			remove(path.join(repo.get_repo_path(), filename))
+
+		return super(RepositoryCreateFileView, self).form_valid(form)
 
 	def get_success_url(self):
 		return reverse(

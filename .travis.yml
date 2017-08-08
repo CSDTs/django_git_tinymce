@@ -3,7 +3,7 @@ language: python
 python: 
   - 3.6
 
-env: "DJANGO=1.11.2 DB=sqlite",
+env: "DJANGO=1.11.2 DB=sqlite"
 
 before_install:
   # install libgit2
