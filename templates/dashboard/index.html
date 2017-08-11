@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+
+<h1>Top Tags</h1>
+<ul>
+	{% for tag in top_tags %}
+	<li><a href="{{ tag.get_absolute_url }}">{{ tag.title }}</a></li>
+	{% endfor %}
+</ul>
+
+</br>
+<h1>Top Repos associated to above tags</h1>
+<ul>
+	{% for repo in repos %}
+	<li><a href="{{ repo.get_absolute_url }}">{{ repo.name }}</a></li>
+	{% endfor %}
+</ul>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Repositories{% endblock %}
+
+{% block content %}
+
+<h1> Tag: {{ tag.title }}</h1>
+<ul>
+{% for repo_instance in object.repos.all %}
+	<li><a href="{{ repo_instance.get_absolute_url }}">{{ repo_instance.name }}</a></li>
+{% empty %}
+	<p>No repositories associated with this tag yet.</p>
+{% endfor %}
+</ul>
+
+
+{% endblock %}

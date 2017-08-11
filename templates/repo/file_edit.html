@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}{{ form.media }}{% endblock %}
+
+{% block title %}Create File{% endblock %}
+
+{% block content %}
+
+<h1>Edit {{ filename }} File</h1>
+
+{% if error_message %}
+	{{ error_message }}
+	
+{% else %}
+	<form action="" method="post">
+	    {% csrf_token %}
+	    {{ form.as_p }}
+	    <input type="submit" value="Create" />
+	</form>
+{% endif %}
+
+{% endblock %}

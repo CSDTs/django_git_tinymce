@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Tags{% endblock %}
+
+{% block content %}
+
+<h1>Tags</h1>
+<ul>
+{% for tag in object_list %}
+	<li><a href="{{ tag.get_absolute_url }}">{{ tag.title }}</a> ({{ tag.repos.count }} {% if tag.repos.count > 1 %} repositories{% else %} repository{% endif %})</li>
+{% empty %}
+	<p>No tags yet.</p>
+{% endfor %}
+</ul>
+
+
+{% endblock %}
