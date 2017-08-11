@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from repos.models import Repository
 
+
 def create_repo(name, username):
 	"""
 	Creates a question with the given `question_text` and published the
@@ -11,12 +12,13 @@ def create_repo(name, username):
 	in the past, positive for questions that have yet to be published).
 	"""
 	user, created = User.objects.get_or_create(
-			username=username,
-			email=username+'@email.com',
-			password='top_secret'
-		)
+		username=username,
+		email=username + '@email.com',
+		password='top_secret'
+	)
 
 	return Repository.objects.create(name=name, owner=user)
+
 
 class RepositoryListViewTests(TestCase):
 	def test_view_with_no_questions(self):

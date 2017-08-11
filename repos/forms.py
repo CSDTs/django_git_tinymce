@@ -46,7 +46,6 @@ class RepositoryModelForm(forms.ModelForm):
 				"Slugified repo named '{}' already exists".format(slugified)
 			)
 
-
 		return name
 
 
@@ -69,12 +68,12 @@ class FileCreateForm(forms.Form):
 			datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
 		)
 	)
-	
+
 	def clean_filename(self):
 		filename = self.cleaned_data['filename']
 		if filename == ('.html'.strip()):
 			raise forms.ValidationError(
 				'Please enter file name, i.e. "example.html"'
 			)
-		
+
 		return filename

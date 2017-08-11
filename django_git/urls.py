@@ -19,7 +19,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from dashboard.views import DashboardView, DashboardAllRepoIndexView
+from dashboard.views import DashboardAllRepoIndexView
+# from dashboard.views import DashboardView
 # from gitusers.views import IndexView
 
 

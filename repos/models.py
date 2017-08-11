@@ -1,11 +1,10 @@
 from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.db.models.signals import pre_save, post_delete
 from django.urls import reverse
 from django.utils.text import slugify
 
-from pygit2 import init_repository
 from os.path import join
 from shutil import rmtree
 
@@ -31,7 +30,7 @@ class Repository(models.Model):
 		return reverse(
 			'gitusers:repo_detail',
 			kwargs={"username": self.owner, "slug": self.slug})
-	
+
 	def get_repo_path(self):
 		return join(settings.REPO_DIR, self.owner.username, str(self.pk))
 

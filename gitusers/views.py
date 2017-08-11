@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -27,7 +26,7 @@ from repos.models import Repository
 from tags.models import Tag
 
 import pygit2
-from os import path, remove
+from os import path
 from shutil import copytree
 
 
@@ -172,7 +171,7 @@ class RepositoryForkView(LoginRequiredMixin, View):
 				description=origin_repo.description,
 				owner=request.user
 			)
-			
+
 			copytree(origin_repo.get_repo_path(), obj.get_repo_path())
 
 			return HttpResponseRedirect(reverse(
@@ -241,7 +240,7 @@ class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/create_file.html'
 	form_class = FileCreateForm
-	
+
 	def get_initial(self, **kwargs):
 		initial = super(RepositoryCreateFileView, self).get_initial()
 		initial['filename'] = '.html'
@@ -257,11 +256,11 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 			slug=self.kwargs['slug']
 		)
 		git_repo = pygit2.Repository(repo.get_repo_path())
-		
+
 		if not git_repo.is_empty:
 			commit = git_repo.revparse_single('HEAD')
 			tree = commit.tree
-			
+
 			if find_file_oid_in_tree(filename, tree) != 404:
 				form.add_error(None, "File named {} already exists".format(filename))
 				return self.form_invalid(form)
@@ -269,10 +268,9 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		file = open(path.join(repo.get_repo_path(), filename), 'w')
 		file.write(filecontent)
 		file.close()
-		
-		
+
 		create_commit(self.request.user, git_repo, commit_message, filename)
-		
+
 		# form.add_error(None, "Failed to create file")
 		# remove(path.join(repo.get_repo_path(), filename))
 		# return self.form_invalid(form)
@@ -314,12 +312,12 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			# 		self.kwargs['slug']
 			# 	)
 			# )
-			
+
 			repo = Repository.objects.get(
 				owner=self.request.user,
 				slug=self.kwargs['slug']
 			)
-			
+
 			self.repo_obj = pygit2.Repository(repo.get_repo_path())
 
 			if self.repo_obj.is_empty:
@@ -379,9 +377,9 @@ class BlobRawView(View):
 		filename = self.kwargs.get('filename')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
-		
+
 		repo = None
-		
+
 		try:
 			# self.repo_obj = pygit2.Repository(
 			# 	path.join(
@@ -390,20 +388,20 @@ class BlobRawView(View):
 			# 		self.kwargs['slug']
 			# 	)
 			# )
-			
+
 			repo = Repository.objects.get(
 				owner__username=self.kwargs.get('username'),
 				slug=self.kwargs['slug']
 			)
-			
-			repo_obj = pygit2.Repository(repo.get_repo_path())
+
+			# repo_obj = pygit2.Repository(repo.get_repo_path())
 
 			if self.repo_obj.is_empty:
 				raise Http404("The repository is empty")
 
 		except:
 			raise Http404("Failed to open repository")
-		
+
 		try:
 			# file = open(
 			# 	path.join(

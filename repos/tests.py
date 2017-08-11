@@ -14,7 +14,7 @@ class RepoModelTest(TestCase):
 			email='jacob@email.com',
 			password='top_secret'
 		)
-		
+
 		Repository.objects.create(name='testRepoUser', owner=jacob)
 		Repository.objects.create(name='teEst 1 2 3', owner=jacob)
 
@@ -34,7 +34,7 @@ class RepoModelTest(TestCase):
 		self.assertEqual(repo.owner.username, 'jacob')
 		self.assertEqual(repo.slug, 'testrepouser')
 		self.assertEqual(
-			repo.get_repo_path(), 
+			repo.get_repo_path(),
 			join(
 				settings.REPO_DIR,
 				repo.owner.username,
@@ -47,5 +47,3 @@ class RepoModelTest(TestCase):
 		repo = Repository.objects.get(name='teEst 1 2 3', owner__username='jacob')
 
 		self.assertEqual(repo.slug, 'teest-1-2-3')
-
-	

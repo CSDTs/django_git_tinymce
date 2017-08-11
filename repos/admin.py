@@ -12,7 +12,7 @@ class RepoAdmin(admin.ModelAdmin):
 
 	class Meta:
 		model = Repository
-		
+
 	def dir(self, obj):
 		return obj.pk
 
