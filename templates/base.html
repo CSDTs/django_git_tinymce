@@ -43,7 +43,7 @@
 						<li><a href="{% url "gitusers:index" user %}">My Repository</a></li>
 						<li><a href="#">My reviews</a></li>
 						<li class="divider"></li>
-						<li><a href="#">New Repository</a></li>
+						<li><a href="{% url 'gitusers:create' user %}">New Repository</a></li>
 					</ul>
 				</li>
 				<li class="dropdown">

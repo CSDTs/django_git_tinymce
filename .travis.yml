@@ -13,6 +13,7 @@ before_install:
   - cmake .
   - make
   - sudo make install
+  - cd ../
 
 install:
   - sudo pip install -r requirements.txt

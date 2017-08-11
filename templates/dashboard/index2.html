@@ -9,6 +9,8 @@
 <ul>
 	{% for repo in repository_list %}
 	<li><a href="{{ repo.get_absolute_url }}">{{ repo.name }} - {{ repo.owner }}</a></li>
+	{% empty %}
+	<p>No repositories</p>
 	{% endfor %}
 </ul>
 

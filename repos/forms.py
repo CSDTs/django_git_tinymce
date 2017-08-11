@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django import forms
+from django.utils.text import slugify
 
 from tinymce.widgets import TinyMCE
 
@@ -27,7 +28,7 @@ class RepositoryModelForm(forms.ModelForm):
 
 	def clean_name(self):
 		# name = self.cleaned_data.get('name')
-		name = self.clean_data['name']
+		name = self.cleaned_data['name']
 		query_set = Repository.objects.filter(
 			name=name,
 			owner=self.request.user
@@ -37,6 +38,14 @@ class RepositoryModelForm(forms.ModelForm):
 			raise forms.ValidationError(
 				"Repository named '{}' already exists".format(name)
 			)
+
+		slugified = slugify(name)
+		if Repository.objects.filter(
+			slug=slugified, owner=self.request.user).exists():
+			raise forms.ValidationError(
+				"Slugified repo named '{}' already exists".format(slugified)
+			)
+
 
 		return name
 
@@ -62,7 +71,7 @@ class FileCreateForm(forms.Form):
 	)
 	
 	def clean_filename(self):
-		filename = self.clean_data['filename']
+		filename = self.cleaned_data['filename']
 		if filename == ('.html'.strip()):
 			raise forms.ValidationError(
 				'Please enter file name, i.e. "example.html"'

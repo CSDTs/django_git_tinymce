@@ -25,9 +25,9 @@
 
     <ul class="nav nav-pills pull-right">
             {% if is_owner %}
+            <li role="presentation"><a href="{% url 'gitusers:create_file' username=object.owner slug=object.slug %}">New file</a></li>
             <li role="presentation"><a href="{% url 'gitusers:setting' username=object.owner slug=object.slug %}">Change name or desc</a></li>
             <li role="presentation"><a href="{% url 'gitusers:delete' username=object.owner slug=object.slug %}">Delete</a></li>
-            <li role="presentation" class="disabled"><a href="#">Settings</a></li>
             {% else %}
             {% if request.user.is_authenticated %}<li role="presentation"><a href="{% url 'gitusers:fork' username=object.owner slug=object.slug %}">Fork</a></li>{% endif %}
             {% endif %}

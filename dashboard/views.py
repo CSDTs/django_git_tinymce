@@ -42,7 +42,6 @@ class DashboardAllRepoIndexView(ListView):
 
 	def get_queryset(self):
 		queryset = Repository.objects.all()
-		print(queryset)
 
 		search_query = self.request.GET.get('search')
 		if search_query:

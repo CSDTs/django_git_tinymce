@@ -239,7 +239,7 @@ class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 
 
 class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
-	template_name = 'contact.html'
+	template_name = 'repo/create_file.html'
 	form_class = FileCreateForm
 	
 	def get_initial(self, **kwargs):
@@ -248,7 +248,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		return initial
 
 	def form_valid(self, form):
-		
 		filename = form.cleaned_data['filename']
 		filecontent = form.cleaned_data['content']
 		commit_message = form.cleaned_data['commit_message']
@@ -257,24 +256,26 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 			owner=self.request.user,
 			slug=self.kwargs['slug']
 		)
+		git_repo = pygit2.Repository(repo.get_repo_path())
 		
-		if not repo.is_empty():
-			commit = self.repo_obj.revparse_single('HEAD')
+		if not git_repo.is_empty:
+			commit = git_repo.revparse_single('HEAD')
 			tree = commit.tree
 			
 			if find_file_oid_in_tree(filename, tree) != 404:
-				form.add_error(None, "File named {} already exists")
+				form.add_error(None, "File named {} already exists".format(filename))
 				return self.form_invalid(form)
-		else:
-			file = open(filename, 'w')
-			file.write(filecontent)
-			file.close()
-			
-		try:
-			repo.create_commit(repo, self.request.user, commit_message, filename)
-		except:
-			self.add_error(None, "Failed to create blob")
-			remove(path.join(repo.get_repo_path(), filename))
+
+		file = open(path.join(repo.get_repo_path(), filename), 'w')
+		file.write(filecontent)
+		file.close()
+		
+		
+		create_commit(self.request.user, git_repo, commit_message, filename)
+		
+		# form.add_error(None, "Failed to create file")
+		# remove(path.join(repo.get_repo_path(), filename))
+		# return self.form_invalid(form)
 
 		return super(RepositoryCreateFileView, self).form_valid(form)
 
@@ -286,8 +287,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 				'slug': self.kwargs.get('slug')
 			}
 		)
-	
-	
 
 
 class BlobEditView(OwnerRequiredMixin, FormView):
