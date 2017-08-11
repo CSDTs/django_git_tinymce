@@ -12,7 +12,6 @@ sudo apt-get install libffi-dev
 
 # Setup
 
-
 Install:
 * VirtualBox
   * Linux: sudo apt-get install virtualbox
@@ -34,10 +33,15 @@ git clone https://github.com/CSnap/django_git_tinymce
 cd django_git_tinymce
 vagrant up
 vagrant ssh
-sudo apt-get install libffi-dev
 cd /vagrant
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8001
 ```
 
 The site should now be accessible at via web browser at localhost:8001
+
+To access site admin:
+
+- To set up admin for site: ```python manage.py createsuperuser```
+- Visit ```/admin```
+
