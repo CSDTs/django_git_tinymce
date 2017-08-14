@@ -34,14 +34,14 @@ cd django_git_tinymce
 vagrant up
 vagrant ssh
 cd /vagrant
-python manage.py migrate
-python manage.py runserver 0.0.0.0:8001
+python3 manage.py migrate
+python3 manage.py runserver 0.0.0.0:8001
 ```
 
-The site should now be accessible at via web browser at localhost:8001
+The site should now be accessible at via web browser at localhost:1234
 
 To access site admin:
 
-- To set up admin for site: ```python manage.py createsuperuser```
+- To set up admin for site: ```python3 manage.py createsuperuser```
 - Visit ```/admin```
 
