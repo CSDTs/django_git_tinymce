@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'repos.apps.ReposConfig',
     'gitusers.apps.GitusersConfig',
     'tags.apps.TagsConfig',
-    'analytics.apps.AnalyticsConfig',
     'bootstrap3',
     'tinymce',
     'django.contrib.admin',

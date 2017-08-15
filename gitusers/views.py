@@ -15,7 +15,6 @@ from django.views.generic.list import ListView
 from django.urls import reverse, reverse_lazy
 
 from .utils import find_file_oid_in_tree, create_commit
-from analytics.models import TagAnalytics
 from django_git.mixins import OwnerRequiredMixin
 from repos.forms import (
 	RepositoryModelForm,
@@ -84,9 +83,6 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 				new_tag, created = Tag.objects.get_or_create(title=tag)
 				new_tag.repos.add(form.instance)
 
-		# init repo after model object created
-		pygit2.init_repository(form.instance.get_repo_path())
-
 		return valid_data
 
 
@@ -102,24 +98,11 @@ class RepositoryDetailView(DetailView):
 	def get_context_data(self, **kwargs):
 		context = super(RepositoryDetailView, self).get_context_data(**kwargs)
 
-		# Increment Tag Analytics
 		repo_obj = self.get_object()
 		user = self.request.user
-		if user.is_authenticated():
-			tags = repo_obj.tag_set.all()
-			for tag in tags:
-				# tag_analytics_obj = TagAnalytics.objects.add_count(user, tag)
-				TagAnalytics.objects.add_count(user, tag)
 
 		# open repo dir and display repo files
 		try:
-			# git_repo = pygit2.Repository(
-			# 	path.join(
-			# 		settings.REPO_DIR,
-			# 		repo_obj.owner.username,
-			# 		self.kwargs['slug']
-			# 	)
-			# )
 			git_repo = pygit2.Repository(repo_obj.get_repo_path())
 
 			context['is_owner'] = True if repo_obj.owner == user else False
@@ -271,10 +254,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 
 		create_commit(self.request.user, git_repo, commit_message, filename)
 
-		# form.add_error(None, "Failed to create file")
-		# remove(path.join(repo.get_repo_path(), filename))
-		# return self.form_invalid(form)
-
 		return super(RepositoryCreateFileView, self).form_valid(form)
 
 	def get_success_url(self):
@@ -291,6 +270,7 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/file_edit.html'
 	form_class = TinyMCEFileEditForm
 	blob = None
+	repo = None
 	repo_obj = None
 
 	def get_initial(self, **kwargs):
@@ -303,29 +283,19 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			filename += self.kwargs.get('extension')
 
 		try:
-			# self.repo_obj = pygit2.Repository(
-			# 	path.join(
-			# 		settings.REPO_DIR,
-			# 		# because OwnerRequiredMixin insures logged in user is
-			# 		# the owner. So no need to get() object.
-			# 		self.request.user.username,
-			# 		self.kwargs['slug']
-			# 	)
-			# )
-
-			repo = Repository.objects.get(
+			self.repo_obj = Repository.objects.get(
 				owner=self.request.user,
 				slug=self.kwargs['slug']
 			)
 
-			self.repo_obj = pygit2.Repository(repo.get_repo_path())
+			self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
 
-			if self.repo_obj.is_empty:
+			if self.repo.is_empty:
 				raise Http404
 
-			commit = self.repo_obj.revparse_single('HEAD')
+			commit = self.repo.revparse_single('HEAD')
 			tree = commit.tree
-			blob = self.repo_obj[find_file_oid_in_tree(filename, tree)]
+			blob = self.repo[find_file_oid_in_tree(filename, tree)]
 
 			if not blob.is_binary and isinstance(blob, pygit2.Blob):
 				initial['content'] = blob.data
@@ -347,14 +317,8 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		user = self.request.user
 
 		try:
-			# file = open(
-			# 	path.join(
-			# 		settings.REPO_DIR,
-			# 		user.username,
-			# 		self.kwargs['slug'], filename
-			# 	), 'w'
-			# )
-			file = open(self.repo_obj.get_repo_path)
+			repo_path = self.repo_obj.get_repo_path()
+			file = open(path.join(repo_path, filename), 'w')
 
 			file.truncate()
 			file.write(form.cleaned_data['content'])
@@ -362,8 +326,9 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			file.close()
 
 			commit_message = form.cleaned_data['commit_message']
-			# sha = create_commit(user, self.repo_obj, commit_message, filename)
-			create_commit(user, self.repo_obj, commit_message, filename)
+			commit_message = str(filename) + ' ' + commit_message
+			# sha = create_commit(user, self.repo, commit_message, filename)
+			create_commit(user, self.repo, commit_message, filename)
 
 		except OSError:
 			raise form.ValidationError("Save error, please check the file.")
@@ -378,44 +343,30 @@ class BlobRawView(View):
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
 
-		repo = None
+		repo_obj = None
 
 		try:
-			# self.repo_obj = pygit2.Repository(
-			# 	path.join(
-			# 		settings.REPO_DIR,
-			# 		self.kwargs.get('username'),
-			# 		self.kwargs['slug']
-			# 	)
-			# )
-
-			repo = Repository.objects.get(
+			repo_obj = Repository.objects.get(
 				owner__username=self.kwargs.get('username'),
 				slug=self.kwargs['slug']
 			)
+			repo = pygit2.Repository(repo_obj.get_repo_path())
 
-			# repo_obj = pygit2.Repository(repo.get_repo_path())
-
-			if self.repo_obj.is_empty:
+			if repo.is_empty:
+				print('asdfasdfasdfasfd')
 				raise Http404("The repository is empty")
 
 		except:
 			raise Http404("Failed to open repository")
 
 		try:
-			# file = open(
-			# 	path.join(
-			# 		settings.REPO_DIR,
-			# 		self.kwargs.get('username'),
-			# 		self.kwargs['slug'],
-			# 		filename
-			# 	), 'r'
-			# )
-			file = open(repo.get_repo_path())
-			file_raw = file.read()
-			file.close()
-
-			return HttpResponse(file_raw)
+			commit = repo.revparse_single('HEAD')
+			tree = commit.tree
+			blob_id = find_file_oid_in_tree(filename, tree)
+			if blob_id != 404:
+				return HttpResponse(repo[blob_id].data)
+			else:
+				return Http404("Read raw data error")
 
 		except OSError:
 			raise Http404("Failed to open or read file")

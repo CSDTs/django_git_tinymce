@@ -1,12 +1,14 @@
 from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_delete
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.urls import reverse
 from django.utils.text import slugify
 
 from os.path import join
 from shutil import rmtree
+
+from pygit2 import init_repository
 
 
 class RepositoryManager(models.Manager):
@@ -49,10 +51,13 @@ def repository_pre_save(sender, instance, **kwargs):
 		slug = slugify(instance.name)
 		instance.slug = slug
 
+@receiver(post_save, sender=Repository)
+def repository_post_save(sender, instance, **kwagrs):
+	# init repo after model object created
+	init_repository(instance.get_repo_path())
 
 @receiver(post_delete, sender=Repository)
 def repository_post_delete(sender, instance, **kwargs):
-	# path = join(settings.REPO_DIR, instance.owner.username, instance.name)
 	path = instance.get_repo_path()
 	try:
 		rmtree(path)
