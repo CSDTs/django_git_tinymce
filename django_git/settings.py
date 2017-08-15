@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    
+
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -127,9 +127,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static", "project_static"),
+#     # '/var/www/static/',
+# ]
+
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static", "project_static"),
-    # '/var/www/static/',
+    os.path.join(BASE_DIR, "static"),
+    '/var/www/static/',
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static", "static_cdn")

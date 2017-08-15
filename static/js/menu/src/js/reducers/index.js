@@ -1,9 +1,11 @@
 import { combineReducers } from "redux"
 
-import tweets from "./tweetsReducer"
+import repos from "./ReposReducer"
 import user from "./userReducer"
+import tags from "./tagsReducer"
 
 export default combineReducers({
-  tweets,
+  repos,
   user,
+  tags,
 })
