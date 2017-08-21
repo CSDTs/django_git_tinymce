@@ -21,8 +21,16 @@ def create_commit(user, repo, message, filename):
 	)
 	'''
 	ref = 'refs/heads/master'
-	author = Signature(user.username, user.email)
-	committer = Signature(user.username, user.email)
+	# we don't require email addresses for accounts, so this throws an error
+	# if that is the case for the user
+	# ...making a default email, though I'm not sure how effective that is
+	useremail = ""
+	if user.email != "":
+		useremail = user.email
+	else:
+		useremail = 'none@noemail.com'
+	author = Signature(user.username, useremail)
+	committer = Signature(user.username, useremail)
 	repo.index.add(filename)
 	repo.index.write()
 	tree = repo.index.write_tree()

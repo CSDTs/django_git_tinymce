@@ -315,6 +315,7 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			filename += self.kwargs.get('extension')
 
 		user = self.request.user
+		print('user', user.email)
 
 		try:
 			repo_path = self.repo_obj.get_repo_path()

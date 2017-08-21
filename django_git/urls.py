@@ -28,11 +28,14 @@ from tags import viewsets as tags_viewsets
 from repos import viewsets as repos_viewsets
 from gitusers import viewsets as gitusers_viewsets
 
+from gitusers import viewsets as gituser_viewsets
+
 
 router = routers.DefaultRouter()
 router.register(r'tag', tags_viewsets.TagViewSet, base_name='api-tag')
 router.register(r'repository', repos_viewsets.RepositoryViewSet, base_name='api-repository')
 router.register(r'owner', gitusers_viewsets.OwnerViewSet, base_name='api-owner')
+
 
 urlpatterns = [
     # url(r'^$', DashboardView.as_view(), name='index'),
@@ -45,6 +48,7 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^tags/', include('tags.urls', namespace='tags')),
     url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
+	url(r'^api/v1/files/(?P<resource_id>\d+)[/]?$', gituser_viewsets.FilesView.as_view(), name='my_rest_view'),
 
 
 
