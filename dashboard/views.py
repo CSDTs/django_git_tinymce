@@ -20,3 +20,8 @@ class DashboardAllRepoIndexView(ListView):
 				Q(description__icontains=search_query)
 			).order_by('name')
 		return queryset
+
+
+class MenuView(ListView):
+    model = Repository
+    template_name = "dashboard/menu.html"

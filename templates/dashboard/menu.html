@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Menu{% endblock %}
+
+{% block content %}
+<div id="app"></div>
+{% endblock %}
+
+{% block js %}
+{{ super }}
+  <script type="text/javascript" src="{% static "js/menu/src/client.min.js" %}"></script>
+{% endblock %}

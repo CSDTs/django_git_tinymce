@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
 from rest_framework import generics
@@ -6,6 +7,7 @@ from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.decorators import detail_route
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -15,7 +17,6 @@ from time import time
 import json
 import datetime
 
-
 from . import models
 from . import serializers
 
@@ -24,6 +25,14 @@ class OwnerViewSet(viewsets.ModelViewSet):
     queryset = models.Owner.objects.all()
     serializer_class = serializers.Owner
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class UserView(viewsets.ModelViewSet):
+    serializer_class = serializers.UserSerializer
+    model = User
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    queryset = User.objects.all()
+
 
 
 class FilesView(APIView):

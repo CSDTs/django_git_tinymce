@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
 
-from dashboard.views import DashboardAllRepoIndexView
+from dashboard.views import DashboardAllRepoIndexView, MenuView
 # from dashboard.views import DashboardView
 # from gitusers.views import IndexView
 
@@ -28,18 +28,17 @@ from tags import viewsets as tags_viewsets
 from repos import viewsets as repos_viewsets
 from gitusers import viewsets as gitusers_viewsets
 
-from gitusers import viewsets as gituser_viewsets
-
 
 router = routers.DefaultRouter()
 router.register(r'tag', tags_viewsets.TagViewSet, base_name='api-tag')
 router.register(r'repository', repos_viewsets.RepositoryViewSet, base_name='api-repository')
 router.register(r'owner', gitusers_viewsets.OwnerViewSet, base_name='api-owner')
+router.register(r'user', gitusers_viewsets.UserView, 'list')
 
 
 urlpatterns = [
     # url(r'^$', DashboardView.as_view(), name='index'),
-    url(r'^$', DashboardAllRepoIndexView.as_view(), name='index'),
+    url(r'^$', MenuView.as_view(), name='index'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
@@ -48,7 +47,7 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^tags/', include('tags.urls', namespace='tags')),
     url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
-	url(r'^api/v1/files/(?P<resource_id>\d+)[/]?$', gituser_viewsets.FilesView.as_view(), name='my_rest_view'),
+	url(r'^api/v1/files/(?P<resource_id>\d+)[/]?$', gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
 
 
 
