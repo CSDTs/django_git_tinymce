@@ -2,15 +2,12 @@ import React from "react"
 import axios from "axios";
 import { connect } from "react-redux"
 
-import { fetchUser } from "../actions/userActions"
 import { fetchRepos } from "../actions/reposActions"
 import { fetchTags } from "../actions/tagsActions"
 
 
 @connect((store) => {
   return {
-    user: store.user.user,
-    userFetched: store.user.fetched,
     repos: store.repos.repos,
     tags: store.tags.tags
   };
