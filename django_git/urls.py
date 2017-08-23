@@ -35,18 +35,18 @@ router.register(r'repository', repos_viewsets.RepositoryViewSet, base_name='api-
 router.register(r'owner', gitusers_viewsets.OwnerViewSet, base_name='api-owner')
 
 urlpatterns = [
-    # url(r'^$', DashboardView.as_view(), name='index'),
-    url(r'^$', DashboardAllRepoIndexView.as_view(), name='index'),
-    url(r'^admin/', admin.site.urls),
-    url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
-    url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
-    url(r'^tinymce/', include('tinymce.urls')),
-    url(r'^api/repos/', include('repos.api.urls', namespace='repos-api')),
-    url(r'^api/v1/', include(router.urls, namespace='apiv1')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^tags/', include('tags.urls', namespace='tags')),
-    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
-    
+	# url(r'^$', DashboardView.as_view(), name='index'),
+	url(r'^$', DashboardAllRepoIndexView.as_view(), name='index'),
+	url(r'^admin/', admin.site.urls),
+	url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
+	url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
+	url(r'^tinymce/', include('tinymce.urls')),
+	url(r'^api/', include('repos.api.urls', namespace='repos-api')),
+	url(r'^api/v1/', include(router.urls, namespace='apiv1')),
+	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+	url(r'^tags/', include('tags.urls', namespace='tags')),
+	url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
+
 
 
 ]

@@ -10,8 +10,6 @@ class RepoDetailFieldLookupMixin(object):
 	of the default single field filtering.
 	"""
 	def get_object(self):
-		#if self.kwargs[field]
-
 		queryset = self.get_queryset()
 		queryset = self.filter_queryset(queryset)
 		filter = {}
@@ -22,7 +20,7 @@ class RepoDetailFieldLookupMixin(object):
 					owner_obj = User.objects.get(username=self.kwargs[field])
 					filter[field] = owner_obj
 				except:
-					raise Http404("user does not exist")				
+					raise Http404("user does not exist")
 
 			elif self.kwargs[field]:
 				filter[field] = self.kwargs[field]

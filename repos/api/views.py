@@ -1,27 +1,36 @@
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import (
+	CreateAPIView,
 	DestroyAPIView,
 	ListAPIView,
 	RetrieveAPIView,
-	UpdateAPIView,
+	RetrieveUpdateAPIView,
 )
-
+from rest_framework.permissions import (
+	IsAuthenticated,
+	# IsAdminUser,
+	IsAuthenticatedOrReadOnly,
+)
 from repos.models import Repository
 from .mixins import RepoDetailFieldLookupMixin
-from .serializers import RepositoryListSerializer
-from .serializers import RepositoryDetailSerializer
+from .permissions import IsOwnerOrReadOnly
+from .serializers import (
+	RepositoryCreateUpdateSerializer,
+	RepositoryDetailSerializer,
+	RepositoryListSerializer,
+)
 
-class RepoListAPIView(ListAPIView):
+
+class RepoCreateAPIView(CreateAPIView):
 	queryset = Repository.objects.all()
-	serializer_class = RepositoryListSerializer
+	serializer_class = RepositoryCreateUpdateSerializer
+	permission_classes = [IsAuthenticated]
+
+	def perform_create(self, serializer):
+		serializer.save(owner=self.request.user)
 
 
 class RepoDetailAPIView(RepoDetailFieldLookupMixin, RetrieveAPIView):
-	queryset = Repository.objects.all()
-	serializer_class = RepositoryDetailSerializer
-	lookup_fields = ('owner', 'slug')
-
-
-class RepoUpdateAPIView(RepoDetailFieldLookupMixin, UpdateAPIView):
 	queryset = Repository.objects.all()
 	serializer_class = RepositoryDetailSerializer
 	lookup_fields = ('owner', 'slug')
@@ -31,3 +40,25 @@ class RepoDeleteAPIView(RepoDetailFieldLookupMixin, DestroyAPIView):
 	queryset = Repository.objects.all()
 	serializer_class = RepositoryDetailSerializer
 	lookup_fields = ('owner', 'slug')
+
+
+class RepoListAPIView(ListAPIView):
+	queryset = Repository.objects.all()
+	serializer_class = RepositoryListSerializer
+	filter_backends = [SearchFilter, OrderingFilter]
+	search_fields = ['name', 'description']
+
+	# USAGE of search filter and ordering filter
+	# api/?search=repo&ordering=name
+	# api/?search=repo&ordering=-owner   # reverse ordering
+
+	# Advanced filters use django-filter which supports highly customizable
+	# field filtering for REST framework.
+	# http://www.django-rest-framework.org/api-guide/filtering/#djangofilterbackend
+
+
+class RepoUpdateAPIView(RepoDetailFieldLookupMixin, RetrieveUpdateAPIView):
+	queryset = Repository.objects.all()
+	serializer_class = RepositoryCreateUpdateSerializer
+	lookup_fields = ('owner', 'slug')
+	permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]

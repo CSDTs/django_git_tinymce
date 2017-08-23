@@ -3,6 +3,29 @@ from rest_framework.serializers import ModelSerializer
 from repos.models import Repository
 
 
+class RepositoryCreateUpdateSerializer(ModelSerializer):
+	class Meta:
+		model = Repository
+		fields = (
+			'name',
+			"description",
+		)
+
+
+class RepositoryDetailSerializer(ModelSerializer):
+	class Meta:
+		model = Repository
+		fields = (
+			'id',
+			'name',
+			'description',
+			'slug',
+			'timestamp',
+			'owner',
+			'editors',
+		)
+
+
 class RepositoryListSerializer(ModelSerializer):
 	class Meta:
 		model = Repository
@@ -14,19 +37,6 @@ class RepositoryListSerializer(ModelSerializer):
 			'owner',
 		)
 
-
-class RepositoryDetailSerializer(ModelSerializer):
-    class Meta:
-        model = Repository
-        fields = (
-            'id',
-            'name',
-            'description',
-            'slug',
-            'timestamp',
-            'owner',
-            'editors',
-        )
 
 """
 
