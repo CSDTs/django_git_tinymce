@@ -128,6 +128,37 @@ class RepositoryDetailView(DetailView):
 
 		return context
 
+class ReduxRepositoryDetailView(DetailView):
+	model = Repository
+	template_name = 'repo/redux_repo.html'
+	component = 'repo/src/client.min.js'
+
+	def get(self, request, slug, username):
+    	# gets passed to react via window.props
+		owner_name = self.kwargs['username']
+		repo_name = self.kwargs['slug']
+		user = User.objects.get(username=owner_name)
+		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
+
+		props = {
+					'repo_name': repo_name,
+					'repo_owner': owner_name,
+					'repo_owner_id' : user.id,
+					'repo_id': repo.id,
+					
+
+		}
+
+		context = {
+
+        	'component': self.component,
+        	'props': props,
+		}
+
+		return render(request, self.template_name, context)
+
+
+
 
 class RepositoryForkView(LoginRequiredMixin, View):
 	template = 'repo/fork.html'
