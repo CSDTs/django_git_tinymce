@@ -27,6 +27,8 @@ from tags.models import Tag
 import pygit2
 from os import path
 from shutil import copytree
+import os
+import time
 
 
 class IndexView(LoginRequiredMixin, ListView):
@@ -145,7 +147,7 @@ class ReduxRepositoryDetailView(DetailView):
 					'repo_owner': owner_name,
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
-					
+
 
 		}
 
@@ -283,6 +285,22 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		file.write(filecontent)
 		file.close()
 
+
+		b = git_repo.create_blob_fromworkdir(filename)
+		bld = git_repo.TreeBuilder()
+		bld.insert(filename, b, os.stat(os.path.join(repo.get_repo_path(), filename)).st_mode )
+		t = bld.write()
+		git_repo.index.read()
+		git_repo.index.add(filename)
+		git_repo.index.write()
+		email = "nonegiven@nonegiven.com"
+		if self.request.user.email:
+			email = self.request.user.email
+		# s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
+		#s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
+		#c = git_repo.create_commit('HEAD', s,s, commit_message, t, [git_repo.head.target])
+
+
 		create_commit(self.request.user, git_repo, commit_message, filename)
 
 		return super(RepositoryCreateFileView, self).form_valid(form)
@@ -398,7 +416,7 @@ class BlobRawView(View):
 			if blob_id != 404:
 				return HttpResponse(repo[blob_id].data)
 			else:
-				return Http404("Read raw data error")
+				raise Http404("Read raw data error")
 
 		except OSError:
 			raise Http404("Failed to open or read file")

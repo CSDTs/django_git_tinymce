@@ -2,8 +2,7 @@ def find_file_oid_in_tree(filename, tree):
 	for entry in tree:
 		if entry.name == filename:
 			return entry.id
-		else:
-			return 404
+	return 404
 
 
 def create_commit(user, repo, message, filename):
