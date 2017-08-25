@@ -454,7 +454,6 @@ class BlobDeleteView(DeleteView):
 		tree = commit.tree
 		blob_id = find_file_oid_in_tree(filename, tree)
 		file_name = str(filename)
-		repo_path = repo_obj.get_repo_path()
 		commit_message = str(filename) + ' deleted'
 		delete_commit(self.request.user, repo, commit_message, filename)
 		try:

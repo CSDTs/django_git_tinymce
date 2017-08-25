@@ -80,6 +80,7 @@ export default class Layout extends React.Component {
           </p>
         </div>
         <div className="col-md-6 text-right col-xs-4">
+          {files.is_owner &&
           <div class="btn-group ">
             <button type="button" class="btn btn-danger"><i className="glyphicon glyphicon-cog"/></button>
             <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -92,8 +93,7 @@ export default class Layout extends React.Component {
               <li><a href={`/${window.props.repo_owner}/${window.props.repo_name}/delete`}><font style={{color: '#f33'}}>Delete Repo</font></a></li>
             </ul>
           </div>
-
-
+        }
         </div>
       </div>
       <div className="row">
@@ -103,7 +103,7 @@ export default class Layout extends React.Component {
 
           </p>
 
-          <Branches branches={files.branches}/>
+          <Branches branches={files.branches} is_owner={files.is_owner}/>
 
           <div class="panel panel-success">
             {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a></div> : <div class="panel-heading">No Files Yet</div> }
@@ -120,7 +120,7 @@ export default class Layout extends React.Component {
               {this.props.files.files.map((file) => {
                 const icon = this.getIcon(file.type)
                 const editLink = (files.is_owner) ? <a href={`blob/${file.name}/edit`} style={{fontSize: '.75em', color: '#999'}}>edit</a> : null
-                return <tr key={file.id}><th scope="row">{icon} <a href={`blob/${file.name}`}>{ file.name }</a> &nbsp;{editLink}</th><td><a href={`blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a></td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
+                return <tr key={file.id}><th scope="row">{icon} <a href={`blob/${file.name}`}>{ file.name }</a> &nbsp;{editLink}</th><td>{ files.is_owner && <a href={`blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a>}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
               })}
               </tbody>
             </table>
