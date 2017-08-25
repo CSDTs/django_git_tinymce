@@ -74,11 +74,30 @@ export default class Layout extends React.Component {
 
     return <div>
       <div className="row">
-        <div className="col-md-12">
+        <div className="col-md-6 col-xs-8">
           <p>
             <h2 className="repo-header"><a href={`/${window.props.repo_owner}`}>{window.props.repo_owner}</a> / <a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{window.props.repo_name}</a></h2>
           </p>
+        </div>
+        <div className="col-md-6 text-right col-xs-4">
+          <div class="btn-group ">
+            <button type="button" class="btn btn-danger"><i className="glyphicon glyphicon-cog"/></button>
+            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href={`setting/`}>Edit Description</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href={`/${window.props.repo_owner}/${window.props.repo_name}/delete`}><font style={{color: '#f33'}}>Delete Repo</font></a></li>
+            </ul>
+          </div>
 
+
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-md-12">
           <p>
             <h4 className="repo-header">{repo.description} {editShow}</h4>
 
@@ -87,11 +106,12 @@ export default class Layout extends React.Component {
           <Branches branches={files.branches}/>
 
           <div class="panel panel-success">
-            {(files.committer) ? <div class="panel-heading">Latest commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>"{files.message}" <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a></div> : <div class="panel-heading">No Files Yet</div> }
+            {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a></div> : <div class="panel-heading">No Files Yet</div> }
             <table class="table">
               <thead>
                 <tr>
                   <th>Filename</th>
+                  <th></th>
                   <th>Last Commit</th>
                 </tr>
               </thead>
@@ -100,7 +120,7 @@ export default class Layout extends React.Component {
               {this.props.files.files.map((file) => {
                 const icon = this.getIcon(file.type)
                 const editLink = (files.is_owner) ? <a href={`blob/${file.name}/edit`} style={{fontSize: '.75em', color: '#999'}}>edit</a> : null
-                return <tr key={file.id}><th scope="row">{icon} <a href={`blob/${file.name}`}>{ file.name }</a> &nbsp;{editLink}</th><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
+                return <tr key={file.id}><th scope="row">{icon} <a href={`blob/${file.name}`}>{ file.name }</a> &nbsp;{editLink}</th><td><a href={`blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a></td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
               })}
               </tbody>
             </table>
