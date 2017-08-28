@@ -113,30 +113,34 @@ class FilesView(APIView):
         this_repo = Repository(specific_repo.get_repo_path())
         print(this_repo)
 
-        data = request.data
-        print(data)
-        data_name = str(data['name'])
-        data2 = data['name']
-        path = default_storage.save(os.path.join(specific_repo.get_repo_path(), data_name), ContentFile(data2.read()))
-        print('path', path)
-        tmp_file = os.path.join(specific_repo.get_repo_path(), path)
+        data3 = request.data
+        print(data3)
+        data4 = data3['name']
+        for data in request.data.getlist('name'):
+            print('data', data)
+            data_name = str(data)
+            print('data_name', data_name)
+            data2 = data
+            path = default_storage.save(os.path.join(specific_repo.get_repo_path(), data_name), ContentFile(data2.read()))
+            print('path', path)
+            tmp_file = os.path.join(specific_repo.get_repo_path(), path)
 
-        b = this_repo.create_blob_fromworkdir(data_name)
-        bld = this_repo.TreeBuilder()
-        bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), data_name)).st_mode )
-        t = bld.write()
-        this_repo.index.read()
-        this_repo.index.add(data_name)
-        this_repo.index.write()
-        email = "nonegiven@nonegiven.com"
-        if self.request.user.email:
-            email = self.request.user.email
-		# s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
-		#s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
-		#c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
-        commit_message = "Uploaded file"
+            b = this_repo.create_blob_fromworkdir(data_name)
+            bld = this_repo.TreeBuilder()
+            bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), data_name)).st_mode )
+            t = bld.write()
+            this_repo.index.read()
+            this_repo.index.add(data_name)
+            this_repo.index.write()
+            email = "nonegiven@nonegiven.com"
+            if self.request.user.email:
+                email = self.request.user.email
+    		# s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
+    		#s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
+    		#c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
+            commit_message = "Uploaded file " + data_name
 
-        create_commit(self.request.user, this_repo, commit_message, data_name)
+            create_commit(self.request.user, this_repo, commit_message, data_name)
         return HttpResponseRedirect(reverse(
 			'gitusers:repo_detail',
 			args=(request.user.username, specific_repo.slug))

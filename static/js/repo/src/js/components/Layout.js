@@ -63,18 +63,27 @@ export default class Layout extends React.Component {
       dropzoneActive: false
     });
     var file = new FormData();
-
+    const Throttle = require('superagent-throttle')
+    let throttle = new Throttle({
+      active: true,     // set false to pause queue
+      rate: 1,          // how many requests can be sent every `ratePer`
+      ratePer: 1000,   // number of ms in which `rate` requests may be sent
+      concurrent: 1     // how many requests can be sent concurrently
+    })
+    var req=request
+              .post(`/api/v1/files/${window.props.repo_id}`)
+              .use(throttle.plugin())
     files.forEach((dropped_file) => {
-      var req=request
-                .post(`/api/v1/files/${window.props.repo_id}`)
+
+
 
       req.attach('name', dropped_file);
       //file.append('name',dropped_file)
+
+      });
       req.send
       req.end(function(err,response){
           console.log("upload done!!!!!");
-      });
-
     })
 
 
@@ -209,7 +218,7 @@ export default class Layout extends React.Component {
                 onDrop={this.onDrop.bind(this)}
                 className="dropzone"
                 >
-                <p>&nbsp;&nbsp;<b>Upload File:</b> To upload a file, drag & drop file anywhere above. Or click this box to select file to upload.</p>
+                <p>&nbsp;&nbsp;<b>Upload Files:</b> To upload files, drag & drop files anywhere above. Or click this box to select files to upload.</p>
               </Dropzone>
             </div>
             <aside>
