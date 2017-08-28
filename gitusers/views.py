@@ -464,6 +464,3 @@ class BlobDeleteView(DeleteView):
 			'gitusers:repo_detail',
 			args=(request.user.username, repo_obj.slug))
 		)
-
-		# except OSError:
-		# 	raise Http404("Failed to open or read file")
