@@ -14,7 +14,7 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from django.urls import reverse, reverse_lazy
 
-from .utils import find_file_oid_in_tree, create_commit, delete_commit
+from .utils import find_file_oid_in_tree, create_commit, delete_commit, find_file_oid_in_tree_using_index
 from django_git.mixins import OwnerRequiredMixin
 from repos.forms import (
 	RepositoryModelForm,
@@ -135,10 +135,14 @@ class ReduxRepositoryDetailView(DetailView):
 	template_name = 'repo/redux_repo.html'
 	component = 'repo/src/client.min.js'
 
+
 	def get(self, request, slug, username):
     	# gets passed to react via window.props
 		owner_name = self.kwargs['username']
 		repo_name = self.kwargs['slug']
+		directory = ""
+		if 'directories' in self.kwargs:
+			directory = self.kwargs['directories']
 		user = User.objects.get(username=owner_name)
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
 
@@ -147,6 +151,41 @@ class ReduxRepositoryDetailView(DetailView):
 					'repo_owner': owner_name,
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
+					'directory': directory
+
+
+		}
+
+		context = {
+
+        	'component': self.component,
+        	'props': props,
+		}
+
+		return render(request, self.template_name, context)
+
+class ReduxRepositoryFolderDetailView(DetailView):
+	model = Repository
+	template_name = 'repo/redux_repo.html'
+	component = 'repo/src/client.min.js'
+
+
+	def get(self, request, slug, username, directories):
+    	# gets passed to react via window.props
+		owner_name = self.kwargs['username']
+		repo_name = self.kwargs['slug']
+		directory = ""
+		if 'directories' in self.kwargs:
+			directory = self.kwargs['directories']
+		user = User.objects.get(username=owner_name)
+		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
+
+		props = {
+					'repo_name': repo_name,
+					'repo_owner': owner_name,
+					'repo_owner_id' : user.id,
+					'repo_id': repo.id,
+					'directory': directory
 
 
 		}
@@ -280,18 +319,35 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 			if find_file_oid_in_tree(filename, tree) != 404:
 				form.add_error(None, "File named {} already exists".format(filename))
 				return self.form_invalid(form)
+		dirname = ""
+		filename2 = filename
 
-		file = open(path.join(repo.get_repo_path(), filename), 'w')
+		if "/" in filename:
+			# import re
+			# pattern = re.compile(r"^(.+)/([^/]+)$")
+			# matches = pattern.search(filename)
+			# print('matches', matches)
+			dirname, filename2 = os.path.split(filename)
+
+		if not os.path.exists(path.join(repo.get_repo_path(), dirname)):
+		    try:
+		        os.makedirs(os.path.dirname(path.join(repo.get_repo_path(), dirname, filename2)))
+		    except OSError as exc: # Guard against race condition
+		        if exc.errno != errno.EEXIST:
+		            raise
+
+		print(filename2)
+		file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
 		file.write(filecontent)
 		file.close()
 
 
-		b = git_repo.create_blob_fromworkdir(filename)
+		b = git_repo.create_blob_fromworkdir(path.join(dirname, filename2))
 		bld = git_repo.TreeBuilder()
-		bld.insert(filename, b, os.stat(os.path.join(repo.get_repo_path(), filename)).st_mode )
+		bld.insert(filename2, b, os.stat(os.path.join(repo.get_repo_path(), dirname, filename2)).st_mode )
 		t = bld.write()
 		git_repo.index.read()
-		git_repo.index.add(filename)
+		git_repo.index.add(path.join( dirname, filename2))
 		git_repo.index.write()
 		email = "nonegiven@nonegiven.com"
 		if self.request.user.email:
@@ -301,7 +357,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		#c = git_repo.create_commit('HEAD', s,s, commit_message, t, [git_repo.head.target])
 
 
-		create_commit(self.request.user, git_repo, commit_message, filename)
+		create_commit(self.request.user, git_repo, commit_message, path.join( dirname, filename2))
 
 		return super(RepositoryCreateFileView, self).form_valid(form)
 
@@ -390,6 +446,9 @@ class BlobRawView(View):
 	def get(self, request, **kwargs):
 
 		filename = self.kwargs.get('filename')
+		directory = ""
+		if 'directories' in self.kwargs:
+			directory = self.kwargs.get('directories')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
 
@@ -410,9 +469,12 @@ class BlobRawView(View):
 			raise Http404("Failed to open repository")
 
 		try:
+			index_tree = repo.index
 			commit = repo.revparse_single('HEAD')
 			tree = commit.tree
-			blob_id = find_file_oid_in_tree(filename, tree)
+			item = tree.__getitem__(str(directory))
+			index_tree.read_tree(item.id)
+			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			if blob_id != 404:
 				return HttpResponse(repo[blob_id].data)
 			else:

@@ -57,6 +57,24 @@ class FilesView(APIView):
         except:
             return Response({'detail': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
         this_repo = Repository(specific_repo.get_repo_path())
+        directory = ""
+        if 'directories' in self.kwargs:
+            directory = self.kwargs['directories']
+        dir_path = path.join(specific_repo.get_repo_path(), directory)
+        print('dir_path', dir_path)
+        os.chdir(dir_path)
+        print(os.listdir())
+
+        index_tree = this_repo.index
+        # commit = this_repo.revparse_single('HEAD')
+        # tree10 = commit.tree
+
+        # index_tree.read_tree(item.id)
+        #print('item', item)
+        #print('index_tree', list(index_tree))
+
+
+
         tuplet = []
         time = None
         user = request.user
@@ -67,14 +85,30 @@ class FilesView(APIView):
         try:
             commit = this_repo.revparse_single('HEAD')
             tree = commit.tree
-            for entry in tree:
-                tuplet.append({'name': entry.name, 'id': entry.id.hex, 'type': entry.type, 'filemode': entry.filemode})
+            if directory != "":
+                item = tree.__getitem__(str(directory))
+                index_tree.read_tree(item.id)
+                for entry in index_tree:
+                    print('entry.path', entry.path)
+                    print('entry.path', entry.hex)
+                    filemode = index_tree[entry.path].mode
+                    type = ""
+                    if filemode is '33188':
+                        type = "tree"
+                    else:
+                        type = "blob"
+
+                    tuplet.append({'name': entry.path, 'id': entry.hex, 'type': type, 'filemode': filemode})
+            else:
+                for entry in tree:
+                    tuplet.append({'name': entry.name, 'id': entry.id.hex, 'type': entry.type, 'filemode': entry.filemode})
             date_handler = lambda obj: (
                 obj.isoformat()
                 if isinstance(obj, (datetime.datetime, datetime.date))
                 else None
             )
             time = json.dumps(datetime.datetime.fromtimestamp(commit.commit_time), default=date_handler)
+            dir_hier = directory
 
             main_list = {
                         'files': tuplet,
@@ -85,7 +119,8 @@ class FilesView(APIView):
                         'time': time,
                         'branches': list(this_repo.branches),
                         'is_owner': is_owner,
-                        'is_empty': empty
+                        'is_empty': empty,
+                        'dir_hier': dir_hier
             }
 
         except:

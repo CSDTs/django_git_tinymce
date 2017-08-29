@@ -4,6 +4,11 @@ def find_file_oid_in_tree(filename, tree):
 			return entry.id
 	return 404
 
+def find_file_oid_in_tree_using_index(filename, index_tree):
+	for entry in index_tree:
+		if entry.path == filename:
+			return entry.hex
+	return 404
 
 def create_commit(user, repo, message, filename):
 	from pygit2 import Signature

@@ -5,7 +5,7 @@ export function fetchFiles() {
     dispatch({type: "FETCH_FILES"});
 
 
-    axios.get(`/api/v1/files/${window.props.repo_id}`)
+    axios.get(`/api/v1/files/${window.props.repo_id}/${window.props.directory}`)
       .then((response) => {
         console.log('data.files', response.data)
         // if response.data.files == undefined {
