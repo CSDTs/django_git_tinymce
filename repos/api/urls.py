@@ -7,6 +7,8 @@ from .views import (
 	RepoListAPIView,
 	RepoUpdateAPIView,
 )
+
+app_name = "repo_api"
 urlpatterns = [
 	url(r'^$', RepoListAPIView.as_view(), name='list'),
 	url(r'^(?P<owner>[\w.+-]+)/create/$', RepoCreateAPIView.as_view(), name='create'),

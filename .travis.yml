@@ -1,9 +1,7 @@
 language: python
 
-python: 
+python:
   - 3.6
-
-env: "DJANGO=1.11.2 DB=sqlite"
 
 before_install:
   # install libgit2
@@ -20,10 +18,10 @@ install:
   - sudo pip install flake8
   # dynamic linker for libgit2 library
   - sudo ldconfig
-  
+
 before_script:
   # W191: indentation contains tabs
-  
+
   # - flake8 --exclude=migrations --ignore=W191 --max-line-length=122 .
 
 script:

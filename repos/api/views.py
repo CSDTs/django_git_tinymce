@@ -6,11 +6,7 @@ from rest_framework.generics import (
 	RetrieveAPIView,
 	RetrieveUpdateAPIView,
 )
-from rest_framework.permissions import (
-	IsAuthenticated,
-	# IsAdminUser,
-	IsAuthenticatedOrReadOnly,
-)
+from rest_framework.permissions import AllowAny
 from repos.models import Repository
 from .mixins import RepoDetailFieldLookupMixin
 from .permissions import IsOwnerOrReadOnly
@@ -24,7 +20,8 @@ from .serializers import (
 class RepoCreateAPIView(CreateAPIView):
 	queryset = Repository.objects.all()
 	serializer_class = RepositoryCreateUpdateSerializer
-	permission_classes = [IsAuthenticated]
+	# Permission is default to IsAuthenticatedOrReadOnly in django.settings
+	# permission_classes = [IsAuthenticated]
 
 	def perform_create(self, serializer):
 		serializer.save(owner=self.request.user)
@@ -33,6 +30,7 @@ class RepoCreateAPIView(CreateAPIView):
 class RepoDetailAPIView(RepoDetailFieldLookupMixin, RetrieveAPIView):
 	queryset = Repository.objects.all()
 	serializer_class = RepositoryDetailSerializer
+	permission_classes = [AllowAny]
 	lookup_fields = ('owner', 'slug')
 
 
@@ -40,11 +38,13 @@ class RepoDeleteAPIView(RepoDetailFieldLookupMixin, DestroyAPIView):
 	queryset = Repository.objects.all()
 	serializer_class = RepositoryDetailSerializer
 	lookup_fields = ('owner', 'slug')
+	permission_classes = [IsOwnerOrReadOnly]
 
 
 class RepoListAPIView(ListAPIView):
 	queryset = Repository.objects.all()
 	serializer_class = RepositoryListSerializer
+	permission_classes = [AllowAny]
 	filter_backends = [SearchFilter, OrderingFilter]
 	search_fields = ['name', 'description']
 
@@ -61,4 +61,4 @@ class RepoUpdateAPIView(RepoDetailFieldLookupMixin, RetrieveUpdateAPIView):
 	queryset = Repository.objects.all()
 	serializer_class = RepositoryCreateUpdateSerializer
 	lookup_fields = ('owner', 'slug')
-	permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+	permission_classes = [IsOwnerOrReadOnly]

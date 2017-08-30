@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
@@ -17,6 +17,7 @@ class RepoDetailFieldLookupMixin(object):
 		for field in self.lookup_fields:
 			if field == "owner" and self.kwargs[field]:
 				try:
+					User = get_user_model()
 					owner_obj = User.objects.get(username=self.kwargs[field])
 					filter[field] = owner_obj
 				except:

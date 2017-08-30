@@ -1,6 +1,18 @@
 from rest_framework.serializers import ModelSerializer
 
+from accounts.api.serializers import UserDetailSerializer
+from .serializer_relations import ParameterisedHyperlinkedIdentityField
 from repos.models import Repository
+
+DETAIL_URL = ParameterisedHyperlinkedIdentityField(
+	view_name='repo_api:detail',
+	lookup_fields=(('owner', 'owner'), ('slug', 'slug'),)
+)
+
+DELETE_URL = ParameterisedHyperlinkedIdentityField(
+	view_name='repo_api:delete',
+	lookup_fields=(('owner', 'owner'), ('slug', 'slug'),)
+)
 
 
 class RepositoryCreateUpdateSerializer(ModelSerializer):
@@ -13,9 +25,14 @@ class RepositoryCreateUpdateSerializer(ModelSerializer):
 
 
 class RepositoryDetailSerializer(ModelSerializer):
+	detail_url = DETAIL_URL
+	delete_url = DELETE_URL
+	owner = UserDetailSerializer(read_only=True)
+
 	class Meta:
 		model = Repository
 		fields = (
+			'detail_url',
 			'id',
 			'name',
 			'description',
@@ -23,34 +40,22 @@ class RepositoryDetailSerializer(ModelSerializer):
 			'timestamp',
 			'owner',
 			'editors',
+			'delete_url',
 		)
 
 
 class RepositoryListSerializer(ModelSerializer):
+	detail_url = DETAIL_URL
+	delete_url = DELETE_URL
+	owner = UserDetailSerializer(read_only=True)
+
 	class Meta:
 		model = Repository
 		fields = (
-			'id',
+			'detail_url',
 			'name',
 			'description',
 			'slug',
 			'owner',
+			'delete_url',
 		)
-
-
-"""
-
-data = {
-	'name': 'repo3',
-	'owner': 1,
-	'slug': 'repo3'
-}
-
-obj = Repository.objects.get(id=3)
-
-new_obj = RepositoryDetailSerializer(data=data)
-if new_obj.is_valid():
-	new_obj.save()
-else:
-	print(new_obj.errors)
-"""

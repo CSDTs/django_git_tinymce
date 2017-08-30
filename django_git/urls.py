@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
+from rest_framework_jwt.views import obtain_jwt_token
 
 from dashboard.views import DashboardAllRepoIndexView
 # from dashboard.views import DashboardView
@@ -41,7 +42,9 @@ urlpatterns = [
 	url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
 	url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
 	url(r'^tinymce/', include('tinymce.urls')),
-	url(r'^api/', include('repos.api.urls', namespace='repos-api')),
+	url(r'^api/auth/token/', obtain_jwt_token),
+	url(r'^api/repos/', include('repos.api.urls', namespace='repo_api')),
+	url(r'^api/users/', include('accounts.api.urls', namespace='user_api')),
 	url(r'^api/v1/', include(router.urls, namespace='apiv1')),
 	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 	url(r'^tags/', include('tags.urls', namespace='tags')),
