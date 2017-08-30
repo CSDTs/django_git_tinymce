@@ -14,7 +14,7 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from django.urls import reverse, reverse_lazy
 
-from .utils import find_file_oid_in_tree, create_commit, delete_commit, delete_commit_folders, find_file_oid_in_tree_using_index
+from .utils import find_file_oid_in_tree, create_commit, create_commit_folders, delete_commit, delete_commit_folders, find_file_oid_in_tree_using_index
 from django_git.mixins import OwnerRequiredMixin
 from repos.forms import (
 	RepositoryModelForm,
@@ -335,8 +335,8 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		    except OSError as exc: # Guard against race condition
 		        if exc.errno != errno.EEXIST:
 		            raise
-
-		print(filename2)
+		print('dirname', dirname)
+		print('filename2', filename2)
 		file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
 		file.write(filecontent)
 		file.close()
@@ -346,9 +346,9 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		bld = git_repo.TreeBuilder()
 		bld.insert(filename2, b, os.stat(os.path.join(repo.get_repo_path(), dirname, filename2)).st_mode )
 		t = bld.write()
-		git_repo.index.read()
-		git_repo.index.add(path.join( dirname, filename2))
-		git_repo.index.write()
+		# git_repo.index.read()
+		# git_repo.index.add(path.join( dirname, filename2))
+		# git_repo.index.write()
 		email = "nonegiven@nonegiven.com"
 		if self.request.user.email:
 			email = self.request.user.email
@@ -357,7 +357,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		#c = git_repo.create_commit('HEAD', s,s, commit_message, t, [git_repo.head.target])
 
 
-		create_commit(self.request.user, git_repo, commit_message, path.join( dirname, filename2))
+		create_commit_folders(self.request.user, git_repo, commit_message, filename2, dirname)
 
 		return super(RepositoryCreateFileView, self).form_valid(form)
 
@@ -387,7 +387,9 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		filename = self.kwargs.get('filename')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
-
+		directory = ""
+		if 'directories' in self.kwargs:
+			directory = self.kwargs.get('directories')
 		try:
 			self.repo_obj = Repository.objects.get(
 				owner=self.request.user,
@@ -399,9 +401,21 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			if self.repo.is_empty:
 				raise Http404
 
+			index_tree = self.repo.index
 			commit = self.repo.revparse_single('HEAD')
 			tree = commit.tree
-			blob = self.repo[find_file_oid_in_tree(filename, tree)]
+			# blob = self.repo[find_file_oid_in_tree(filename, tree)]
+
+			print('directory', directory)
+			if directory != "":
+				item = tree.__getitem__(str(directory))
+				print('item', item)
+				index_tree.read_tree(item.id)
+
+			print('find_file_oid_in_tree_using_index(filename, index_tree)', find_file_oid_in_tree_using_index(filename, index_tree))
+			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
+			blob = self.repo[blob_id]
+
 
 			if not blob.is_binary and isinstance(blob, pygit2.Blob):
 				initial['content'] = blob.data
@@ -419,13 +433,16 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		filename = self.kwargs.get('filename')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
+		directory = ""
+		if self.kwargs.get('directories'):
+			directory = self.kwargs.get('directories')
 
 		user = self.request.user
 		print('user', user.email)
 
 		try:
 			repo_path = self.repo_obj.get_repo_path()
-			file = open(path.join(repo_path, filename), 'w')
+			file = open(path.join(repo_path, directory, filename), 'w')
 
 			file.truncate()
 			file.write(form.cleaned_data['content'])
@@ -435,7 +452,9 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			commit_message = form.cleaned_data['commit_message']
 			commit_message = str(filename) + ' ' + commit_message
 			# sha = create_commit(user, self.repo, commit_message, filename)
-			create_commit(user, self.repo, commit_message, filename)
+			print ('filename', filename)
+			print('directory', directory)
+			create_commit_folders(user, self.repo, commit_message, filename, directory)
 
 		except OSError:
 			raise form.ValidationError("Save error, please check the file.")
