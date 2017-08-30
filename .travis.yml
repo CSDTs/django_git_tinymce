@@ -14,8 +14,8 @@ before_install:
   - cd ../
 
 install:
-  - sudo pip install -r requirements.txt
-  - sudo pip install flake8
+  - pip install -r requirements.txt
+  - pip install flake8
   # dynamic linker for libgit2 library
   - sudo ldconfig
 
