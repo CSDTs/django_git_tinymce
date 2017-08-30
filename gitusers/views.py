@@ -1,5 +1,5 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -133,6 +133,7 @@ class RepositoryForkView(LoginRequiredMixin, View):
 	template = 'repo/fork.html'
 
 	def get(self, request, *args, **kwargs):
+		User = get_user_model()
 		username_in_url = self.kwargs.get("username")
 		origin_user = User.objects.get(username=username_in_url)
 		origin_repo = self.kwargs.get("slug")
