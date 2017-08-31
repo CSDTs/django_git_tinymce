@@ -91,14 +91,21 @@ class FilesView(APIView):
                 for entry in index_tree:
                     print('entry.path', entry.path)
                     print('entry.path', entry.hex)
+                    name = entry.path
                     filemode = index_tree[entry.path].mode
                     type = ""
                     if filemode is '33188':
                         type = "tree"
                     else:
                         type = "blob"
+                    if "/" in entry.path:
+                        name = entry.path.split("/")[0]
+                        filemode = '100644'
+                        type = "tree"
 
-                    tuplet.append({'name': entry.path, 'id': entry.hex, 'type': type, 'filemode': filemode})
+
+
+                    tuplet.append({'name': name, 'id': entry.hex, 'type': type, 'filemode': filemode})
             else:
                 for entry in tree:
                     tuplet.append({'name': entry.name, 'id': entry.id.hex, 'type': entry.type, 'filemode': entry.filemode})

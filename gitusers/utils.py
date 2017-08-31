@@ -87,7 +87,13 @@ def create_commit_folders(user, repo, message, filename, directory):
 	tree = commit.tree
 	#folders = directory.split("/")
 	index_tree.read()
-	index_tree.add(path.join( directory, filename))
+	folders = directory.split("/")
+	# for folder in folders:
+	# 	index_tree.write_tree(str(folder))
+	# 	item = index_tree.__getitem__(str(folder))
+	# 	print('item', item)
+	# 	index_tree.read_tree(item.id)
+	index_tree.add(path.join(directory))
 	index_tree.write()
 	index_tree = repo.index
 

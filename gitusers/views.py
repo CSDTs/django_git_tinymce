@@ -170,13 +170,15 @@ class ReduxRepositoryFolderDetailView(DetailView):
 	component = 'repo/src/client.min.js'
 
 
-	def get(self, request, slug, username, directories):
+	def get(self, request, slug, username, directories, directories_ext):
     	# gets passed to react via window.props
 		owner_name = self.kwargs['username']
 		repo_name = self.kwargs['slug']
 		directory = ""
 		if 'directories' in self.kwargs:
 			directory = self.kwargs['directories']
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs['directories_ext']
 		user = User.objects.get(username=owner_name)
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
 
