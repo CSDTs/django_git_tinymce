@@ -29,7 +29,7 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 
-from .utils import create_commit
+from .utils import create_commit, create_commit_folders
 
 
 class OwnerViewSet(viewsets.ModelViewSet):
@@ -148,6 +148,10 @@ class FilesView(APIView):
 
     def post(self, request, format=None, *args, **kw):
         repo = self.kwargs['resource_id']
+        directory = ""
+        if 'directories' in self.kwargs:
+            directory += self.kwargs['directories']
+        print('directory', directory)
         try:
             specific_repo = repo_model.objects.get(id=repo)
         except:
@@ -163,17 +167,17 @@ class FilesView(APIView):
             data_name = str(data)
             print('data_name', data_name)
             data2 = data
-            path = default_storage.save(os.path.join(specific_repo.get_repo_path(), data_name), ContentFile(data2.read()))
+            path = default_storage.save(os.path.join(specific_repo.get_repo_path(), directory, data_name), ContentFile(data2.read()))
             print('path', path)
             tmp_file = os.path.join(specific_repo.get_repo_path(), path)
 
-            b = this_repo.create_blob_fromworkdir(data_name)
+            b = this_repo.create_blob_fromworkdir(os.path.join(directory, data_name))
             bld = this_repo.TreeBuilder()
-            bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), data_name)).st_mode )
+            bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), directory, data_name)).st_mode )
             t = bld.write()
-            this_repo.index.read()
-            this_repo.index.add(data_name)
-            this_repo.index.write()
+            # this_repo.index.read()
+            # this_repo.index.add(data_name)
+            # this_repo.index.write()
             email = "nonegiven@nonegiven.com"
             if self.request.user.email:
                 email = self.request.user.email
@@ -182,7 +186,7 @@ class FilesView(APIView):
     		#c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
             commit_message = "Uploaded file " + data_name
 
-            create_commit(self.request.user, this_repo, commit_message, data_name)
+            create_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
         return HttpResponseRedirect(reverse(
 			'gitusers:repo_detail',
 			args=(request.user.username, specific_repo.slug))
