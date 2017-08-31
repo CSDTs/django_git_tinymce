@@ -170,7 +170,7 @@ class ReduxRepositoryFolderDetailView(DetailView):
 	component = 'repo/src/client.min.js'
 
 
-	def get(self, request, slug, username, directories, directories_ext):
+	def get(self, request, slug, username, directories, directories_ext=None):
     	# gets passed to react via window.props
 		owner_name = self.kwargs['username']
 		repo_name = self.kwargs['slug']
@@ -473,7 +473,8 @@ class BlobRawView(View):
 			directory = self.kwargs.get('directories')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
-
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs.get('directories_ext')
 		repo_obj = None
 
 		try:
@@ -494,9 +495,20 @@ class BlobRawView(View):
 			index_tree = repo.index
 			commit = repo.revparse_single('HEAD')
 			tree = commit.tree
+			folders = directory.split("/")
+			print('index_tree', index_tree)
+			dir = ""
+
 			if directory != "":
-				item = tree.__getitem__(str(directory))
-				index_tree.read_tree(item.id)
+				for folder in folders:
+					dir += folder + "/"
+					item = tree.__getitem__(str(dir))
+					index_tree.read_tree(item.id)
+					print('index_tree_int', index_tree)
+			# if directory != "":
+			# 	item = tree.__getitem__(path.join(directory, filename))
+			# 	index_tree.read_tree(item.id)
+			# 	print('index_tree_int', index_tree)
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			if blob_id != 404:
 				return HttpResponse(repo[blob_id].data)
