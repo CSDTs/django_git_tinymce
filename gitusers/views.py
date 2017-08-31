@@ -584,6 +584,8 @@ class BlobDeleteFolderView(DeleteView):
 		directory = ""
 		if 'directories' in self.kwargs:
 			directory = self.kwargs['directories']
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs['directories_ext']
 
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
