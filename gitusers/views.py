@@ -170,7 +170,7 @@ class ReduxRepositoryFolderDetailView(DetailView):
 	component = 'repo/src/client.min.js'
 
 
-	def get(self, request, slug, username, directories, directories_ext):
+	def get(self, request, slug, username, directories, directories_ext=None):
     	# gets passed to react via window.props
 		owner_name = self.kwargs['username']
 		repo_name = self.kwargs['slug']
@@ -392,6 +392,8 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		directory = ""
 		if 'directories' in self.kwargs:
 			directory = self.kwargs.get('directories')
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs.get('directories_ext')
 		try:
 			self.repo_obj = Repository.objects.get(
 				owner=self.request.user,
@@ -407,12 +409,21 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			commit = self.repo.revparse_single('HEAD')
 			tree = commit.tree
 			# blob = self.repo[find_file_oid_in_tree(filename, tree)]
+			#
+			# print('directory', directory)
+			# if directory != "":
+			# 	item = tree.__getitem__(str(directory))
+			# 	print('item', item)
+			# 	index_tree.read_tree(item.id)
 
-			print('directory', directory)
 			if directory != "":
-				item = tree.__getitem__(str(directory))
-				print('item', item)
-				index_tree.read_tree(item.id)
+				folders = directory.split("/")
+				dir = ""
+				for folder in folders:
+					dir += folder + "/"
+					item = tree.__getitem__(str(dir))
+					index_tree.read_tree(item.id)
+					print('index_tree_int', index_tree)
 
 			print('find_file_oid_in_tree_using_index(filename, index_tree)', find_file_oid_in_tree_using_index(filename, index_tree))
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
@@ -438,6 +449,8 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		directory = ""
 		if self.kwargs.get('directories'):
 			directory = self.kwargs.get('directories')
+		if self.kwargs.get('directories_ext'):
+			directory += "/" + self.kwargs.get('directories_ext')
 
 		user = self.request.user
 		print('user', user.email)
@@ -473,7 +486,8 @@ class BlobRawView(View):
 			directory = self.kwargs.get('directories')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
-
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs.get('directories_ext')
 		repo_obj = None
 
 		try:
@@ -495,8 +509,17 @@ class BlobRawView(View):
 			commit = repo.revparse_single('HEAD')
 			tree = commit.tree
 			if directory != "":
-				item = tree.__getitem__(str(directory))
-				index_tree.read_tree(item.id)
+				folders = directory.split("/")
+				dir = ""
+				for folder in folders:
+					dir += folder + "/"
+					item = tree.__getitem__(str(dir))
+					index_tree.read_tree(item.id)
+					print('index_tree_int', index_tree)
+			# if directory != "":
+			# 	item = tree.__getitem__(path.join(directory, filename))
+			# 	index_tree.read_tree(item.id)
+			# 	print('index_tree_int', index_tree)
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			if blob_id != 404:
 				return HttpResponse(repo[blob_id].data)
@@ -561,6 +584,8 @@ class BlobDeleteFolderView(DeleteView):
 		directory = ""
 		if 'directories' in self.kwargs:
 			directory = self.kwargs['directories']
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs['directories_ext']
 
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
