@@ -392,6 +392,8 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		directory = ""
 		if 'directories' in self.kwargs:
 			directory = self.kwargs.get('directories')
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs.get('directories_ext')
 		try:
 			self.repo_obj = Repository.objects.get(
 				owner=self.request.user,
@@ -407,12 +409,21 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			commit = self.repo.revparse_single('HEAD')
 			tree = commit.tree
 			# blob = self.repo[find_file_oid_in_tree(filename, tree)]
+			#
+			# print('directory', directory)
+			# if directory != "":
+			# 	item = tree.__getitem__(str(directory))
+			# 	print('item', item)
+			# 	index_tree.read_tree(item.id)
 
-			print('directory', directory)
 			if directory != "":
-				item = tree.__getitem__(str(directory))
-				print('item', item)
-				index_tree.read_tree(item.id)
+				folders = directory.split("/")
+				dir = ""
+				for folder in folders:
+					dir += folder + "/"
+					item = tree.__getitem__(str(dir))
+					index_tree.read_tree(item.id)
+					print('index_tree_int', index_tree)
 
 			print('find_file_oid_in_tree_using_index(filename, index_tree)', find_file_oid_in_tree_using_index(filename, index_tree))
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
@@ -438,6 +449,8 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		directory = ""
 		if self.kwargs.get('directories'):
 			directory = self.kwargs.get('directories')
+		if self.kwargs.get('directories_ext'):
+			directory += "/" + self.kwargs.get('directories_ext')
 
 		user = self.request.user
 		print('user', user.email)
@@ -495,11 +508,9 @@ class BlobRawView(View):
 			index_tree = repo.index
 			commit = repo.revparse_single('HEAD')
 			tree = commit.tree
-			folders = directory.split("/")
-			print('index_tree', index_tree)
-			dir = ""
-
 			if directory != "":
+				folders = directory.split("/")
+				dir = ""
 				for folder in folders:
 					dir += folder + "/"
 					item = tree.__getitem__(str(dir))
