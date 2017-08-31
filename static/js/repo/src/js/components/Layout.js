@@ -187,7 +187,7 @@ export default class Layout extends React.Component {
       <div className="row">
         <div className="col-md-6 col-xs-8">
           <p>
-            <h2 className="repo-header"><a href={`/${window.props.repo_owner}`}>{window.props.repo_owner}</a> / <a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{window.props.repo_name}</a> {(window.props.directory) ? <font>/ <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${window.props.directory}`}>{window.props.directory}</a></font>: null}</h2>
+            <h2 className="repo-header"><a href={`/${window.props.repo_owner}`}>{window.props.repo_owner}</a> / <a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{window.props.repo_name}</a> </h2>
           </p>
         </div>
         <div className="col-md-6 text-right col-xs-4">
