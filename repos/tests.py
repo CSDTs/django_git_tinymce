@@ -1,10 +1,14 @@
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
 from repos.models import Repository
 
 from os.path import join
+
+
+User = get_user_model()
 
 
 class RepoModelTest(TestCase):

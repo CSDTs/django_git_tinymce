@@ -1,0 +1,4 @@
+
+curl -X POST -d "username=user1&password=user1user1" http://127.0.0.1:8000/api/auth/token/
+
+curl -H "Authorization: JWT <your_token>" http://127.0.0.1:8000/api/repos/user1/create

@@ -51,10 +51,12 @@ def repository_pre_save(sender, instance, **kwargs):
 		slug = slugify(instance.name)
 		instance.slug = slug
 
+
 @receiver(post_save, sender=Repository)
 def repository_post_save(sender, instance, **kwagrs):
 	# init repo after model object created
 	init_repository(instance.get_repo_path())
+
 
 @receiver(post_delete, sender=Repository)
 def repository_post_delete(sender, instance, **kwargs):

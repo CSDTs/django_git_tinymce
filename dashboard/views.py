@@ -1,7 +1,5 @@
 from django.db.models import Q
-from django.views import View
 from django.views.generic.list import ListView
-from django.shortcuts import render
 
 from repos.models import Repository
 

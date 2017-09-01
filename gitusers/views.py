@@ -1,5 +1,5 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -18,6 +18,7 @@ from .utils import find_file_oid_in_tree, create_commit, create_commit_folders, 
 from django_git.mixins import OwnerRequiredMixin
 from repos.forms import (
 	RepositoryModelForm,
+	RepositoryUpdateModelForm,
 	TinyMCEFileEditForm,
 	FileCreateForm,
 )
@@ -207,6 +208,7 @@ class RepositoryForkView(LoginRequiredMixin, View):
 	template = 'repo/fork.html'
 
 	def get(self, request, *args, **kwargs):
+		User = get_user_model()
 		username_in_url = self.kwargs.get("username")
 		origin_user = User.objects.get(username=username_in_url)
 		origin_repo = self.kwargs.get("slug")
@@ -242,7 +244,7 @@ class RepositoryForkView(LoginRequiredMixin, View):
 class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	model = Repository
 	template_name = 'repo/setting.html'
-	form_class = RepositoryModelForm
+	form_class = RepositoryUpdateModelForm
 
 	def get_object(self):
 		queryset = super(RepositoryUpdateView, self).get_queryset()
@@ -252,6 +254,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	def get_form_kwargs(self):
 		kwargs = super(RepositoryUpdateView, self).get_form_kwargs()
 		kwargs.update({'request': self.request})
+		kwargs.update({'old_name': self.object.name})
 		return kwargs
 
 	def get_initial(self):
