@@ -71,7 +71,7 @@ def repository_post_save(sender, instance, **kwagrs):
 	f.close()
 	b = repo.create_blob_fromworkdir(fn)
 	bld = repo.TreeBuilder()
-	bld.insert(fn, b, os.stat(os.path.join(fn)).st_mode )
+	bld.insert(fn, b, os.stat(os.path.join(instance.get_repo_path(), fn)).st_mode )
 	t = bld.write()
 	repo.index.read()
 	repo.index.add(fn)
