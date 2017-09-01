@@ -31,6 +31,7 @@ from shutil import copytree
 import os
 import time
 
+User = get_user_model()
 
 class IndexView(LoginRequiredMixin, ListView):
 	model = Repository

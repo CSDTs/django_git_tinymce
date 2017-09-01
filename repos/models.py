@@ -5,9 +5,12 @@ from django.db.models.signals import pre_save, post_save, post_delete
 from django.urls import reverse
 from django.utils.text import slugify
 
+import os
 from os.path import join
 from shutil import rmtree
 
+import pygit2
+import time
 from pygit2 import init_repository
 
 
@@ -55,7 +58,26 @@ def repository_pre_save(sender, instance, **kwargs):
 @receiver(post_save, sender=Repository)
 def repository_post_save(sender, instance, **kwagrs):
 	# init repo after model object created
-	init_repository(instance.get_repo_path())
+	repo = init_repository(instance.get_repo_path())
+	s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
+	print('instance', instance)
+	print('sender', sender)
+	print('repo', repo)
+	data = '# {}'.format(instance)
+	fn = 'README.md'
+	bld = repo.TreeBuilder()
+	f = open(os.path.join(repo.workdir,fn), 'w')
+	f.write(data)
+	f.close()
+	b = repo.create_blob_fromworkdir(fn)
+	bld = repo.TreeBuilder()
+	bld.insert(fn, b, os.stat(os.path.join(fn)).st_mode )
+	t = bld.write()
+	repo.index.read()
+	repo.index.add(fn)
+	repo.index.write()
+	# head = repo.lookup_reference('HEAD').resolve()
+	c = repo.create_commit('HEAD', s,s, 'Initialized repo with a README.md', t, [])
 
 
 @receiver(post_delete, sender=Repository)
