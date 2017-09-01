@@ -304,7 +304,15 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 
 	def get_initial(self, **kwargs):
 		initial = super(RepositoryCreateFileView, self).get_initial()
-		initial['filename'] = '.html'
+		directory = ""
+		if 'directories' in self.kwargs:
+			directory = self.kwargs['directories']
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs['directories_ext']
+		if directory != "":
+			initial['filename'] = directory + '/.html'
+		else:
+			initial['filename'] = '.html'
 		return initial
 
 	def form_valid(self, form):
@@ -617,8 +625,11 @@ class BlobDeleteFolderView(DeleteView):
 		print('directory.split("/")', directory.split("/"))
 		folders = directory.split("/")
 		for folder in folders:
-			item = tree.__getitem__(str(folder))
-			index_tree.read_tree(item.id)
+			try:
+				item = tree.__getitem__(str(folder))
+				index_tree.read_tree(item.id)
+			except:
+				pass
 		blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 		print('index_tree.__contains__(filename)', index_tree.__contains__(filename))
 		# index_tree.remove(str(filename))
