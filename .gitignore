@@ -17,3 +17,4 @@ local_settings.py
 node_modules/
 package-lock.json
 .coverage
+git_repos/

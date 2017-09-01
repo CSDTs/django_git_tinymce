@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load json_filter %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div id="app"></div>
+{% endblock %}
+
+{% block js %}
+{{ super }}
+
+  <script>window.props = {{props|json}}; </script>
+  <script src="/static/js/{{component}}"></script>
+{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="/static/css/repo.css">
+{% endblock %}

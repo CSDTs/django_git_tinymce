@@ -3,6 +3,8 @@ from . import models
 
 
 class Repository(serializers.ModelSerializer):
+    owner_username = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         fields = (
             'id',
@@ -11,6 +13,7 @@ class Repository(serializers.ModelSerializer):
             'slug',
             'timestamp',
             'owner',
+            'owner_username',
             'editors'
         )
         model = models.Repository

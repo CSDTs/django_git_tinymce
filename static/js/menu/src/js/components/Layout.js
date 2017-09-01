@@ -1,15 +1,13 @@
 import React from "react"
+import axios from "axios";
 import { connect } from "react-redux"
 
-import { fetchUser } from "../actions/userActions"
 import { fetchRepos } from "../actions/reposActions"
 import { fetchTags } from "../actions/tagsActions"
 
 
 @connect((store) => {
   return {
-    user: store.user.user,
-    userFetched: store.user.fetched,
     repos: store.repos.repos,
     tags: store.tags.tags
   };
@@ -25,6 +23,19 @@ export default class Layout extends React.Component {
     this.props.dispatch(fetchRepos())
   }
 
+  fetchUser(num) {
+    axios.get(`/api/v1/user/${num}`)
+      .then((response) => {
+        //dispatch({type: "FETCH_TAGS_FULFILLED", payload: response.data})
+        this.owner = response.data.username
+        console.log('username', response.data.username)
+      })
+      .catch((err) => {
+        this.owner = "unknown"
+      })
+    return this.owner
+  }
+
   render() {
     const { user, repos, fetching, fetched, tags } = this.props;
 
@@ -33,10 +44,11 @@ export default class Layout extends React.Component {
     // }
 
     //const mappedTweets = tweets.map(tweet => <li key={tweet.id}>{tweet.text}</li>)
-    const mappedRepos = this.props.repos.map(repo =>
-      /* need to find method of pinging owner ids to match to username for url */
-      <a href="#" key={repo.id}><div className="col-md-4" ><img src="https://dummyimage.com/400x300/000/fff" width="100%" className="img-responsive"/>{repo.name} - by { repo.owner }</div></a>
-    )
+
+    const mappedRepos = this.props.repos.map(repo => {
+      return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4" ><img src="https://dummyimage.com/400x300/000/fff" width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
+    })
+
     const mappedTags = this.props.tags.map(tag => {
       function toTitleCase(str)
       {
@@ -50,7 +62,7 @@ export default class Layout extends React.Component {
     return <div>
       <div className="row">
         <div className="col-md-12">
-          <h1 className="text-center">OPENS</h1>
+          <h1 className="text-center">Repositories</h1>
         </div>
       </div>
       <div className="row">

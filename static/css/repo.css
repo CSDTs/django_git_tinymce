@@ -1,0 +1,22 @@
+.repo-header {
+  display: inline;
+}
+
+.header {
+  margin: 20px;
+}
+
+.button-link {
+  text-decoration:none;
+  display: inline-block;
+}
+
+.dropzone {
+  width: 100%;
+
+  border : 1px dashed lightgrey;
+}
+
+.dir-tree {
+  font-size: 1.75em;
+}

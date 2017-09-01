@@ -19,9 +19,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
-from rest_framework_jwt.views import obtain_jwt_token
 
-from dashboard.views import DashboardAllRepoIndexView
+from dashboard.views import DashboardAllRepoIndexView, MenuView
 # from dashboard.views import DashboardView
 # from gitusers.views import IndexView
 
@@ -34,21 +33,22 @@ router = routers.DefaultRouter()
 router.register(r'tag', tags_viewsets.TagViewSet, base_name='api-tag')
 router.register(r'repository', repos_viewsets.RepositoryViewSet, base_name='api-repository')
 router.register(r'owner', gitusers_viewsets.OwnerViewSet, base_name='api-owner')
+router.register(r'user', gitusers_viewsets.UserView, 'list')
+
 
 urlpatterns = [
-	# url(r'^$', DashboardView.as_view(), name='index'),
-	url(r'^$', DashboardAllRepoIndexView.as_view(), name='index'),
-	url(r'^admin/', admin.site.urls),
-	url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
-	url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
-	url(r'^tinymce/', include('tinymce.urls')),
-	url(r'^api/auth/token/', obtain_jwt_token),
-	url(r'^api/repos/', include('repos.api.urls', namespace='repo_api')),
-	url(r'^api/users/', include('accounts.api.urls', namespace='user_api')),
-	url(r'^api/v1/', include(router.urls, namespace='apiv1')),
-	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-	url(r'^tags/', include('tags.urls', namespace='tags')),
-	url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
+    # url(r'^$', DashboardView.as_view(), name='index'),
+    url(r'^$', MenuView.as_view(), name='index'),
+    url(r'^admin/', admin.site.urls),
+    url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
+    url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
+    url(r'^tinymce/', include('tinymce.urls')),
+    url(r'^api/v1/', include(router.urls, namespace='apiv1')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^tags/', include('tags.urls', namespace='tags')),
+	url(r'^api/v1/files/(?P<resource_id>\d+)[/]?$', gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
+	url(r'^api/v1/files/(?P<resource_id>\d+)/(?P<directories>.*)/$', gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
+    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
 
 
 

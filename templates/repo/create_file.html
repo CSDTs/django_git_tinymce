@@ -12,9 +12,9 @@
 {% if error_message %}
 	{{ error_message }}
 	<p><a href="{% url 'gitusers:create_file' username=object.owner slug=object.slug %}">Go back</a></p>
-	
+
 {% else %}
-	<form action="" method="post">
+	<form action="" method="post" novalidate>
 	    {% csrf_token %}
 	    {{ form.as_p }}
 	    <input type="submit" value="Create" />
