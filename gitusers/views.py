@@ -376,6 +376,25 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		return super(RepositoryCreateFileView, self).form_valid(form)
 
 	def get_success_url(self):
+		if 'directories_ext' in self.kwargs:
+			return reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories'),
+					'directories_ext': self.kwargs.get('directories_ext')
+				}
+			)
+		if 'directories' in self.kwargs:
+			return reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories')
+				}
+			)
 		return reverse(
 			"gitusers:repo_detail",
 			kwargs={
@@ -545,7 +564,7 @@ class BlobRawView(View):
 class BlobDeleteView(DeleteView):
 
 	template_name = 'repo/delete.html'
-	success_url = reverse_lazy('index')
+	# success_url = reverse_lazy('index')
 
 	def get(self, request, **kwargs):
 
@@ -584,6 +603,7 @@ class BlobDeleteView(DeleteView):
 			'gitusers:repo_detail',
 			args=(request.user.username, repo_obj.slug))
 		)
+
 
 class BlobDeleteFolderView(DeleteView):
 
@@ -646,7 +666,37 @@ class BlobDeleteFolderView(DeleteView):
 			os.remove(os.path.join(repo.workdir, directory, file_name))
 		except OSError:
 			pass
-		return HttpResponseRedirect(reverse(
-			'gitusers:repo_detail',
-			args=(request.user.username, repo_obj.slug))
+		if 'directories_ext' in self.kwargs:
+			return HttpResponseRedirect(reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories'),
+					'directories_ext': self.kwargs.get('directories_ext')
+				}
+			)
 		)
+		if 'directories' in self.kwargs:
+			return HttpResponseRedirect(reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories')
+				}
+			)
+		)
+		return HttpResponseRedirect(reverse(
+			"gitusers:repo_detail",
+			kwargs={
+				'username': self.request.user.username,
+				'slug': self.kwargs.get('slug')
+
+			}
+		)
+		)
+		# return HttpResponseRedirect(reverse(
+		# 	'gitusers:repo_detail',
+		# 	args=(request.user.username, repo_obj.slug))
+		# )
