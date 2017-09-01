@@ -18,6 +18,7 @@ from .utils import find_file_oid_in_tree, create_commit, create_commit_folders, 
 from django_git.mixins import OwnerRequiredMixin
 from repos.forms import (
 	RepositoryModelForm,
+	RepositoryUpdateModelForm,
 	TinyMCEFileEditForm,
 	FileCreateForm,
 )
@@ -243,7 +244,7 @@ class RepositoryForkView(LoginRequiredMixin, View):
 class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	model = Repository
 	template_name = 'repo/setting.html'
-	form_class = RepositoryModelForm
+	form_class = RepositoryUpdateModelForm
 
 	def get_object(self):
 		queryset = super(RepositoryUpdateView, self).get_queryset()
@@ -253,6 +254,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	def get_form_kwargs(self):
 		kwargs = super(RepositoryUpdateView, self).get_form_kwargs()
 		kwargs.update({'request': self.request})
+		kwargs.update({'old_name': self.object.name})
 		return kwargs
 
 	def get_initial(self):
