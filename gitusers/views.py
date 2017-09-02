@@ -31,6 +31,7 @@ from shutil import copytree
 import os
 import time
 
+User = get_user_model()
 
 class IndexView(LoginRequiredMixin, ListView):
 	model = Repository
@@ -303,7 +304,15 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 
 	def get_initial(self, **kwargs):
 		initial = super(RepositoryCreateFileView, self).get_initial()
-		initial['filename'] = '.html'
+		directory = ""
+		if 'directories' in self.kwargs:
+			directory = self.kwargs['directories']
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs['directories_ext']
+		if directory != "":
+			initial['filename'] = directory + '/.html'
+		else:
+			initial['filename'] = '.html'
 		return initial
 
 	def form_valid(self, form):
@@ -367,6 +376,25 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		return super(RepositoryCreateFileView, self).form_valid(form)
 
 	def get_success_url(self):
+		if 'directories_ext' in self.kwargs:
+			return reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories'),
+					'directories_ext': self.kwargs.get('directories_ext')
+				}
+			)
+		if 'directories' in self.kwargs:
+			return reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories')
+				}
+			)
 		return reverse(
 			"gitusers:repo_detail",
 			kwargs={
@@ -536,7 +564,7 @@ class BlobRawView(View):
 class BlobDeleteView(DeleteView):
 
 	template_name = 'repo/delete.html'
-	success_url = reverse_lazy('index')
+	# success_url = reverse_lazy('index')
 
 	def get(self, request, **kwargs):
 
@@ -575,6 +603,7 @@ class BlobDeleteView(DeleteView):
 			'gitusers:repo_detail',
 			args=(request.user.username, repo_obj.slug))
 		)
+
 
 class BlobDeleteFolderView(DeleteView):
 
@@ -616,8 +645,11 @@ class BlobDeleteFolderView(DeleteView):
 		print('directory.split("/")', directory.split("/"))
 		folders = directory.split("/")
 		for folder in folders:
-			item = tree.__getitem__(str(folder))
-			index_tree.read_tree(item.id)
+			try:
+				item = tree.__getitem__(str(folder))
+				index_tree.read_tree(item.id)
+			except:
+				pass
 		blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 		print('index_tree.__contains__(filename)', index_tree.__contains__(filename))
 		# index_tree.remove(str(filename))
@@ -634,7 +666,37 @@ class BlobDeleteFolderView(DeleteView):
 			os.remove(os.path.join(repo.workdir, directory, file_name))
 		except OSError:
 			pass
-		return HttpResponseRedirect(reverse(
-			'gitusers:repo_detail',
-			args=(request.user.username, repo_obj.slug))
+		if 'directories_ext' in self.kwargs:
+			return HttpResponseRedirect(reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories'),
+					'directories_ext': self.kwargs.get('directories_ext')
+				}
+			)
 		)
+		if 'directories' in self.kwargs:
+			return HttpResponseRedirect(reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories')
+				}
+			)
+		)
+		return HttpResponseRedirect(reverse(
+			"gitusers:repo_detail",
+			kwargs={
+				'username': self.request.user.username,
+				'slug': self.kwargs.get('slug')
+
+			}
+		)
+		)
+		# return HttpResponseRedirect(reverse(
+		# 	'gitusers:repo_detail',
+		# 	args=(request.user.username, repo_obj.slug))
+		# )

@@ -85,6 +85,7 @@ class FilesView(APIView):
         try:
             commit = this_repo.revparse_single('HEAD')
             tree = commit.tree
+            folders = []
             if directory != "":
                 item = tree.__getitem__(str(directory))
                 index_tree.read_tree(item.id)
@@ -96,19 +97,25 @@ class FilesView(APIView):
                     type = ""
                     if filemode is '33188':
                         type = "tree"
+                        if name in folders:
+                            continue
+                        folders.append(name)
                     else:
                         type = "blob"
                     if "/" in entry.path:
                         name = entry.path.split("/")[0]
                         filemode = '100644'
                         type = "tree"
-
+                        if name in folders:
+                            continue
+                        folders.append(name)
 
 
                     tuplet.append({'name': name, 'id': entry.hex, 'type': type, 'filemode': filemode})
             else:
                 for entry in tree:
                     tuplet.append({'name': entry.name, 'id': entry.id.hex, 'type': entry.type, 'filemode': entry.filemode})
+            print('folders', folders)
             date_handler = lambda obj: (
                 obj.isoformat()
                 if isinstance(obj, (datetime.datetime, datetime.date))
