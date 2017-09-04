@@ -48,7 +48,7 @@ class RepoListAPIView(ListAPIView):
 	filter_backends = [SearchFilter, OrderingFilter]
 	search_fields = ['name', 'description']
 
-	# USAGE of search filter and ordering filter
+	# search filter and ordering filter USAGE
 	# api/?search=repo&ordering=name
 	# api/?search=repo&ordering=-owner   # reverse ordering
 

@@ -6,7 +6,7 @@ from .views import (
 	BlobRawView,
 	RepositoryCreateView,
 	RepositoryCreateFileView,
-	RepositoryDetailView,
+	# RepositoryDetailView,
 	RepositoryDeleteView,
 	RepositoryForkView,
 	RepositoryUpdateView,

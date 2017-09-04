@@ -67,19 +67,18 @@ def repository_post_save(sender, instance, **kwagrs):
 		data = '# {}'.format(instance)
 		fn = 'README.md'
 		bld = repo.TreeBuilder()
-		f = open(os.path.join(repo.workdir,fn), 'w')
+		f = open(os.path.join(repo.workdir, fn), 'w')
 		f.write(data)
 		f.close()
 		b = repo.create_blob_fromworkdir(fn)
 		bld = repo.TreeBuilder()
-		bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+		bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode)
 		t = bld.write()
 		repo.index.read()
 		repo.index.add(fn)
 		repo.index.write()
 		# head = repo.lookup_reference('HEAD').resolve()
-		c = repo.create_commit('HEAD', s,s, 'Initialized repo with a README.md', t, [])
-
+		c = repo.create_commit('HEAD', s, s, 'Initialized repo with a README.md', t, [])
 
 
 @receiver(post_delete, sender=Repository)
