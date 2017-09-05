@@ -15,6 +15,7 @@
   width: 100%;
 
   border : 1px dashed lightgrey;
+  border-radius: 5px;
 }
 
 .dir-tree {
