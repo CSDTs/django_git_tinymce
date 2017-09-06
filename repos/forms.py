@@ -121,3 +121,22 @@ class FileCreateForm(forms.Form):
 			)
 
 		return filename
+
+
+class FileRenameForm(forms.Form):
+	# old_filename = forms.CharField(label='File name', required=True)
+	new_filename = forms.CharField(label='New file name', required=True)
+	commit_message = forms.CharField(
+		required=False,
+		empty_value="Created on {}".format(
+			datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+		)
+	)
+	def clean_filename(self):
+		new_filename = self.cleaned_data['new_filename']
+		if new_filename == ('.html'.strip()):
+			raise forms.ValidationError(
+				'Please enter file name, i.e. "example.html"'
+			)
+
+		return new_filename

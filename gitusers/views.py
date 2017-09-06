@@ -21,6 +21,7 @@ from repos.forms import (
 	RepositoryUpdateModelForm,
 	TinyMCEFileEditForm,
 	FileCreateForm,
+	FileRenameForm
 )
 from repos.models import Repository
 from tags.models import Tag
@@ -30,6 +31,8 @@ from os import path
 from shutil import copytree
 import os
 import time
+from pathlib import Path
+
 
 User = get_user_model()
 
@@ -696,7 +699,163 @@ class BlobDeleteFolderView(DeleteView):
 			}
 		)
 		)
-		# return HttpResponseRedirect(reverse(
-		# 	'gitusers:repo_detail',
-		# 	args=(request.user.username, repo_obj.slug))
-		# )
+
+
+class RenameFileView(FormView):
+	template_name = 'repo/rename_file.html'
+	form_class = FileRenameForm
+	def get_initial(self, **kwargs):
+		self.success_url = '/{}/{}'.format(self.request.user, self.kwargs['slug'])
+
+		initial = super(RenameFileView, self).get_initial()
+
+		filename = self.kwargs.get('filename')
+		if self.kwargs.get('extension'):
+			filename += self.kwargs.get('extension')
+		directory = ""
+		if 'directories' in self.kwargs:
+			directory = self.kwargs.get('directories')
+		if 'directories_ext' in self.kwargs:
+			directory += "/" + self.kwargs.get('directories_ext')
+		try:
+			self.repo_obj = Repository.objects.get(
+				owner=self.request.user,
+				slug=self.kwargs['slug']
+			)
+
+			self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
+
+			if self.repo.is_empty:
+				raise Http404
+
+			index_tree = self.repo.index
+			commit = self.repo.revparse_single('HEAD')
+			tree = commit.tree
+			# blob = self.repo[find_file_oid_in_tree(filename, tree)]
+			#
+			# print('directory', directory)
+			# if directory != "":
+			# 	item = tree.__getitem__(str(directory))
+			# 	print('item', item)
+			# 	index_tree.read_tree(item.id)
+
+			if directory != "":
+				folders = directory.split("/")
+				dir = ""
+				for folder in folders:
+					dir += folder + "/"
+					item = tree.__getitem__(str(dir))
+					index_tree.read_tree(item.id)
+					print('index_tree_int', index_tree)
+
+			print('find_file_oid_in_tree_using_index(filename, index_tree)', find_file_oid_in_tree_using_index(filename, index_tree))
+			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
+			blob = self.repo[blob_id]
+
+
+			if not blob.is_binary and isinstance(blob, pygit2.Blob):
+				initial['content'] = blob.data
+
+		except IOError:
+			raise Http404("Repository does not exist")
+		return initial
+
+	def form_valid(self, form):
+		# This method is called when valid form data has been POSTed.
+		# It should return an HttpResponse.
+
+		# Base object is immutable and Blob doesn't have a constructor
+		# Have to directly change the actually file in file system
+		new_filename = form.cleaned_data['new_filename']
+		print('new_filename', new_filename)
+		filename = self.kwargs.get('filename')
+		if self.kwargs.get('extension'):
+			filename += self.kwargs.get('extension')
+		directory = ""
+		if self.kwargs.get('directories'):
+			directory = self.kwargs.get('directories')
+		if self.kwargs.get('directories_ext'):
+			directory += "/" + self.kwargs.get('directories_ext')
+
+
+
+		user = self.request.user
+		print('user', user.email)
+
+
+		repo_path = self.repo_obj.get_repo_path()
+		# file = open(path.join(repo_path, directory, filename), 'w')
+		# os.rename('a.txt', 'b.kml')
+		old_file = os.path.join(repo_path, directory, filename)
+		new_file = os.path.join(repo_path, directory, new_filename)
+		my_file = Path(new_file)
+
+		index_tree = self.repo.index
+		if find_file_oid_in_tree_using_index(new_filename, index_tree) != 404:
+			form.add_error(None, "File named {} already exists".format(new_filename))
+			return self.form_invalid(form)
+		os.rename(old_file, new_file)
+
+
+
+		#file.truncate()
+		#file.write(form.cleaned_data['content'])
+
+		#file.close()
+
+		commit_message = form.cleaned_data['commit_message']
+		commit_message = 'Renamed ' + str(filename) + ' to ' + str(new_filename) + ' - ' + commit_message
+		# sha = create_commit(user, self.repo, commit_message, filename)
+		print ('filename', filename)
+		print('directory', directory)
+		delete_commit_folders(user, self.repo, commit_message, filename, directory)
+		create_commit_folders(user, self.repo, commit_message, new_filename, directory)
+
+		# except OSError:
+		# 	raise form.ValidationError("Save error, please check the file.")
+
+		# return super(RenameFileView, self).form_valid(form)
+		if 'directories_ext' in self.kwargs:
+			return HttpResponseRedirect(reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories'),
+					'directories_ext': self.kwargs.get('directories_ext')
+				}
+			)
+		)
+		if 'directories' in self.kwargs:
+			return HttpResponseRedirect(reverse(
+				"gitusers:repo_detail_folder",
+				kwargs={
+					'username': self.request.user.username,
+					'slug': self.kwargs.get('slug'),
+					'directories': self.kwargs.get('directories')
+				}
+			)
+		)
+		return HttpResponseRedirect(reverse(
+			"gitusers:repo_detail",
+			kwargs={
+				'username': self.request.user.username,
+				'slug': self.kwargs.get('slug')
+
+			}
+		)
+		)
+
+	def get(self, request, *args, **kwargs):
+		context = super(RenameFileView, self).get_context_data(**kwargs)
+		filename = self.kwargs.get('filename')
+		if self.kwargs.get('extension'):
+			filename += self.kwargs.get('extension')
+		context['object'] = filename
+		directory = ""
+		if self.kwargs.get('directories'):
+			directory = self.kwargs.get('directories')
+		if self.kwargs.get('directories_ext'):
+			directory += "/" + self.kwargs.get('directories_ext')
+		context['directory'] = directory
+		return render(request, self.template_name, context)
