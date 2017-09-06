@@ -4,6 +4,7 @@ import { connect } from "react-redux"
 
 import { fetchRepo } from "../actions/repoActions"
 import { fetchFiles } from "../actions/filesActions"
+import { fetchReadme } from "../actions/readmeActions"
 //import { fetchTags } from "../actions/tagsActions"
 
 import Branches from "./Branches"
@@ -11,6 +12,8 @@ import Dropzone from 'react-dropzone'
 import request from 'superagent';
 
 require('superagent-django-csrf');
+var ReactMarkdown = require('react-markdown');
+
 
 
 
@@ -20,6 +23,7 @@ require('superagent-django-csrf');
   return {
     repo: store.repo.repo,
     files: store.files,
+    readme: store.readme.readme
   };
 })
 export default class Layout extends React.Component {
@@ -37,6 +41,7 @@ export default class Layout extends React.Component {
     this.props.dispatch(fetchRepo())
     //this.props.dispatch(fetchTags())
     this.props.dispatch(fetchFiles())
+    this.props.dispatch(fetchReadme())
   }
 
   getIcon(type) {
@@ -110,8 +115,9 @@ export default class Layout extends React.Component {
   }
 
 
+
   render() {
-    const { repo, files, is_author } = this.props;
+    const { repo, files, is_author, readme } = this.props;
     const { accept, dropzoneActive } = this.state;
     const overlayStyle = {
       position: 'absolute',
@@ -154,10 +160,10 @@ export default class Layout extends React.Component {
         working_dir += folder
         let words = null
         if (i == last) {
-            words = <font>/ {folder} </font>
+            words = <font key={i}>/ {folder} </font>
         }
         else {
-            words = <font>/ <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${working_dir}`}>{folder}</a> </font>
+            words = <font key={i}>/ <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${working_dir}`}>{folder}</a> </font>
         }
         working_dir += "/"
         return words
@@ -173,6 +179,13 @@ export default class Layout extends React.Component {
     }
 
 
+
+    // function markdown() {
+    //   if (!this.props.readme.readme) {
+    //     return null
+    //   }
+    //   return
+    // }
 
 
     return <div>
@@ -238,12 +251,24 @@ export default class Layout extends React.Component {
                 const deleteLink = (files.is_owner && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a> : null
                 return <tr key={file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink}</th><td>{deleteLink}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
               })}
-              </tbody>
-            </table>
-          </div>
-          <p>
 
-          </p>
+              </tbody>
+
+            </table>
+
+          </div>
+          <div>
+            {(this.props.readme) ? <div>
+              <div class="panel panel-info">
+                <div class="panel-heading">
+                <b><i class="glyphicon glyphicon-book"/> README.md</b>
+                </div>
+                <div class="panel-body">
+                    <ReactMarkdown source={this.props.readme}/>
+                </div>
+              </div>
+            </div> : null}
+          </div>
         </div>
       </div>
       <div className="row">
