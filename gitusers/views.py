@@ -437,7 +437,9 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 				return self.form_invalid(form)
 		dirname = ""
 		filename2 = filename
-
+		if ".." in filename:
+			form.add_error(None, "Can't have '..' anywhere in directories structure")
+			return self.form_invalid(form)
 		if "/" in filename:
 			# import re
 			# pattern = re.compile(r"^(.+)/([^/]+)$")
