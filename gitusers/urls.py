@@ -16,7 +16,8 @@ from .views import (
 	BlobDeleteFolderView,
 	RenameFileView,
 	ForkedReposView,
-	IndividualIndexView
+	IndividualIndexView,
+	CommitLogView
 )
 
 app_name = "gitusers"
@@ -28,11 +29,17 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/fork/$', RepositoryForkView.as_view(), name='fork'),
 	url(r'^(?P<slug>[-\w]+)/forked/$', ForkedReposView.as_view(), name='forked'),
 	url(r'^(?P<slug>[-\w]+)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
+	url(r'^(?P<slug>[-\w]+)/commit/', CommitLogView.as_view(), name='commits'),
+	url(r'^(?P<slug>[-\w]+)/commit/(?P<commit>[-\w]+)', CommitLogView.as_view(), name='commit'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories_ext>.*)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
 
 	url(r'^(?P<slug>[-\w]+)/delete/$', RepositoryDeleteView.as_view(), name='delete'),
 
 	url(r'^(?P<slug>[-\w]+)/create/$', RepositoryCreateFileView.as_view(), name='create_file'),
+
+
+
+
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/create/$', RepositoryCreateFileView.as_view(), name='create_file_dir'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/create/$', RepositoryCreateFileView.as_view(), name='create_file_folder'),
 
@@ -66,7 +73,6 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),
 
-	# url(r'^(?P<slug>[-\w]+)/commit/(?P<commit>[-\w]+)', CommitView.as_view(), name='commit'),
 
 
 	# testing this out: (need to keep last in list)
