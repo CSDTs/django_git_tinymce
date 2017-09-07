@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -27,6 +28,8 @@ from repos.forms import (
 from repos.models import Repository, ForkedRepository
 from tags.models import Tag
 
+from pygit2 import GIT_SORT_TOPOLOGICAL, GIT_SORT_REVERSE
+
 import pygit2
 from os import path
 from shutil import copytree
@@ -34,6 +37,7 @@ import os
 import time
 from pathlib import Path
 import shutil
+import datetime
 
 
 User = get_user_model()
@@ -987,4 +991,59 @@ class ForkedReposView(ListView):
 		context['orig_repo'] = self.repo_name
 		context['orig_author'] = self.owner_name
 		context['repos'] = repos
+		return context
+
+class CommitLogView(ListView):
+	model = Repository
+	template_name = 'repo/commits.html'
+	paginate_by = 100
+
+
+	def get_queryset(self):
+		# queryset = super(ForkedReposView, self).get_queryset()
+
+		self.owner_name = self.kwargs['username']
+		self.repo_name = self.kwargs['slug']
+		user = User.objects.get(username=self.owner_name)
+		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		try:
+			git_repo = pygit2.Repository(repo.get_repo_path())
+		except IOError:
+			raise Http404("Repository does not exist")
+		commits = []
+		class Commit(object):
+			message = ""
+			hex = ""
+			committer = ""
+			commit_time = ""
+			def __init__(self, hex, message, committer, commit_time):
+				self.message = message
+				self.hex = hex
+				self.committer = committer
+				self.commit_time = commit_time
+		for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TOPOLOGICAL):
+			time = datetime.datetime.fromtimestamp(int(commit.commit_time)).strftime('%m-%d-%Y %H:%M:%S')
+
+			commit_obj = Commit(commit.hex, commit.message, commit.committer.name, time)
+			commits.append(commit_obj)
+
+		return commits
+
+
+
+	def get_context_data(self, **kwargs):
+		context = super(CommitLogView, self).get_context_data(**kwargs)
+		commits = self.get_queryset()
+		context['orig_repo'] = self.repo_name
+		context['orig_author'] = self.owner_name
+		page = self.request.GET.get('page', 1)
+		paginator = Paginator(commits, 100)
+		try:
+			commits = paginator.page(page)
+		except PageNotAnInteger:
+			commits = paginator.page(1)
+		except EmptyPage:
+			commits = paginator.page(paginator.num_pages)
+
+		context['commits'] = commits
 		return context

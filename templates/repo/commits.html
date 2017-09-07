@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}{{ form.media }}{% endblock %}
+
+{% block title %}Commit Log{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span>&nbsp;Back to Repo</a>
+
+<h1>Commit Log of "<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}">{{ orig_author }}/{{ orig_repo }}</a>"</h1>
+
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <th>Commit Message</th>
+      <th>Committer</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+
+{% for commit in commits %}
+
+<tr><td><a href="{% url 'gitusers:commit' username=orig_author slug=orig_repo commit=commit.hex %}">{{ commit.message }}</td><td><a href="{% url 'gitusers:index' username=commit.committer %}">{{ commit.committer }}</a></td><td>{{ commit.commit_time}}</td></tr>
+
+{% endfor %}
+  </tbody>
+</table>
+
+{% if is_paginated %}
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in paginator.page_range %}
+      {% if page_obj.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+{% endblock %}
