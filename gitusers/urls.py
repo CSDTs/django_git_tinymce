@@ -30,8 +30,7 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/fork/$', RepositoryForkView.as_view(), name='fork'),
 	url(r'^(?P<slug>[-\w]+)/forked/$', ForkedReposView.as_view(), name='forked'),
 	url(r'^(?P<slug>[-\w]+)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
-
-	url(r'^(?P<slug>[-\w]+)/commit/(?P<commit>[-\w]+)', CommitView.as_view(), name='commit'),
+	url(r'^(?P<slug>[-\w]+)/commit/(?P<commit>[-\w]+)', CommitLogView.as_view(), name='commit'),
 	url(r'^(?P<slug>[-\w]+)/commit/', CommitLogView.as_view(), name='commits'),
 
 	url(r'^(?P<slug>[-\w]+)/(?P<directories_ext>.*)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
