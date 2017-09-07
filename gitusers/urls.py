@@ -14,16 +14,19 @@ from .views import (
 	ReduxRepositoryFolderDetailView,
 	BlobDeleteView,
 	BlobDeleteFolderView,
-	RenameFileView
+	RenameFileView,
+	ForkedReposView,
+	IndividualIndexView
 )
 
 app_name = "gitusers"
 urlpatterns = [
-	url(r'^$', IndexView.as_view(), name='index'),
+	url(r'^$', IndividualIndexView.as_view(), name='index'),
 	url(r'^create/$', RepositoryCreateView.as_view(), name='create'),
 	url(r'^(?P<slug>[-\w]+)/$', ReduxRepositoryDetailView.as_view(), name='repo_detail'),
 
 	url(r'^(?P<slug>[-\w]+)/fork/$', RepositoryForkView.as_view(), name='fork'),
+	url(r'^(?P<slug>[-\w]+)/forked/$', ForkedReposView.as_view(), name='forked'),
 	url(r'^(?P<slug>[-\w]+)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories_ext>.*)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
 
@@ -54,6 +57,8 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/rename/$', RenameFileView.as_view(), name='blob_rename'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/rename/$', RenameFileView.as_view(), name='blob_rename_dir'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/rename/$', RenameFileView.as_view(), name='blob_rename_folders'),
+
+
 
 
 	# Blob raw view

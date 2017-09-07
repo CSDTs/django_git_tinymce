@@ -14,6 +14,7 @@ import time
 from pygit2 import init_repository
 
 
+
 class RepositoryManager(models.Manager):
 	def display_user_repo(self):
 		pass
@@ -88,3 +89,8 @@ def repository_post_delete(sender, instance, **kwargs):
 		rmtree(path)
 	except:
 		pass  # for now
+
+
+class ForkedRepository(models.Model):
+	original = models.OneToOneField(Repository, related_name='original_repo')
+	fork = models.ForeignKey(Repository)

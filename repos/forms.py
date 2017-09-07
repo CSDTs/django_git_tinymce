@@ -140,3 +140,11 @@ class FileRenameForm(forms.Form):
 			)
 
 		return new_filename
+
+class RepoForkRenameForm(forms.Form):
+	# old_filename = forms.CharField(label='File name', required=True)
+	new_reponame = forms.CharField(label='New fork name', required=True)
+	def clean_filename(self):
+		new_reponame = self.cleaned_data['new_reponame']
+
+		return new_reponame

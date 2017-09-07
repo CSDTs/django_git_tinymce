@@ -21,9 +21,10 @@ from repos.forms import (
 	RepositoryUpdateModelForm,
 	TinyMCEFileEditForm,
 	FileCreateForm,
-	FileRenameForm
+	FileRenameForm,
+	RepoForkRenameForm
 )
-from repos.models import Repository
+from repos.models import Repository, ForkedRepository
 from tags.models import Tag
 
 import pygit2
@@ -32,6 +33,7 @@ from shutil import copytree
 import os
 import time
 from pathlib import Path
+import shutil
 
 
 User = get_user_model()
@@ -41,7 +43,26 @@ class IndexView(LoginRequiredMixin, ListView):
 	template_name = 'gituser/index.html'
 
 	def get_queryset(self):
+
 		queryset = Repository.objects.filter(owner=self.request.user)
+
+		search_query = self.request.GET.get('search')
+		if search_query:
+			queryset = queryset.filter(
+				Q(name__icontains=search_query) |
+				Q(description__icontains=search_query)
+			).order_by('name')
+		return queryset
+
+
+class IndividualIndexView(LoginRequiredMixin, ListView):
+	model = Repository
+	template_name = 'gituser/index.html'
+
+	def get_queryset(self):
+		user = self.kwargs['username']
+		user_specific = User.objects.get(username=user)
+		queryset = Repository.objects.filter(owner=user_specific.id)
 
 		search_query = self.request.GET.get('search')
 		if search_query:
@@ -150,13 +171,16 @@ class ReduxRepositoryDetailView(DetailView):
 			directory = self.kwargs['directories']
 		user = User.objects.get(username=owner_name)
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
+		forked_repos = ForkedRepository.objects.filter(original=repo)
+		fork_count = len(forked_repos)
 
 		props = {
 					'repo_name': repo_name,
 					'repo_owner': owner_name,
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
-					'directory': directory
+					'directory': directory,
+					'fork_count': fork_count
 
 
 		}
@@ -186,13 +210,16 @@ class ReduxRepositoryFolderDetailView(DetailView):
 			directory += "/" + self.kwargs['directories_ext']
 		user = User.objects.get(username=owner_name)
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
+		forked_repos = ForkedRepository.objects.filter(original=repo)
+		fork_count = len(forked_repos)
 
 		props = {
 					'repo_name': repo_name,
 					'repo_owner': owner_name,
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
-					'directory': directory
+					'directory': directory,
+					'fork_count': fork_count
 
 
 		}
@@ -208,17 +235,35 @@ class ReduxRepositoryFolderDetailView(DetailView):
 
 
 
-class RepositoryForkView(LoginRequiredMixin, View):
-	template = 'repo/fork.html'
+class RepositoryForkView(LoginRequiredMixin, FormView):
+	template_name = 'repo/rename_forked_repo.html'
+	form_class = RepoForkRenameForm
+
+
+	def get_success_url(self):
+		return reverse(
+			"gitusers:repo_detail",
+			kwargs={
+				'username': self.request.user.username,
+				'slug': self.kwargs.get('slug')
+
+			}
+		)
+
 
 	def get(self, request, *args, **kwargs):
+
 		User = get_user_model()
 		username_in_url = self.kwargs.get("username")
+		# prevents forking your own repo:
+		if username_in_url == request.user.username:
+			raise Http404("You cannot fork your own repo")
 		origin_user = User.objects.get(username=username_in_url)
 		origin_repo = self.kwargs.get("slug")
 		origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
 
 		context = {}
+		context['form'] = RepoForkRenameForm()
 
 		try:
 			obj = Repository.objects.get(
@@ -226,23 +271,77 @@ class RepositoryForkView(LoginRequiredMixin, View):
 				owner=request.user
 			)
 
-			context['message'] = "You already have a repo with the same name"
+			context['message'] = "You already have a repo with the same name. Please rename your fork:"
 
 		except Repository.DoesNotExist:
+
 			obj = Repository.objects.create(
 				name=origin_repo.name,
 				description=origin_repo.description,
 				owner=request.user
 			)
+			src = origin_repo.get_repo_path()
+			dst = obj.get_repo_path()
+			try:
+			    #if path already exists, remove it before copying with copytree()
+			    if os.path.exists(dst):
+			        shutil.rmtree(dst)
+			        shutil.copytree(src, dst)
+			except OSError as e:
+			    # If the error was caused because the source wasn't a directory
+			    if e.errno == errno.ENOTDIR:
+			       shutil.copy(source_dir_prompt, destination_dir_prompt)
+			    else:
+			        print('Directory not copied. Error: %s' % e)
 
-			copytree(origin_repo.get_repo_path(), obj.get_repo_path())
+			new_entry = ForkedRepository(original=origin_repo, fork=obj)
+			# not sure why this isn't needed:
+			# new_entry.save()
+
 
 			return HttpResponseRedirect(reverse(
 				'gitusers:repo_detail',
 				args=(request.user.username, obj.slug))
 			)
 
-		return render(request, self.template, context)
+
+		return render(request, self.template_name, context)
+
+	def form_valid(self, form):
+		valid_data = super(RepositoryForkView, self).form_valid(form)
+		User = get_user_model()
+		username_in_url = self.kwargs.get("username")
+		origin_user = User.objects.get(username=username_in_url)
+		new_reponame = form.cleaned_data.get("new_reponame")
+		origin_repo = self.kwargs.get("slug")
+		origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+		obj = Repository.objects.create(
+			name=new_reponame,
+			description=origin_repo.description,
+			owner=self.request.user
+		)
+		src = origin_repo.get_repo_path()
+		dst = obj.get_repo_path()
+		try:
+			#if path already exists, remove it before copying with copytree()
+			if os.path.exists(dst):
+				shutil.rmtree(dst)
+				shutil.copytree(src, dst)
+		except OSError as e:
+			# If the error was caused because the source wasn't a directory
+			if e.errno == errno.ENOTDIR:
+			   shutil.copy(source_dir_prompt, destination_dir_prompt)
+			else:
+				print('Directory not copied. Error: %s' % e)
+
+		new_entry = ForkedRepository(original=origin_repo, fork=obj)
+		new_entry.save()
+
+		return HttpResponseRedirect(reverse(
+			'gitusers:repo_detail',
+			args=(self.request.user.username, obj.slug))
+		)
+
 
 
 class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
@@ -859,3 +958,31 @@ class RenameFileView(FormView):
 			directory += "/" + self.kwargs.get('directories_ext')
 		context['directory'] = directory
 		return render(request, self.template_name, context)
+
+
+class ForkedReposView(ListView):
+	model = Repository
+	template_name = 'repo/forked_repos.html'
+
+	def get_queryset(self):
+		# queryset = super(ForkedReposView, self).get_queryset()
+
+		self.owner_name = self.kwargs['username']
+		self.repo_name = self.kwargs['slug']
+		user = User.objects.get(username=self.owner_name)
+		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		forked_repos = ForkedRepository.objects.filter(original=repo)
+		return forked_repos
+
+	def get_context_data(self, **kwargs):
+		context = super(ForkedReposView, self).get_context_data(**kwargs)
+		forked_repos = self.get_queryset()
+		repos = []
+		for repo in forked_repos:
+			repo = Repository.objects.get(owner=repo.fork.owner,name=repo.fork.name)
+			repos.append(repo)
+		print('repos', repos)
+		context['orig_repo'] = self.repo_name
+		context['orig_author'] = self.owner_name
+		context['repos'] = repos
+		return context
