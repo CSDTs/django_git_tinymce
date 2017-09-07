@@ -996,7 +996,7 @@ class ForkedReposView(ListView):
 class CommitLogView(ListView):
 	model = Repository
 	template_name = 'repo/commits.html'
-	paginate_by = 100
+	paginate_by = 200
 
 
 	def get_queryset(self):
@@ -1030,14 +1030,13 @@ class CommitLogView(ListView):
 		return commits
 
 
-
 	def get_context_data(self, **kwargs):
 		context = super(CommitLogView, self).get_context_data(**kwargs)
 		commits = self.get_queryset()
 		context['orig_repo'] = self.repo_name
 		context['orig_author'] = self.owner_name
 		page = self.request.GET.get('page', 1)
-		paginator = Paginator(commits, 100)
+		paginator = Paginator(commits, 200)
 		try:
 			commits = paginator.page(page)
 		except PageNotAnInteger:
@@ -1046,4 +1045,45 @@ class CommitLogView(ListView):
 			commits = paginator.page(paginator.num_pages)
 
 		context['commits'] = commits
+		return context
+
+
+class CommitView(ListView):
+	model = Repository
+	template_name = 'repo/commit.html'
+	# paginate_by = 200
+
+	def get_queryset(self):
+		queryset = super(CommitView, self).get_queryset()
+		return queryset
+
+	def get_context_data(self, **kwargs):
+		context = super(CommitView, self).get_context_data(**kwargs)
+		self.owner_name = self.kwargs['username']
+		self.repo_name = self.kwargs['slug']
+		self.commit_hex = self.kwargs['commit']
+		context['orig_repo'] = self.repo_name
+		context['orig_author'] = self.owner_name
+		user = User.objects.get(username=self.owner_name)
+		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		try:
+			git_repo = pygit2.Repository(repo.get_repo_path())
+		except IOError:
+			raise Http404("Repository does not exist")
+		commit = git_repo.revparse_single(self.commit_hex)
+		context['message'] = commit.message
+		context['hash'] = commit.hex
+		diff  = git_repo.diff(commit.parents[0], commit).patch
+		# patches = [p for p in diff]
+		# old_files = []
+		# hunks_files = []
+		# for patch in patches:
+		# 	old_files.append(patch.delta)
+		# 	hunks_files.append(patch.hunks)
+		context['diff'] = diff
+		# context['hunks'] = hunks_files
+		files = []
+		for e in commit.tree:
+			files.append(e.name)
+		context['files'] = files
 		return context
