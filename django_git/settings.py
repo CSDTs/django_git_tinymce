@@ -166,3 +166,24 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     )
 }
+#
+# TINYMCE_DEFAULT_CONFIG = {
+#     # 'relative_urls' : False,
+#     # 'document_base_url': "http://127.0.0.1:8001/",
+#     # 'theme' : 'advanced',
+#     # 'theme_advanced_buttons1' : 'bold,italic,underline,separator,bullist,numlist,separator,link,unlink',
+#     # 'theme_advanced_buttons2' : '',
+#     # 'theme_advanced_buttons3' : '',
+#     # 'theme_advanced_toolbar_location' : 'top',
+#     # 'theme_advanced_toolbar_align': 'left',
+#     # 'paste_text_sticky': True,
+#     # 'paste_text_sticky_default' : True,
+#     # 'valid_styles' : 'font-weight,font-style,text-decoration',
+#
+#     # 'remove_script_host' : False,
+#     # 'convert_urls' : False,
+#
+#     # # URL settings
+#     # 'convert_urls' : False,
+#     # 'relative_urls' : False,
+# }
