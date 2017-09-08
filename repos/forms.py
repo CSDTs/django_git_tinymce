@@ -89,6 +89,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 				raise forms.ValidationError(
 					"Slugified repo named '{}' already exists".format(slugified)
 				)
+				
 
 		return name
 

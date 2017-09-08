@@ -4,6 +4,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.text import slugify
 from django.views import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (
@@ -355,8 +356,8 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 	def get_object(self):
 		queryset = super(RepositoryUpdateView, self).get_queryset()
-		queryset = queryset.filter(owner__username=self.kwargs.get('username'))
-		return queryset.first()
+		queryset = queryset.get(owner__username=self.kwargs.get('username'),slug=self.kwargs.get('slug'))
+		return queryset
 
 	def get_form_kwargs(self):
 		kwargs = super(RepositoryUpdateView, self).get_form_kwargs()
@@ -378,6 +379,10 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		# so that we don't have to go through and compare with get_initial()
 		# all again.
 		obj = self.get_object()
+
+		slug = slugify(form.cleaned_data.get("name"))
+		obj.slug = slug
+
 		obj.tag_set.clear()
 
 		if tags:
@@ -389,9 +394,17 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 					continue
 				new_tag, created = Tag.objects.get_or_create(title=tag)
 				new_tag.repos.add(self.get_object())
-
+		obj.save()
 		return valid_data
 
+
+	def get_success_url(self):
+		return reverse(
+			"gitusers:index",
+			kwargs={
+				'username': self.request.user.username,
+			}
+		)
 
 class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
