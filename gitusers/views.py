@@ -217,7 +217,7 @@ class ReduxRepositoryDetailView(View):
 		return render(request, self.template_name, context)
 
 class ReduxRepositoryFolderDetailView(View):
-	
+
 	template_name = 'repo/redux_repo.html'
 	component = 'repo/src/client.min.js'
 
@@ -1147,20 +1147,27 @@ class CommitView(ListView):
 			git_repo = pygit2.Repository(repo.get_repo_path())
 		except IOError:
 			raise Http404("Repository does not exist")
-		commit = git_repo.revparse_single(self.commit_hex)
-		context['message'] = commit.message
-		context['hash'] = commit.hex
-		diff  = git_repo.diff(commit.parents[0], commit).patch
-		# patches = [p for p in diff]
-		# old_files = []
-		# hunks_files = []
-		# for patch in patches:
-		# 	old_files.append(patch.delta)
-		# 	hunks_files.append(patch.hunks)
-		context['diff'] = diff
+		try:
+			commit = git_repo.revparse_single(self.commit_hex)
+			context['message'] = commit.message
+			context['hash'] = commit.hex
+			diff  = git_repo.diff(commit.parents[0], commit).patch
+			# patches = [p for p in diff]
+			# old_files = []
+			# hunks_files = []
+			# for patch in patches:
+			# 	old_files.append(patch.delta)
+			# 	hunks_files.append(patch.hunks)
+			context['diff'] = diff
+			files = []
+			for e in commit.tree:
+				files.append(e.name)
+			context['files'] = files
+		except:
+			context['message'] = None
+			context['hash'] = self.commit_hex
+			context['diff'] = None
+			context['files'] = None
 		# context['hunks'] = hunks_files
-		files = []
-		for e in commit.tree:
-			files.append(e.name)
-		context['files'] = files
+
 		return context
