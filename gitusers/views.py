@@ -433,6 +433,15 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 				new_tag.repos.add(self.get_object())
 		obj.save()
 
+		# return HttpResponseRedirect(reverse(
+		# 	"gitusers:repo_detail",
+		# 	kwargs={
+		# 		'username': self.kwargs.get('username'),
+		# 		'slug': slug
+		#
+		# 	}
+		# )
+		# )
 
 
 		# return valid_data
@@ -457,6 +466,8 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	#
 	# 		}
 	# 	)
+
+
 
 
 
