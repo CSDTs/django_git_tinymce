@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}{{ form.media }}{% endblock %}
+
+{% block title %}Commit Log{% endblock %}
+
+{% block content %}
+
+<p>
+<a href="{% url 'gitusers:commits' username=orig_author slug=orig_repo  %}"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>&nbsp;Back to Commit Log</a>
+</p>
+<p>
+<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span>&nbsp;Back to Repo</a>
+</p>
+
+<h3>Commit <a href="{% url 'gitusers:index' username=orig_author  %}">{{ orig_author }}</a> / <a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}">{{ orig_repo }}</a> / {{ hash }}</h3>
+
+<p>
+<strong>Message:</strong> {{ message }}
+</p>
+<p>
+<strong>Diff:</strong> {{ diff }}
+<p>
+<strong>Files:</strong> {{ files }}
+</p>
+
+<!-- {% for dif in diff %}
+  {{ dif.new_file.path }}
+{% endfor %}
+
+{% for hunk in hunks %}
+  {{ hunk }}
+{% endfor %} -->
+
+{% endblock %}

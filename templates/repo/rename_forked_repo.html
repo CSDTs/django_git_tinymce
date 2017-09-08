@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}{{ form.media }}{% endblock %}
+
+{% block title %}Rename Forked Repo{% endblock %}
+
+{% block content %}
+
+
+<h1>Rename Forked Repo</h1>
+
+{{ message }}
+
+{% if error_message %}
+	{{ error_message }}
+	<p><a href="{% url 'gitusers:repo_detail' username=object.owner slug=object.slug %}">Go back</a></p>
+
+{% endif %}
+	<form action="" method="post" novalidate>
+	    {% csrf_token %}
+	    {{ form.as_p }}
+	    <input type="submit" value="Rename Forked Repo" />
+	</form>
+
+
+
+{% endblock %}

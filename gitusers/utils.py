@@ -3,14 +3,14 @@ from os import path
 
 def find_file_oid_in_tree(filename, tree):
 	for entry in tree:
-		if entry.name == filename:
+		if entry.name.lower() == filename.lower():
 			return entry.id
 	return 404
 
 
 def find_file_oid_in_tree_using_index(filename, index_tree):
 	for entry in index_tree:
-		if entry.path == filename:
+		if entry.path.lower() == filename.lower():
 			return entry.hex
 	return 404
 
