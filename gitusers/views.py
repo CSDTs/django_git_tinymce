@@ -161,8 +161,7 @@ class RepositoryDetailView(DetailView):
 
 		return context
 
-class ReduxRepositoryDetailView(DetailView):
-	model = Repository
+class ReduxRepositoryDetailView(View):
 	template_name = 'repo/redux_repo.html'
 	component = 'repo/src/client.min.js'
 
@@ -217,8 +216,8 @@ class ReduxRepositoryDetailView(DetailView):
 
 		return render(request, self.template_name, context)
 
-class ReduxRepositoryFolderDetailView(DetailView):
-	model = Repository
+class ReduxRepositoryFolderDetailView(View):
+	
 	template_name = 'repo/redux_repo.html'
 	component = 'repo/src/client.min.js'
 
