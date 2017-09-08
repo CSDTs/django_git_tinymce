@@ -92,5 +92,11 @@ def repository_post_delete(sender, instance, **kwargs):
 
 
 class ForkedRepository(models.Model):
-	original = models.OneToOneField(Repository, related_name='original_repo')
+	original = models.ForeignKey(Repository, related_name='original_repo', blank=True, null=True)
 	fork = models.ForeignKey(Repository)
+
+	def save(self, *args, **kwargs):
+	    if not self.id:
+	        super(ForkedRepository, self).save(*args, **kwargs)
+	    # process self.parent_subject (should be called ...subjects, semantically)
+	    super(ForkedRepository, self).save(*args, **kwargs)
