@@ -178,6 +178,21 @@ class ReduxRepositoryDetailView(DetailView):
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		fork_count = len(forked_repos)
+		print('repo.id', repo.id)
+		try:
+			orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+			if orig_fork:
+				is_fork = True
+			orig = orig_fork.original
+			print('orig_fork', orig_fork)
+			fork_name = orig.name
+			fork_owner = orig.owner.username
+		except:
+			orig_fork = None
+			is_fork = False
+			orig = None
+			fork_name = None
+			fork_owner = None
 
 		props = {
 					'repo_name': repo_name,
@@ -185,7 +200,11 @@ class ReduxRepositoryDetailView(DetailView):
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
 					'directory': directory,
-					'fork_count': fork_count
+					'fork_count': fork_count,
+					'is_fork': is_fork,
+					'fork_name': fork_name,
+					'fork_owner': fork_owner,
+
 
 
 		}
@@ -217,6 +236,20 @@ class ReduxRepositoryFolderDetailView(DetailView):
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		fork_count = len(forked_repos)
+		try:
+			orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+			if orig_fork:
+				is_fork = True
+			orig = orig_fork.original
+			print('orig_fork', orig_fork)
+			fork_name = orig.name
+			fork_owner = orig.owner.username
+		except:
+			orig_fork = None
+			is_fork = False
+			orig = None
+			fork_name = None
+			fork_owner = None
 
 		props = {
 					'repo_name': repo_name,
@@ -224,7 +257,10 @@ class ReduxRepositoryFolderDetailView(DetailView):
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
 					'directory': directory,
-					'fork_count': fork_count
+					'fork_count': fork_count,
+					'is_fork': is_fork,
+					'fork_name': fork_name,
+					'fork_owner': fork_owner,
 
 
 		}
@@ -353,6 +389,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	model = Repository
 	template_name = 'repo/setting.html'
 	form_class = RepositoryUpdateModelForm
+	id = None
 
 	def get_object(self):
 		queryset = super(RepositoryUpdateView, self).get_queryset()
@@ -373,7 +410,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 	def form_valid(self, form):
 		valid_data = super(RepositoryUpdateView, self).form_valid(form)
-
 		tags = form.cleaned_data.get("tags")
 		# de-associate all associated tags and re-create them
 		# so that we don't have to go through and compare with get_initial()
@@ -382,6 +418,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 		slug = slugify(form.cleaned_data.get("name"))
 		obj.slug = slug
+
 
 		obj.tag_set.clear()
 
@@ -395,16 +432,33 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 				new_tag, created = Tag.objects.get_or_create(title=tag)
 				new_tag.repos.add(self.get_object())
 		obj.save()
+
+
+
 		return valid_data
 
+		# return HttpResponseRedirect(reverse(
+		# 	"gitusers:repo_detail",
+		# 	kwargs={
+		# 		'username': self.kwargs.get('username'),
+		# 		'slug': slug
+		#
+		# 	}
+		# )
+		# )
 
 	def get_success_url(self):
+
 		return reverse(
 			"gitusers:index",
 			kwargs={
-				'username': self.request.user.username,
+				'username': self.object.owner,
+				# 'slug': self.object.slug
+
 			}
 		)
+
+
 
 class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
