@@ -206,7 +206,7 @@ export default class Layout extends React.Component {
         </div>
         <div className="col-md-6 text-right col-xs-4">
           <div class="btn-group" role="group" aria-label="...">
-            <a href={`/${window.props.repo_owner}/${window.props.repo_name}/fork`} class="btn btn-default"><i class="glyphicon glyphicon-random"/>&nbsp;&nbsp;Fork</a>
+            {(files.is_owner) ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/fork`} class="btn btn-default disabled"><i class="glyphicon glyphicon-random"/>&nbsp;&nbsp;Fork</a> : <a href={`/${window.props.repo_owner}/${window.props.repo_name}/fork`} class="btn btn-default"><i class="glyphicon glyphicon-random"/>&nbsp;&nbsp;Fork</a> }
             <a href={`/${window.props.repo_owner}/${window.props.repo_name}/forked`} class="btn btn-default">{`${window.props.fork_count}`}</a>
           </div>
           &nbsp;&nbsp;&nbsp;&nbsp;

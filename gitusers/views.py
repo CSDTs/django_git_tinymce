@@ -435,28 +435,28 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 
 
-		return valid_data
+		# return valid_data
 
-		# return HttpResponseRedirect(reverse(
-		# 	"gitusers:repo_detail",
-		# 	kwargs={
-		# 		'username': self.kwargs.get('username'),
-		# 		'slug': slug
-		#
-		# 	}
-		# )
-		# )
-
-	def get_success_url(self):
-
-		return reverse(
-			"gitusers:index",
+		return HttpResponseRedirect(reverse(
+			"gitusers:repo_detail",
 			kwargs={
-				'username': self.object.owner,
-				# 'slug': self.object.slug
+				'username': self.kwargs.get('username'),
+				'slug': slug
 
 			}
 		)
+		)
+
+	# def get_success_url(self):
+	#
+	# 	return reverse(
+	# 		"gitusers:index",
+	# 		kwargs={
+	# 			'username': self.object.owner,
+	# 			# 'slug': self.object.slug
+	#
+	# 		}
+	# 	)
 
 
 
