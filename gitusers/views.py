@@ -178,6 +178,21 @@ class ReduxRepositoryDetailView(DetailView):
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		fork_count = len(forked_repos)
+		print('repo.id', repo.id)
+		try:
+			orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+			if orig_fork:
+				is_fork = True
+			orig = orig_fork.original
+			print('orig_fork', orig_fork)
+			fork_name = orig.name
+			fork_owner = orig.owner.username
+		except:
+			orig_fork = None
+			is_fork = False
+			orig = None
+			fork_name = None
+			fork_owner = None
 
 		props = {
 					'repo_name': repo_name,
@@ -185,7 +200,11 @@ class ReduxRepositoryDetailView(DetailView):
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
 					'directory': directory,
-					'fork_count': fork_count
+					'fork_count': fork_count,
+					'is_fork': is_fork,
+					'fork_name': fork_name,
+					'fork_owner': fork_owner,
+
 
 
 		}
@@ -217,6 +236,20 @@ class ReduxRepositoryFolderDetailView(DetailView):
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		fork_count = len(forked_repos)
+		try:
+			orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+			if orig_fork:
+				is_fork = True
+			orig = orig_fork.original
+			print('orig_fork', orig_fork)
+			fork_name = orig.name
+			fork_owner = orig.owner.username
+		except:
+			orig_fork = None
+			is_fork = False
+			orig = None
+			fork_name = None
+			fork_owner = None
 
 		props = {
 					'repo_name': repo_name,
@@ -224,7 +257,10 @@ class ReduxRepositoryFolderDetailView(DetailView):
 					'repo_owner_id' : user.id,
 					'repo_id': repo.id,
 					'directory': directory,
-					'fork_count': fork_count
+					'fork_count': fork_count,
+					'is_fork': is_fork,
+					'fork_name': fork_name,
+					'fork_owner': fork_owner,
 
 
 		}
