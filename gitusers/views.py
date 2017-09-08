@@ -389,6 +389,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	model = Repository
 	template_name = 'repo/setting.html'
 	form_class = RepositoryUpdateModelForm
+	id = None
 
 	def get_object(self):
 		queryset = super(RepositoryUpdateView, self).get_queryset()
@@ -409,7 +410,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 	def form_valid(self, form):
 		valid_data = super(RepositoryUpdateView, self).form_valid(form)
-
 		tags = form.cleaned_data.get("tags")
 		# de-associate all associated tags and re-create them
 		# so that we don't have to go through and compare with get_initial()
@@ -418,6 +418,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 		slug = slugify(form.cleaned_data.get("name"))
 		obj.slug = slug
+
 
 		obj.tag_set.clear()
 
@@ -431,16 +432,33 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 				new_tag, created = Tag.objects.get_or_create(title=tag)
 				new_tag.repos.add(self.get_object())
 		obj.save()
+
+
+
 		return valid_data
 
+		# return HttpResponseRedirect(reverse(
+		# 	"gitusers:repo_detail",
+		# 	kwargs={
+		# 		'username': self.kwargs.get('username'),
+		# 		'slug': slug
+		#
+		# 	}
+		# )
+		# )
 
 	def get_success_url(self):
+
 		return reverse(
 			"gitusers:index",
 			kwargs={
-				'username': self.request.user.username,
+				'username': self.object.owner,
+				# 'slug': self.object.slug
+
 			}
 		)
+
+
 
 class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
