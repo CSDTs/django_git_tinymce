@@ -206,7 +206,7 @@ export default class Layout extends React.Component {
         </div>
         <div className="col-md-6 text-right col-xs-4">
           <div class="btn-group" role="group" aria-label="...">
-            <a href={`/${window.props.repo_owner}/${window.props.repo_name}/fork`} class="btn btn-default"><i class="glyphicon glyphicon-random"/>&nbsp;&nbsp;Fork</a>
+            {(files.is_owner) ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/fork`} class="btn btn-default disabled"><i class="glyphicon glyphicon-random"/>&nbsp;&nbsp;Fork</a> : <a href={`/${window.props.repo_owner}/${window.props.repo_name}/fork`} class="btn btn-default"><i class="glyphicon glyphicon-random"/>&nbsp;&nbsp;Fork</a> }
             <a href={`/${window.props.repo_owner}/${window.props.repo_name}/forked`} class="btn btn-default">{`${window.props.fork_count}`}</a>
           </div>
           &nbsp;&nbsp;&nbsp;&nbsp;
@@ -252,7 +252,7 @@ export default class Layout extends React.Component {
 
               {this.props.files.files.map((file) => {
                 const icon = this.getIcon(file.type)
-                const editLink = (files.is_owner) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/edit`} style={{fontSize: '.75em', color: '#999'}}>edit</a>: null : null
+                const editLink = (files.is_owner) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}edit/${file.name}`} style={{fontSize: '.75em', color: '#999'}}>edit</a>: null : null
                 const renameLink = (files.is_owner) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/rename`} style={{fontSize: '.75em', color: '#444'}}>rename</a>: null : null
                 const fileLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${window.props.directory}/blob/${file.name}`}>{ file.name }</a> : (file.type == 'blob') ? <a href={`blob/${file.name}`}>{ file.name }</a> : <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}${file.name}`}>{ file.name }</a>
                 const deleteLink = (files.is_owner && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a> : null

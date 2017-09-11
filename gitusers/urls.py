@@ -49,10 +49,6 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/$', ReduxRepositoryFolderDetailView.as_view(), name='repo_detail_folder'),
 
 
-	# blob edit
-	url(r'^(?P<slug>[-\w]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/edit/$', BlobEditView.as_view(), name='blob_edit'),
-	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/edit/$', BlobEditView.as_view(), name='blob_edit_dir'),
-	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/edit/$', BlobEditView.as_view(), name='blob_edit_folder'),
 
 
 
@@ -74,6 +70,11 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),
+
+	# blob edit - must be after blob raw view
+	url(r'^(?P<slug>[-\w]+)/edit/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobEditView.as_view(), name='blob_edit'),
+	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/edit/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobEditView.as_view(), name='blob_edit_dir'),
+	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/edit/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobEditView.as_view(), name='blob_edit_folder'),
 
 
 

@@ -15,7 +15,7 @@
 {% endif %}
 {% for repo in repos %}
 
-<li><a href="{% url 'gitusers:index' username=repo.owner %}">{{ repo.owner}}</a>/<a href="{% url 'gitusers:repo_detail' username=repo.owner slug=repo.name  %}">{{ repo.name }}</a> - {{ repo.description}}</li>
+<li><a href="{% url 'gitusers:repo_detail' username=repo.owner slug=repo.name  %}">{{ repo.owner}}/{{ repo.name }}</a> - {{ repo.description}}</li>
 
 {% endfor %}
 </ul>
