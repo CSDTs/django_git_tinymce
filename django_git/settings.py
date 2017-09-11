@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_cleanup',
 
 ]
 
@@ -140,6 +141,9 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static", "static_cdn")
 STATIC_ROOT = os.path.join(BASE_DIR, "media", "media_cdn")
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+
 
 # Pygit2 settings
 REPO_DIR = os.path.join(BASE_DIR, "git_repos")

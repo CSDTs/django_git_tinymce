@@ -13,11 +13,17 @@ import pygit2
 import time
 from pygit2 import init_repository
 
+from . import imglib
+
 
 
 class RepositoryManager(models.Manager):
 	def display_user_repo(self):
 		pass
+
+
+def my_awesome_upload_function(instance, filename):
+    return os.path.join('profile/%s/' % instance.id, filename)
 
 
 class Repository(models.Model):
@@ -28,6 +34,7 @@ class Repository(models.Model):
 	owner = models.ForeignKey(settings.AUTH_USER_MODEL)
 	editors = models.ManyToManyField(
 		settings.AUTH_USER_MODEL, related_name='editors', blank=True)
+	image = models.ImageField(null=True, blank=True, upload_to=my_awesome_upload_function)
 
 	def __str__(self):
 		return "{} - {}".format(self.name, self.owner.username)
@@ -39,6 +46,19 @@ class Repository(models.Model):
 
 	def get_repo_path(self):
 		return join(settings.REPO_DIR, self.owner.username, str(self.pk))
+
+	def save(self, *args, **kwargs):
+		super(Repository, self).save(*args, **kwargs)
+		if self.image:
+			imglib.resize_image(self.image)
+
+	@property
+	def image_url(self):
+	    if self.image and hasattr(self.image, 'url'):
+	        return self.image.url
+
+	
+
 
 
 # Django Signals

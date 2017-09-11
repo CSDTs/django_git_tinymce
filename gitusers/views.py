@@ -430,7 +430,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 					continue
 				new_tag, created = Tag.objects.get_or_create(title=tag)
 				new_tag.repos.add(self.get_object())
-		obj.save()
+		form.save()
 
 		# return HttpResponseRedirect(reverse(
 		# 	"gitusers:repo_detail",

@@ -56,7 +56,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 
 	class Meta:
 		model = Repository
-		fields = ['name', 'description']
+		fields = ['name', 'description', 'image']
 
 		widgets = {
 			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),
@@ -69,6 +69,8 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 		self.request = kwargs.pop('request')
 		self.old_name = kwargs.pop('old_name')
 		super(RepositoryUpdateModelForm, self).__init__(*args, **kwargs)
+		self.fields['image'].label = 'Image (400x300px)'
+
 
 	def clean_name(self):
 		name = self.cleaned_data['name']
@@ -89,7 +91,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 				raise forms.ValidationError(
 					"Slugified repo named '{}' already exists".format(slugified)
 				)
-				
+
 
 		return name
 

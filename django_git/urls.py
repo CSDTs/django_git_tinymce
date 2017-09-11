@@ -48,7 +48,7 @@ urlpatterns = [
     url(r'^tags/', include('tags.urls', namespace='tags')),
 	url(r'^api/v1/files/(?P<resource_id>\d+)[/]?$', gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
 	url(r'^api/v1/files/(?P<resource_id>\d+)/(?P<directories>.*)/$', gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
-    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
+
 
 
 
@@ -61,3 +61,6 @@ url(r'^accounts/login/$', auth_views.LoginView.as_view(template_name='myapp/logi
 
 if settings.DEBUG:
 	urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+	urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
