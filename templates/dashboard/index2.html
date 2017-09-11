@@ -6,12 +6,22 @@
 
 </br>
 <h1>All Repositories</h1>
-<ul>
-	{% for repo in repository_list %}
-	<li><a href="{{ repo.get_absolute_url }}">{{ repo.name }} - {{ repo.owner }}</a></li>
-	{% empty %}
-	<p>No repositories</p>
-	{% endfor %}
-</ul>
+
+<div class='col-sm-6 col-sm-offset-3'>
+{% for repo in repository_list %}
+<div class="row">
+  <div class="col-sm-12">
+    <div class="thumbnail">
+      {% if repo.image %}
+        <img src='{{ repo.image.url }}' class='img-responsive' />
+      {% endif %}
+      <div class="caption">
+        <h3 style="text-align:center;"><a href='{{ repo.get_absolute_url }}'>{{ repo.name }} - {{ repo.owner }}</a></h3>
+      </div>
+    </div>
+  </div>
+<hr/>
+</div>
+{% endfor %}
 
 {% endblock %}

@@ -13,7 +13,7 @@ class RepositoryModelForm(forms.ModelForm):
 
 	class Meta:
 		model = Repository
-		fields = ['name', 'description']
+		fields = ['name', 'description', 'image']
 
 		widgets = {
 			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),
