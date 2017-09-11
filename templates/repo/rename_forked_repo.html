@@ -19,9 +19,23 @@
 	<form action="" method="post" novalidate>
 	    {% csrf_token %}
 	    {{ form.as_p }}
-	    <input type="submit" value="Rename Forked Repo" />
+	    <input type="submit" id="btnSubmit" value="Rename Forked Repo" />
 	</form>
 
 
 
+{% endblock %}
+
+{% block js %}
+<script>
+$(document).ready(function () {
+$("#btnSubmit").click(function () {
+    setTimeout(function () { disableButton(); }, 0);
+});
+
+function disableButton() {
+    $("#btnSubmit").prop('disabled', true);
+}
+});
+</script>
 {% endblock %}
