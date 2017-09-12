@@ -57,7 +57,7 @@ class Repository(models.Model):
 	    if self.image and hasattr(self.image, 'url'):
 	        return self.image.url
 
-	
+
 
 
 

@@ -274,7 +274,7 @@ class ReduxRepositoryFolderDetailView(View):
 
 
 
-
+# Fork Already Named Fork
 class RepositoryForkView(LoginRequiredMixin, FormView):
 	template_name = 'repo/rename_forked_repo.html'
 	form_class = RepoForkRenameForm
@@ -289,6 +289,12 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
 
 			}
 		)
+
+	def get_form_kwargs(self):
+		kwargs = super(RepositoryForkView, self).get_form_kwargs()
+		kwargs.update({'request': self.request})
+		# kwargs.update({'old_name': self.object.name})
+		return kwargs
 
 
 	def get(self, request, *args, **kwargs):
