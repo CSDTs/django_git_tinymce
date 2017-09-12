@@ -15,6 +15,16 @@ export function fetchRepos() {
   }
 }
 
+// export function filterRepos(response) {
+//   return function(dispatch) {
+//     console.log('response', response)
+//     dispatch({type: "FILTER_REPOS", payload: response});
+//
+//
+//
+//   }
+// }
+
 
 //
 // export function addTweet(id, text) {
