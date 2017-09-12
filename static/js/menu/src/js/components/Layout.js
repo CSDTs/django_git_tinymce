@@ -23,6 +23,7 @@ import { withRouter } from 'react-router'
     repos: store.repos.repos,
     tags: store.tags.tags,
     page: 1,
+    copy: store.repos.copy,
     //page: Number(store.routing.locationBeforeTransitions.query.page) || 1
   };
 })
@@ -34,10 +35,10 @@ export default class Layout extends React.Component {
 
 
 
-
   constructor(props) {
     super(props);
     this.changePage = this.changePage.bind(this);
+    this.state = {boolean: false};
   }
 
   componentWillMount() {
@@ -63,7 +64,46 @@ export default class Layout extends React.Component {
     return this.owner
   }
 
+  loadTags(id) {
+
+    const reduce = this.props.tags.filter((tag) => {
+      return tag.id == id
+    })
+    let array1 = []
+    const repos_filtered = this.props.repos.filter((repo) => {
+      const okay = reduce.map(tag_repo => {
+        const okay3 = tag_repo.repos.filter((tag) => {
+          console.log('tag', tag)
+          console.log(repo.id, 'repo.id')
+          return tag == repo.id
+        })
+        console.log('okay3', okay3)
+        return okay3
+      })
+      console.log(okay, 'okay')
+      console.log(repo, 'repo')
+      if (okay[0].length == 0) {
+        return false
+      }
+      else {
+        return true
+      }
+    })
+    console.log('repos_filtered', repos_filtered)
+
+    this.props.dispatch({type: "FILTER_REPOS", payload: repos_filtered})
+
+  }
+
+  none() {
+    this.props.dispatch({type: "FILTER_REPOS", payload: this.props.repos})
+  }
+
+
+
   render() {
+    let boolean = this.state.boolean
+    console.log('boolean', boolean)
 
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
@@ -78,7 +118,7 @@ export default class Layout extends React.Component {
     console.log(query, 'query')
     const { user, repos, fetching, fetched, tags } = this.props;
     const per_page = 20;
-    const pages = Math.ceil(this.props.repos.length / per_page );
+    const pages = Math.ceil(this.props.copy.length / per_page );
     const current_page = query
     console.log('current_page', current_page)
     const start_offset = (current_page - 1) * per_page;
@@ -90,10 +130,9 @@ export default class Layout extends React.Component {
 
     //const mappedTweets = tweets.map(tweet => <li key={tweet.id}>{tweet.text}</li>)
 
-    const mappedRepos = this.props.repos.map((repo, index) => {
+    const mappedRepos = this.props.copy.map((repo, index) => {
       if (index >= start_offset && start_count < per_page) {
         start_count++;
-        console.log('start_count', start_count)
         return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
       }
 
@@ -107,7 +146,7 @@ export default class Layout extends React.Component {
       let titled = toTitleCase(tag.title)
       console.log('titled', titled)
 
-      return <li key={tag.id}><a href="#" >{titled}</a></li>
+      return <li key={tag.id}><a href="#" onClick={() => this.loadTags(tag.id)}>{titled}</a></li>
 
 
     })
@@ -121,7 +160,7 @@ export default class Layout extends React.Component {
       <div className="row">
         <div className="col-md-2">
           <ul style={{listStyle: 'none', fontSize: '.90em'}}>
-            Tags
+            Tags &nbsp;<a onClick={() => {this.none();}}>(clear)</a>
             {mappedTags}
 
           </ul>

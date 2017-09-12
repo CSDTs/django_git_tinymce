@@ -1,5 +1,6 @@
 export default function reducer(state={
     repos: [],
+    copy: [],
     fetching: false,
     fetched: false,
     error: null,
@@ -18,31 +19,13 @@ export default function reducer(state={
           fetching: false,
           fetched: true,
           repos: action.payload,
+          copy: action.payload,
         }
       }
-      // case "ADD_TWEET": {
-      //   return {
-      //     ...state,
-      //     repos: [...state.repos, action.payload],
-      //   }
-      // }
-      // case "UPDATE_TWEET": {
-      //   const { id, text } = action.payload
-      //   const newTweets = [...state.repos]
-      //   const tweetToUpdate = newTweets.findIndex(tweet => tweet.id === id)
-      //   newTweets[tweetToUpdate] = action.payload;
-      //
-      //   return {
-      //     ...state,
-      //     repos: newTweets,
-      //   }
-      // }
-      // case "DELETE_TWEET": {
-      //   return {
-      //     ...state,
-      //     repos: state.repos.filter(tweet => tweet.id !== action.payload),
-      //   }
-      // }
+      case "FILTER_REPOS": {
+        return {...state, copy: action.payload}
+      }
+
     }
 
     return state
