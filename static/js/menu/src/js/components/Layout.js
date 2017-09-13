@@ -46,7 +46,7 @@ export default class Layout extends React.Component {
     //const mappedTweets = tweets.map(tweet => <li key={tweet.id}>{tweet.text}</li>)
 
     const mappedRepos = this.props.repos.map(repo => {
-      return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4" ><img src="https://dummyimage.com/400x300/000/fff" width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
+      return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
     })
 
     const mappedTags = this.props.tags.map(tag => {

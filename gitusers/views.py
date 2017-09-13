@@ -431,6 +431,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 				new_tag, created = Tag.objects.get_or_create(title=tag)
 				new_tag.repos.add(self.get_object())
 		obj.save()
+		form.save()
 
 		# return HttpResponseRedirect(reverse(
 		# 	"gitusers:repo_detail",
@@ -455,30 +456,28 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		)
 		)
 
-	# def get_success_url(self):
-	#
-	# 	return reverse(
-	# 		"gitusers:index",
-	# 		kwargs={
-	# 			'username': self.object.owner,
-	# 			# 'slug': self.object.slug
-	#
-	# 		}
-	# 	)
-
-
+def remove_all_tags_without_objects():
+	for tag in Tag.objects.all():
+		if tag.repos.count() == 0:
+			tag.delete()
+		else:
+			pass
 
 
 
 class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
 	template_name = 'repo/delete.html'
-	success_url = reverse_lazy('index')
+
 
 	def get_queryset(self):
 		queryset = super(RepositoryDeleteView, self).get_queryset()
 
 		return queryset.filter(owner__username=self.kwargs.get('username'))
+
+	def get_success_url(self):
+		remove_all_tags_without_objects()
+		return reverse_lazy('index')
 
 
 class RepositoryCreateFileView(OwnerRequiredMixin, FormView):

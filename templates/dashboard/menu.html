@@ -11,3 +11,14 @@
 {{ super }}
   <script type="text/javascript" src="{% static "js/menu/src/client.min.js" %}"></script>
 {% endblock %}
+
+{% block extra_head %}
+<style>.img-responsive {
+  border: 1px solid darkgrey;
+  border-radius: 10px;
+}
+.box {
+  padding: 5px 10px;
+}
+</style>
+{% endblock %}

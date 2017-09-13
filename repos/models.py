@@ -1,26 +1,29 @@
 from django.db import models
 from django.conf import settings
-from django.core.files import File
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.urls import reverse
 from django.utils.text import slugify
 
 import os
-import random
-from PIL import Image
+from os.path import join
 from shutil import rmtree
 
 import pygit2
 import time
 from pygit2 import init_repository
 
-def img_upload_location(instance, filename):
-    return "{}/{}/{}".format(instance.owner, instance.slug, filename)
+from . import imglib
+
+
 
 class RepositoryManager(models.Manager):
     def display_user_repo(self):
         pass
+
+
+def my_awesome_upload_function(instance, filename):
+    return os.path.join('profile/%s/' % instance.id, filename)
 
 
 class Repository(models.Model):
@@ -28,18 +31,10 @@ class Repository(models.Model):
     description = models.CharField(max_length=200, blank=True, null=False)
     slug = models.SlugField(max_length=100)  # default max_length=50
     timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
-    image = models.ImageField(
-        upload_to=img_upload_location,
-        width_field='width',
-        height_field='height',
-        null=True,
-        blank=True
-    )
-    height = models.CharField(max_length=10, null=True)
-    width = models.CharField(max_length=10, null=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL)
     editors = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name='editors', blank=True)
+    image = models.ImageField(null=True, blank=True, upload_to=my_awesome_upload_function)
 
     def __str__(self):
         return "{} - {}".format(self.name, self.owner.username)
@@ -50,31 +45,20 @@ class Repository(models.Model):
             kwargs={"username": self.owner, "slug": self.slug})
 
     def get_repo_path(self):
-        return os.path.join(settings.REPO_DIR, self.owner.username, str(self.pk))
+        return join(settings.REPO_DIR, self.owner.username, str(self.pk))
+
+    def save(self, *args, **kwargs):
+        super(Repository, self).save(*args, **kwargs)
+        if self.image:
+            imglib.resize_image(self.image)
+
+    @property
+    def image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
 
 
-def create_thumbnail(media_path, instance, owner_name, max_length, max_width):
-    filename = os.path.basename(media_path)
-    thumb = Image.open(media_path)
-    size = (max_length, max_width)
-    thumb.thumbnail(size, Image.ANTIALIAS)
-    temp_loc = "%s/%s/tmp" %(settings.MEDIA_ROOT, owner_name)
-    if not os.path.exists(temp_loc):
-        os.makedirs(temp_loc)
-    temp_file_path = os.path.join(temp_loc, filename)
-    if os.path.exists(temp_file_path):
-        temp_path = os.path.join(temp_loc, "%s" %(random.random()))
-        os.makedirs(temp_path)
-        temp_file_path = os.path.join(temp_path, filename)
 
-    temp_image = open(temp_file_path, "w")
-    thumb.save(temp_image)
-    thumb_data = open(temp_file_path, "rb")
-
-    thumb_file = File(thumb_data)
-    instance.image.save(filename.encode('ascii','ignore'), thumb_file)
-    shutil.rmtree(temp_loc, ignore_errors=True)
-    return True
 
 
 # Django Signals
@@ -92,9 +76,8 @@ def repository_pre_save(sender, instance, **kwargs):
         instance.slug = slug
 
 
-@receiver(post_save, sender=Repository, dispatch_uid="path.to.this.module")
+@receiver(post_save, sender=Repository)
 def repository_post_save(sender, instance, **kwagrs):
-    print('***************post save **************')
     # init repo after model object created
     repo = init_repository(instance.get_repo_path())
     if repo.head_is_unborn:
@@ -105,26 +88,18 @@ def repository_post_save(sender, instance, **kwagrs):
         data = '# {}'.format(instance)
         fn = 'README.md'
         bld = repo.TreeBuilder()
-        f = open(os.path.join(repo.workdir, fn), 'w')
+        f = open(os.path.join(repo.workdir,fn), 'w')
         f.write(data)
         f.close()
         b = repo.create_blob_fromworkdir(fn)
         bld = repo.TreeBuilder()
-        bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode)
-        # bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         t = bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
         # head = repo.lookup_reference('HEAD').resolve()
-        c = repo.create_commit('HEAD', s, s, 'Initialized repo with a README.md', t, [])
-
-    # if instance.image:
-    #     img_max_size = (400, 300)
-
-    #     media_path = instance.image.path
-    #     owner = instance.owner
-    #     create_thumbnail(media_path, instance, owner, img_max_size[0], img_max_size[1])
+        c = repo.create_commit('HEAD', s,s, 'Initialized repo with a README.md', t, [])
 
 
 @receiver(post_delete, sender=Repository)

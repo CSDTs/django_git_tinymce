@@ -20,8 +20,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
 
-from dashboard.views import DashboardAllRepoIndexView
-from dashboard.views import MenuView
+from dashboard.views import DashboardAllRepoIndexView, MenuView
 # from dashboard.views import DashboardView
 # from gitusers.views import IndexView
 
@@ -38,8 +37,8 @@ router.register(r'user', gitusers_viewsets.UserView, 'list')
 
 
 urlpatterns = [
+    # url(r'^$', DashboardView.as_view(), name='index'),
     url(r'^$', MenuView.as_view(), name='index'),
-    url(r'^index2/$', DashboardAllRepoIndexView.as_view(), name='index2'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
@@ -49,7 +48,7 @@ urlpatterns = [
     url(r'^tags/', include('tags.urls', namespace='tags')),
     url(r'^api/v1/files/(?P<resource_id>\d+)[/]?$', gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
     url(r'^api/v1/files/(?P<resource_id>\d+)/(?P<directories>.*)/$', gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
-    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
+
 
 
 
@@ -63,3 +62,5 @@ url(r'^accounts/login/$', auth_views.LoginView.as_view(template_name='myapp/logi
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
