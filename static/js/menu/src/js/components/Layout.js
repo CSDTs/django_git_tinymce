@@ -40,6 +40,7 @@ export default class Layout extends React.Component {
   constructor(props) {
     super(props);
     this.changePage = this.changePage.bind(this);
+    this.state = {boolean: false};
   }
 
   componentWillMount() {
@@ -103,6 +104,8 @@ export default class Layout extends React.Component {
 
 
   render() {
+    let boolean = this.state.boolean
+    console.log('boolean', boolean)
 
 
     function getParameterByName(name, url) {
