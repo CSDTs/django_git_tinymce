@@ -144,7 +144,7 @@ export default class Layout extends React.Component {
       let titled = toTitleCase(tag.title)
 
 
-      return <li key={tag.id}><a href="" onClick={() => {this.loadTags(tag.id);this.props.dispatch({type:"SHOW_CLEAR", payload: true});}}>{titled}</a></li>
+      return <li key={tag.id}><a href="#" onClick={() => {this.loadTags(tag.id);this.props.dispatch({type:"SHOW_CLEAR", payload: true});}}>{titled}</a></li>
 
 
     })
@@ -166,7 +166,7 @@ export default class Layout extends React.Component {
         </div>
         <div className="col-md-10">
           <div className="row">
-            {(this.props.name) ? <h2>Showing repos with tag "{name}" <a href='' onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a>:</h2>: null}
+            {(this.props.name) ? <h2>Showing repos with tag "{name}" <a href="#" onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a>:</h2>: null}
             {mappedRepos}
             <br/>
 
