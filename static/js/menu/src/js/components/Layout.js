@@ -149,7 +149,7 @@ export default class Layout extends React.Component {
       let titled = toTitleCase(tag.title)
 
 
-      return <li key={tag.id}><a href="#" onClick={() => {this.loadTags(tag.id);this.props.dispatch({type:"SHOW_CLEAR", payload: true});}}>{titled}</a></li>
+      return <li key={tag.id}><a href="" onClick={() => {this.loadTags(tag.id);this.props.dispatch({type:"SHOW_CLEAR", payload: true});}}>{titled}</a></li>
 
 
     })
