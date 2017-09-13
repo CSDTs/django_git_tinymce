@@ -23,6 +23,9 @@ import { withRouter } from 'react-router'
     repos: store.repos.repos,
     tags: store.tags.tags,
     page: 1,
+    copy: store.repos.copy,
+    clear: store.tags.clear,
+    name: store.tags.name,
     //page: Number(store.routing.locationBeforeTransitions.query.page) || 1
   };
 })
@@ -30,7 +33,6 @@ import { withRouter } from 'react-router'
 
 
 export default class Layout extends React.Component {
-
 
 
 
@@ -55,7 +57,7 @@ export default class Layout extends React.Component {
       .then((response) => {
         //dispatch({type: "FETCH_TAGS_FULFILLED", payload: response.data})
         this.owner = response.data.username
-        console.log('username', response.data.username)
+
       })
       .catch((err) => {
         this.owner = "unknown"
@@ -63,7 +65,45 @@ export default class Layout extends React.Component {
     return this.owner
   }
 
+  loadTags(id) {
+
+    const filtered_tags = this.props.tags.filter((tag) => {
+      return tag.id == id
+    })
+
+    name = filtered_tags[0].title
+    this.props.dispatch({type: "CHANGE_NAME", payload: name})
+
+    const repos_filtered = this.props.repos.filter((repo) => {
+      const okay = filtered_tags.map(tag_repo => {
+        const okay3 = tag_repo.repos.filter((tag) => {
+
+          return tag == repo.id
+        })
+
+        return okay3
+      })
+
+      if (okay[0].length == 0) {
+        return false
+      }
+      else {
+        return true
+      }
+    })
+
+    this.props.dispatch({type: "FILTER_REPOS", payload: repos_filtered})
+
+  }
+
+  none() {
+    this.props.dispatch({type: "FILTER_REPOS", payload: this.props.repos})
+  }
+
+
+
   render() {
+
 
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
@@ -78,7 +118,7 @@ export default class Layout extends React.Component {
     console.log(query, 'query')
     const { user, repos, fetching, fetched, tags } = this.props;
     const per_page = 20;
-    const pages = Math.ceil(this.props.repos.length / per_page );
+    const pages = Math.ceil(this.props.copy.length / per_page );
     const current_page = query
     console.log('current_page', current_page)
     const start_offset = (current_page - 1) * per_page;
@@ -90,10 +130,9 @@ export default class Layout extends React.Component {
 
     //const mappedTweets = tweets.map(tweet => <li key={tweet.id}>{tweet.text}</li>)
 
-    const mappedRepos = this.props.repos.map((repo, index) => {
+    const mappedRepos = this.props.copy.map((repo, index) => {
       if (index >= start_offset && start_count < per_page) {
         start_count++;
-        console.log('start_count', start_count)
         return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
       }
 
@@ -105,9 +144,9 @@ export default class Layout extends React.Component {
           return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
       }
       let titled = toTitleCase(tag.title)
-      console.log('titled', titled)
 
-      return <li key={tag.id}><a href="#" >{titled}</a></li>
+
+      return <li key={tag.id}><a href="#" onClick={() => {this.loadTags(tag.id);this.props.dispatch({type:"SHOW_CLEAR", payload: true});}}>{titled}</a></li>
 
 
     })
@@ -116,18 +155,20 @@ export default class Layout extends React.Component {
       <div className="row">
         <div className="col-md-12">
           <h1 className="text-center">Repositories</h1>
+
         </div>
       </div>
       <div className="row">
         <div className="col-md-2">
           <ul style={{listStyle: 'none', fontSize: '.90em'}}>
-            Tags
+            Tags &nbsp;{this.props.clear ? <a onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a> : null }
             {mappedTags}
 
           </ul>
         </div>
         <div className="col-md-10">
           <div className="row">
+            {(this.props.name) ? <h2>Showing repos with tag "{name}" <a href='' onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a>:</h2>: null}
             {mappedRepos}
             <br/>
 

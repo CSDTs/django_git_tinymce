@@ -3,6 +3,8 @@ export default function reducer(state={
     fetching: false,
     fetched: false,
     error: null,
+    clear: false,
+    name: null,
   }, action) {
 
     switch (action.type) {
@@ -20,6 +22,13 @@ export default function reducer(state={
           tags: action.payload,
         }
       }
+      case "SHOW_CLEAR": {
+        return {...state, clear: action.payload}
+      }
+      case "CHANGE_NAME": {
+        return {...state, name: action.payload}
+      }
+
       // case "ADD_TWEET": {
       //   return {
       //     ...state,
