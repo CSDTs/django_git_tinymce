@@ -115,6 +115,10 @@ export default class Layout extends React.Component {
         return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
     let query = getParameterByName('page') || 1
+    let search = getParameterByName('search') || null
+    if (search) {
+      search = search.toLowerCase()
+    }
     const { user, repos, fetching, fetched, tags } = this.props;
     const per_page = 20;
     const pages = Math.ceil(this.props.copy.length / per_page );
@@ -127,14 +131,39 @@ export default class Layout extends React.Component {
     // }
 
     //const mappedTweets = tweets.map(tweet => <li key={tweet.id}>{tweet.text}</li>)
+    let mappedRepos = null
+    if (search) {
+      const filteredRepos = this.props.copy.filter((repo) => {
+        if (`${repo.name}`.toLowerCase().includes(search))
+          return true
+        if (`${repo.owner_username}`.toLowerCase().includes(search))
+          return true
+        if (`${repo.description}`.toLowerCase().includes(search))
+          return true
+        return false
+      })
+      mappedRepos = filteredRepos.map((repo, index) => {
+        if (index >= start_offset && start_count < per_page) {
+          start_count++;
+          return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
+        }
 
-    const mappedRepos = this.props.copy.map((repo, index) => {
-      if (index >= start_offset && start_count < per_page) {
-        start_count++;
-        return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
-      }
+      })
 
-    })
+    }
+    else {
+
+        mappedRepos = this.props.copy.map((repo, index) => {
+          if (index >= start_offset && start_count < per_page) {
+            start_count++;
+            return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
+          }
+
+        })
+    }
+
+
+
 
     const mappedTags = this.props.tags.map(tag => {
       function toTitleCase(str)
@@ -166,7 +195,8 @@ export default class Layout extends React.Component {
         </div>
         <div className="col-md-10">
           <div className="row">
-            {(this.props.name) ? <h2>Showing repos with tag "{name}" <a href="#" onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a>:</h2>: null}
+            {(this.props.name) ? (search)? <h2>Showing repos with tag "{name}" and search term "{search}" <a href="/">(clear)</a>:</h2>: <h2>Showing repos with tag "{name}" <a href="#" onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a>:</h2>: null}
+            {(search && ! this.props.name) ? <h2>Showing repos that match search term "{search}" <a href="/">(clear)</a>:</h2>: null}
             {mappedRepos}
             <br/>
 
