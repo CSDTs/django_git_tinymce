@@ -40,7 +40,6 @@ export default class Layout extends React.Component {
   constructor(props) {
     super(props);
     this.changePage = this.changePage.bind(this);
-    this.state = {boolean: false};
   }
 
   componentWillMount() {
@@ -104,8 +103,6 @@ export default class Layout extends React.Component {
 
 
   render() {
-    let boolean = this.state.boolean
-    console.log('boolean', boolean)
 
 
     function getParameterByName(name, url) {
@@ -118,12 +115,10 @@ export default class Layout extends React.Component {
         return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
     let query = getParameterByName('page') || 1
-    console.log(query, 'query')
     const { user, repos, fetching, fetched, tags } = this.props;
     const per_page = 20;
     const pages = Math.ceil(this.props.copy.length / per_page );
     const current_page = query
-    console.log('current_page', current_page)
     const start_offset = (current_page - 1) * per_page;
     let start_count = 0;
 
