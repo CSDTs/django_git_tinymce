@@ -78,7 +78,15 @@ class FilesView(APIView):
         tuplet = []
         time = None
         user = request.user
-        is_owner = True if specific_repo.owner == user else False
+        is_owner = False
+        if specific_repo.owner == user:
+            is_owner = True
+        for editor in specific_repo.editors.all():
+            if editor == user:
+                is_owner = True
+        if user.is_superuser:
+            is_owner = True
+
         empty = False
         if this_repo.is_empty:
             empty = True
