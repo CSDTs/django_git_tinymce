@@ -24,6 +24,8 @@ import { withRouter } from 'react-router'
     tags: store.tags.tags,
     page: 1,
     copy: store.repos.copy,
+    clear: store.tags.clear,
+    name: store.tags.name,
     //page: Number(store.routing.locationBeforeTransitions.query.page) || 1
   };
 })
@@ -38,7 +40,6 @@ export default class Layout extends React.Component {
   constructor(props) {
     super(props);
     this.changePage = this.changePage.bind(this);
-    this.state = {boolean: false};
   }
 
   componentWillMount() {
@@ -56,7 +57,7 @@ export default class Layout extends React.Component {
       .then((response) => {
         //dispatch({type: "FETCH_TAGS_FULFILLED", payload: response.data})
         this.owner = response.data.username
-        console.log('username', response.data.username)
+
       })
       .catch((err) => {
         this.owner = "unknown"
@@ -66,22 +67,23 @@ export default class Layout extends React.Component {
 
   loadTags(id) {
 
-    const reduce = this.props.tags.filter((tag) => {
+    const filtered_tags = this.props.tags.filter((tag) => {
       return tag.id == id
     })
-    let array1 = []
+
+    name = filtered_tags[0].title
+    this.props.dispatch({type: "CHANGE_NAME", payload: name})
+
     const repos_filtered = this.props.repos.filter((repo) => {
-      const okay = reduce.map(tag_repo => {
+      const okay = filtered_tags.map(tag_repo => {
         const okay3 = tag_repo.repos.filter((tag) => {
-          console.log('tag', tag)
-          console.log(repo.id, 'repo.id')
+
           return tag == repo.id
         })
-        console.log('okay3', okay3)
+
         return okay3
       })
-      console.log(okay, 'okay')
-      console.log(repo, 'repo')
+
       if (okay[0].length == 0) {
         return false
       }
@@ -89,7 +91,6 @@ export default class Layout extends React.Component {
         return true
       }
     })
-    console.log('repos_filtered', repos_filtered)
 
     this.props.dispatch({type: "FILTER_REPOS", payload: repos_filtered})
 
@@ -102,8 +103,7 @@ export default class Layout extends React.Component {
 
 
   render() {
-    let boolean = this.state.boolean
-    console.log('boolean', boolean)
+
 
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
@@ -144,9 +144,9 @@ export default class Layout extends React.Component {
           return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
       }
       let titled = toTitleCase(tag.title)
-      console.log('titled', titled)
 
-      return <li key={tag.id}><a href="#" onClick={() => this.loadTags(tag.id)}>{titled}</a></li>
+
+      return <li key={tag.id}><a href="#" onClick={() => {this.loadTags(tag.id);this.props.dispatch({type:"SHOW_CLEAR", payload: true});}}>{titled}</a></li>
 
 
     })
@@ -155,18 +155,20 @@ export default class Layout extends React.Component {
       <div className="row">
         <div className="col-md-12">
           <h1 className="text-center">Repositories</h1>
+
         </div>
       </div>
       <div className="row">
         <div className="col-md-2">
           <ul style={{listStyle: 'none', fontSize: '.90em'}}>
-            Tags &nbsp;<a onClick={() => {this.none();}}>(clear)</a>
+            Tags &nbsp;{this.props.clear ? <a onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a> : null }
             {mappedTags}
 
           </ul>
         </div>
         <div className="col-md-10">
           <div className="row">
+            {(this.props.name) ? <h2>Showing repos with tag "{name}" <a href='' onClick={() => {this.none();this.props.dispatch({type:"SHOW_CLEAR", payload: false});this.props.dispatch({type: "CHANGE_NAME", payload: null});}}>(clear)</a>:</h2>: null}
             {mappedRepos}
             <br/>
 
