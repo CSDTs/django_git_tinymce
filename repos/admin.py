@@ -16,5 +16,8 @@ class RepoAdmin(admin.ModelAdmin):
 	def dir(self, obj):
 		return obj.pk
 
+	def get_tags(self, obj):
+		return "\n".join([editor for editor in obj.tags_set.all()])
+
 
 admin.site.register(Repository, RepoAdmin)
