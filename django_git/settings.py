@@ -146,7 +146,7 @@ MEDIA_URL = "/media/"
 
 
 # Pygit2 settings
-REPO_DIR = os.path.join(BASE_DIR, "git_repos")
+REPO_DIR = os.path.join(BASE_DIR, "media", "git_repos")
 '''
 if not path.exists(GITS_DIR):
     os.makedirs(GITS_DIR)
