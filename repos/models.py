@@ -58,9 +58,6 @@ class Repository(models.Model):
             return self.image.url
 
 
-
-
-
 # Django Signals
 # https://docs.djangoproject.com/en/1.11/ref/signals/#post-save
 
@@ -93,7 +90,8 @@ def repository_post_save(sender, instance, **kwagrs):
         f.close()
         b = repo.create_blob_fromworkdir(fn)
         bld = repo.TreeBuilder()
-        bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode)
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
         t = bld.write()
         repo.index.read()
         repo.index.add(fn)

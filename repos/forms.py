@@ -66,6 +66,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 		}
 
 	def __init__(self, *args, **kwargs):
+		print(kwargs, 'kwargs *************************')
 		self.request = kwargs.pop('request')
 		self.old_name = kwargs.pop('old_name')
 		super(RepositoryUpdateModelForm, self).__init__(*args, **kwargs)
@@ -145,9 +146,31 @@ class FileRenameForm(forms.Form):
 		return new_filename
 
 class RepoForkRenameForm(forms.Form):
-	# old_filename = forms.CharField(label='File name', required=True)
 	new_reponame = forms.CharField(label='New fork name', required=True)
-	def clean_filename(self):
+
+	def __init__(self, *args, **kwargs):
+		self.request = kwargs.pop('request', None)
+		super(RepoForkRenameForm, self).__init__(*args, **kwargs)
+
+	def clean_new_reponame(self):
 		new_reponame = self.cleaned_data['new_reponame']
+		# if not new_reponame == self.old_filename:
+		query_set = Repository.objects.filter(
+			name=new_reponame,
+			owner=self.request.user
+		)
+
+		if query_set.exists():
+			raise forms.ValidationError(
+				"Repository named '{}' already exists".format(new_reponame)
+			)
+
+		slugified = slugify(new_reponame)
+		if Repository.objects.filter(
+			slug=slugified, owner=self.request.user).exists():
+			raise forms.ValidationError(
+				"Slugified repo named '{}' already exists".format(slugified)
+			)
+
 
 		return new_reponame
