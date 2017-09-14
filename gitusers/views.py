@@ -65,8 +65,9 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 	template_name = 'gituser/index.html'
 
 	def get_queryset(self):
-		user = self.kwargs['username']
-		user_specific = User.objects.get(username=user)
+		owner_name = self.kwargs['username']
+		print('owner_name', owner_name)
+		user_specific = User.objects.get(username=owner_name)
 		queryset = Repository.objects.filter(owner=user_specific.id)
 
 		search_query = self.request.GET.get('search')
