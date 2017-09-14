@@ -82,9 +82,6 @@ def repository_post_save(sender, instance, **kwagrs):
 	repo = init_repository(instance.get_repo_path())
 	if repo.head_is_unborn:
 		s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
-		print('instance', instance)
-		print('sender', sender)
-		print('repo', repo)
 		data = '# {}'.format(instance)
 		fn = 'README.md'
 		bld = repo.TreeBuilder()

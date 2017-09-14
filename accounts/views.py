@@ -10,7 +10,6 @@ from .forms import UserLoginForm
 
 
 def login_view(request):
-    print(request.user.is_authenticated())
     next = request.GET.get('next')
     title = "Login"
     form = UserLoginForm(request.POST or None)

@@ -61,9 +61,8 @@ class FilesView(APIView):
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         dir_path = path.join(specific_repo.get_repo_path(), directory)
-        print('dir_path', dir_path)
         os.chdir(dir_path)
-        print(os.listdir())
+
 
         index_tree = this_repo.index
         # commit = this_repo.revparse_single('HEAD')
@@ -98,8 +97,6 @@ class FilesView(APIView):
                 item = tree.__getitem__(str(directory))
                 index_tree.read_tree(item.id)
                 for entry in index_tree:
-                    print('entry.path', entry.path)
-                    print('entry.path', entry.hex)
                     name = entry.path
                     filemode = index_tree[entry.path].mode
                     type = ""
@@ -123,7 +120,6 @@ class FilesView(APIView):
             else:
                 for entry in tree:
                     tuplet.append({'name': entry.name, 'id': entry.id.hex, 'type': entry.type, 'filemode': entry.filemode})
-            print('folders', folders)
             date_handler = lambda obj: (
                 obj.isoformat()
                 if isinstance(obj, (datetime.datetime, datetime.date))
@@ -166,24 +162,18 @@ class FilesView(APIView):
         directory = ""
         if 'directories' in self.kwargs:
             directory += self.kwargs['directories']
-        print('directory', directory)
         try:
             specific_repo = repo_model.objects.get(id=repo)
         except:
             return Response({'detail': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
         this_repo = Repository(specific_repo.get_repo_path())
-        print(this_repo)
 
         data3 = request.data
-        print(data3)
         data4 = data3['name']
         for data in request.data.getlist('name'):
-            print('data', data)
             data_name = str(data)
-            print('data_name', data_name)
             data2 = data
             path = default_storage.save(os.path.join(specific_repo.get_repo_path(), directory, data_name), ContentFile(data2.read()))
-            print('path', path)
             tmp_file = os.path.join(specific_repo.get_repo_path(), path)
 
             b = this_repo.create_blob_fromworkdir(os.path.join(directory, data_name))
