@@ -120,7 +120,7 @@ export default class Layout extends React.Component {
       search = search.toLowerCase()
     }
     const { user, repos, fetching, fetched, tags } = this.props;
-    const per_page = 20;
+    const per_page = 30;
     const pages = Math.ceil(this.props.copy.length / per_page );
     const current_page = query
     const start_offset = (current_page - 1) * per_page;
@@ -203,7 +203,7 @@ export default class Layout extends React.Component {
           </div>
           <div className="row">
             <div className="col-md-12 text-center">
-              <Pagination className="user-pagination" bsSize="medium" maxButtons={10} first last next prev boundaryLinks items={pages} activePage={current_page} onSelect={this.changePage}/>
+              {(pages > 1) ? <Pagination className="user-pagination" bsSize="medium" maxButtons={10} first last next prev boundaryLinks items={pages} activePage={current_page} onSelect={this.changePage}/> : null}
             </div>
           </div>
         </div>
