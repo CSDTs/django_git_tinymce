@@ -743,6 +743,8 @@ class BlobRawView(View):
 			# 	print('index_tree_int', index_tree)
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			if blob_id != 404:
+				if self.kwargs.get('extension') == '.png || .jpeg || .jpg || .gif || .svg':
+					return HttpResponse(repo[blob_id].data, content_type="image/png")
 				return HttpResponse(repo[blob_id].data)
 			else:
 				raise Http404("Read raw data error")
