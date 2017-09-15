@@ -10,92 +10,66 @@ from tags.models import Tag
 
 
 class RepositoryModelForm(forms.ModelForm):
-    # tags = forms.CharField(label='Related tags', required=False)
-    tags = forms.ModelMultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple,
-        queryset=Tag.objects.all())
-    # tags = forms.CheckboxSelectMultiple(choices=Tag.objects.all())
+	# tags = forms.CharField(label='Related tags', required=False)
+	# tags = forms.ModelMultipleChoiceField(
+	# 	widget=forms.CheckboxSelectMultiple,
+	# 	queryset=Tag.objects.all())
+	# tags = forms.CheckboxSelectMultiple(choices=Tag.objects.all())
 
-    class Meta:
-        model = Repository
-        fields = ['name', 'description', 'image']
+	class Meta:
+		model = Repository
+		fields = ['name', 'description', 'image', 'tags']
 
-        widgets = {
-            "name": forms.TextInput(attrs={"placeholder": "Repository name"}),
-            "description": forms.Textarea(
-                attrs={"placeholder": "Repository description"}
-            ),
-        }
+		widgets = {
+			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),
+			"description": forms.Textarea(
+				attrs={"placeholder": "Repository description"}
+			),
+			"tags": forms.CheckboxSelectMultiple(),
+		}
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request')
-        super(RepositoryModelForm, self).__init__(*args, **kwargs)
+	def __init__(self, *args, **kwargs):
+		self.request = kwargs.pop('request')
+		super(RepositoryModelForm, self).__init__(*args, **kwargs)
 
-    def clean_name(self):
-        # name = self.cleaned_data.get('name')
-        name = self.cleaned_data['name']
-        query_set = Repository.objects.filter(
-            name=name,
-            owner=self.request.user
-        )
+	def clean_name(self):
+		# name = self.cleaned_data.get('name')
+		name = self.cleaned_data['name']
+		query_set = Repository.objects.filter(
+			name=name,
+			owner=self.request.user
+		)
 
-        if query_set.exists():
-            raise forms.ValidationError(
-                "Repository named '{}' already exists".format(name)
-            )
+		if query_set.exists():
+			raise forms.ValidationError(
+				"Repository named '{}' already exists".format(name)
+			)
 
-        slugified = slugify(name)
-        if Repository.objects.filter(
-            slug=slugified, owner=self.request.user).exists():
-            raise forms.ValidationError(
-                "Slugified repo named '{}' already exists".format(slugified)
-            )
+		slugified = slugify(name)
+		if Repository.objects.filter(
+			slug=slugified, owner=self.request.user).exists():
+			raise forms.ValidationError(
+				"Slugified repo named '{}' already exists".format(slugified)
+			)
 
-        return name
-
-    def clean_tags(self):
-        tags = self.cleaned_data['tags']
-        if tags:
-            tags = [t for t in self.cleaned_data['tags']]
-            print(tags)
-
-        return tags
-
-
-    def save(self, commit=True):
-        instance = forms.ModelForm.save(self, False)
-
-        # Prepare a 'save_m2m' method for the form,
-        old_save_m2m = self.save_m2m
-        def save_m2m():
-           old_save_m2m()
-           instance.tag_set.clear()
-           for tag in self.cleaned_data['tags']:
-               instance.tag_set.add(tag)
-        self.save_m2m = save_m2m
-
-        if commit:
-            instance.save()
-            self.save_m2m()
-
-        return instance
+		return name
 
 
 class RepositoryUpdateModelForm(forms.ModelForm):
-    tags = forms.CharField(label='Related tags', required=False)
-    request = None
-    old_name = None
+	tags = forms.CharField(label='Related tags', required=False)
+	request = None
+	old_name = None
 
-    class Meta:
-        model = Repository
-        fields = ['name', 'description', 'image']
+	class Meta:
+		model = Repository
+		fields = ['name', 'description', 'image']
 
-        widgets = {
-            "name": forms.TextInput(attrs={"placeholder": "Repository name"}),
-            "description": forms.Textarea(
-                attrs={"placeholder": "Repository description"}
-            )
-        }
+		widgets = {
+			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),
+			"description": forms.Textarea(
+				attrs={"placeholder": "Repository description"}
+			)
+		}
 
 	def __init__(self, *args, **kwargs):
 		self.request = kwargs.pop('request')
@@ -104,104 +78,104 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 		self.fields['image'].label = 'Image (400x300px)'
 
 
-    def clean_name(self):
-        name = self.cleaned_data['name']
-        if not name == self.old_name:
-            query_set = Repository.objects.filter(
-                name=name,
-                owner=self.request.user
-            )
+	def clean_name(self):
+		name = self.cleaned_data['name']
+		if not name == self.old_name:
+			query_set = Repository.objects.filter(
+				name=name,
+				owner=self.request.user
+			)
 
-            if query_set.exists():
-                raise forms.ValidationError(
-                    "Repository named '{}' already exists".format(name)
-                )
+			if query_set.exists():
+				raise forms.ValidationError(
+					"Repository named '{}' already exists".format(name)
+				)
 
-            slugified = slugify(name)
-            if Repository.objects.filter(
-                slug=slugified, owner=self.request.user).exists():
-                raise forms.ValidationError(
-                    "Slugified repo named '{}' already exists".format(slugified)
-                )
+			slugified = slugify(name)
+			if Repository.objects.filter(
+				slug=slugified, owner=self.request.user).exists():
+				raise forms.ValidationError(
+					"Slugified repo named '{}' already exists".format(slugified)
+				)
 
 
-        return name
+		return name
 
 
 class TinyMCEFileEditForm(forms.Form):
-    content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
-    commit_message = forms.CharField(
-        required=False,
-        empty_value="edited on {}".format(
-            datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-        )
-    )
+	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
+	commit_message = forms.CharField(
+		required=False,
+		empty_value="edited on {}".format(
+			datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+		)
+	)
 
 
 class FileCreateForm(forms.Form):
-    filename = forms.CharField(label='File name', required=True)
-    content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
-    commit_message = forms.CharField(
-        required=False,
-        empty_value="Created on {}".format(
-            datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-        )
-    )
+	filename = forms.CharField(label='File name', required=True)
+	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
+	commit_message = forms.CharField(
+		required=False,
+		empty_value="Created on {}".format(
+			datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+		)
+	)
 
-    def clean_filename(self):
-        filename = self.cleaned_data['filename']
-        if filename == ('.html'.strip()):
-            raise forms.ValidationError(
-                'Please enter file name, i.e. "example.html"'
-            )
+	def clean_filename(self):
+		filename = self.cleaned_data['filename']
+		if filename == ('.html'.strip()):
+			raise forms.ValidationError(
+				'Please enter file name, i.e. "example.html"'
+			)
 
-        return filename
+		return filename
 
 
 class FileRenameForm(forms.Form):
-    # old_filename = forms.CharField(label='File name', required=True)
-    new_filename = forms.CharField(label='New file name', required=True)
-    commit_message = forms.CharField(
-        required=False,
-        empty_value="Created on {}".format(
-            datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
-        )
-    )
-    def clean_filename(self):
-        new_filename = self.cleaned_data['new_filename']
-        if new_filename == ('.html'.strip()):
-            raise forms.ValidationError(
-                'Please enter file name, i.e. "example.html"'
-            )
+	# old_filename = forms.CharField(label='File name', required=True)
+	new_filename = forms.CharField(label='New file name', required=True)
+	commit_message = forms.CharField(
+		required=False,
+		empty_value="Created on {}".format(
+			datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+		)
+	)
+	def clean_filename(self):
+		new_filename = self.cleaned_data['new_filename']
+		if new_filename == ('.html'.strip()):
+			raise forms.ValidationError(
+				'Please enter file name, i.e. "example.html"'
+			)
 
-        return new_filename
+		return new_filename
 
 class RepoForkRenameForm(forms.Form):
-    new_reponame = forms.CharField(label='New fork name', required=True)
+	new_reponame = forms.CharField(label='New fork name', required=True)
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RepoForkRenameForm, self).__init__(*args, **kwargs)
+	def __init__(self, *args, **kwargs):
+		self.request = kwargs.pop('request', None)
+		super(RepoForkRenameForm, self).__init__(*args, **kwargs)
 
-    def clean_new_reponame(self):
-        new_reponame = self.cleaned_data['new_reponame']
-        # if not new_reponame == self.old_filename:
-        query_set = Repository.objects.filter(
-            name=new_reponame,
-            owner=self.request.user
-        )
+	def clean_new_reponame(self):
+		new_reponame = self.cleaned_data['new_reponame']
+		# if not new_reponame == self.old_filename:
+		query_set = Repository.objects.filter(
+			name=new_reponame,
+			owner=self.request.user
+		)
 
-        if query_set.exists():
-            raise forms.ValidationError(
-                "Repository named '{}' already exists".format(new_reponame)
-            )
+		if query_set.exists():
+			raise forms.ValidationError(
+				"Repository named '{}' already exists".format(new_reponame)
+			)
 
-        slugified = slugify(new_reponame)
-        if Repository.objects.filter(
-            slug=slugified, owner=self.request.user).exists():
-            raise forms.ValidationError(
-                "Slugified repo named '{}' already exists".format(slugified)
-            )
+		slugified = slugify(new_reponame)
+		if Repository.objects.filter(
+			slug=slugified, owner=self.request.user).exists():
+			raise forms.ValidationError(
+				"Slugified repo named '{}' already exists".format(slugified)
+			)
 
 
-        return new_reponame
+		return new_reponame
