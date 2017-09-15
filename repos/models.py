@@ -10,6 +10,7 @@ from os.path import join
 from shutil import rmtree
 
 from . import imglib
+from . import choices as c
 from tags.models import Tag
 import pygit2
 import time
@@ -35,6 +36,10 @@ class Repository(models.Model):
 		settings.AUTH_USER_MODEL, related_name='editors', blank=True)
 	image = models.ImageField(null=True, blank=True, upload_to=my_awesome_upload_function)
 	tags = models.ManyToManyField(Tag, blank=True)
+	grade_level = models.CharField(max_length=2, choices=c.GRADE_LEVEL, blank=True)
+	subjects = models.CharField(max_length=100, choices=c.SUBJECTS, blank=True)
+	cultures = models.CharField(max_length=100, choices=c.CULTURES, blank=False)
+
 
 	def __str__(self):
 		return "{} - {}".format(self.name, self.owner.username)
