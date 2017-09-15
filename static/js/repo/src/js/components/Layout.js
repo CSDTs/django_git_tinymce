@@ -270,7 +270,7 @@ export default class Layout extends React.Component {
             {(this.props.readme) ? <div>
               <div class="panel panel-info">
                 <div class="panel-heading">
-                <b><i class="glyphicon glyphicon-book"/> README.md</b>
+                <b><i class="glyphicon glyphicon-book"/> README.html</b>
                 </div>
                 <div class="panel-body">
                     <ReactMarkdown source={this.props.readme}/>

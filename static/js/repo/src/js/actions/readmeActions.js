@@ -5,7 +5,7 @@ export function fetchReadme() {
     dispatch({type: "FETCH_FILES"});
 
 
-    axios.get(`/${window.props.repo_owner}/${window.props.repo_name}${(window.props.directory !== '') ? `/${window.props.directory}` : ``}/blob/README.md`)
+    axios.get(`/${window.props.repo_owner}/${window.props.repo_name}${(window.props.directory !== '') ? `/${window.props.directory}` : ``}/blob/README.html`)
       .then((response) => {
         console.log('data.files', response.data)
         // if response.data.files == undefined {
