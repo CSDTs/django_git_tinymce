@@ -56,7 +56,7 @@ class RepositoryModelForm(forms.ModelForm):
 
 
 class RepositoryUpdateModelForm(forms.ModelForm):
-	tags = forms.CharField(label='Related tags', required=False)
+	# tags = forms.CharField(label='Related tags', required=False)
 	request = None
 	old_name = None
 

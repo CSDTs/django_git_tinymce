@@ -406,8 +406,8 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 	def get_initial(self):
 		initial = super(RepositoryUpdateView, self).get_initial()
-		tags = self.get_object().tag_set.all()
-		initial['tags'] = ", ".join([tag.title for tag in tags])
+		# tags = self.get_object().tag_set.all()
+		# initial['tags'] = ", ".join([tag.title for tag in tags])
 		return initial
 
 	def form_valid(self, form):
