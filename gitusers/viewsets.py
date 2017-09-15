@@ -1,20 +1,20 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-# from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
-# from rest_framework import generics
-# from rest_framework import mixins
-# from rest_framework import permissions
+from rest_framework import generics
+from rest_framework import mixins
+from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework import status
-# from rest_framework.decorators import detail_route
-# from rest_framework.permissions import AllowAny
+from rest_framework.decorators import detail_route
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from repos.models import Repository as repo_model
-from pygit2 import Repository  # , Signature
+from pygit2 import Repository, Signature
 from time import time
 import json
 import datetime
@@ -23,6 +23,8 @@ from . import models
 from . import serializers
 from os import path
 import os
+import re
+
 
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -32,20 +34,19 @@ from pathlib import Path
 
 from .utils import create_commit, create_commit_folders, delete_commit_folders
 
-# from .utils import create_commit
-from .utils import create_commit_folders
 
 class OwnerViewSet(viewsets.ModelViewSet):
     queryset = models.Owner.objects.all()
     serializer_class = serializers.Owner
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class UserView(viewsets.ModelViewSet):
     serializer_class = serializers.UserSerializer
     model = User
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = User.objects.all()
+
 
 
 class FilesView(APIView):
@@ -71,20 +72,23 @@ class FilesView(APIView):
         # tree10 = commit.tree
 
         # index_tree.read_tree(item.id)
-        # print('item', item)
-        # print('index_tree', list(index_tree))
+        #print('item', item)
+        #print('index_tree', list(index_tree))
+
+
 
         tuplet = []
         time = None
         user = request.user
         is_owner = False
+        is_editor = False
         if specific_repo.owner == user:
+            is_owner = True
+        if user.is_superuser:
             is_owner = True
         for editor in specific_repo.editors.all():
             if editor == user.id:
-                is_owner = True
-        if user.is_superuser:
-            is_owner = True
+                is_editor = True
 
         empty = False
         if this_repo.is_empty:
@@ -115,6 +119,7 @@ class FilesView(APIView):
                             continue
                         folders.append(name)
 
+
                     tuplet.append({'name': name, 'id': entry.hex, 'type': type, 'filemode': filemode})
             else:
                 for entry in tree:
@@ -128,30 +133,33 @@ class FilesView(APIView):
             dir_hier = directory
 
             main_list = {
-                'files': tuplet,
-                'hex': commit.hex,
-                'message': commit.message,
-                'author': commit.author.name,
-                'committer': commit.committer.name,
-                'time': time,
-                'branches': list(this_repo.branches),
-                'is_owner': is_owner,
-                'is_empty': empty,
-                'dir_hier': dir_hier
+                        'files': tuplet,
+                        'hex': commit.hex,
+                        'message': commit.message,
+                        'author': commit.author.name,
+                        'committer': commit.committer.name,
+                        'time': time,
+                        'branches': list(this_repo.branches),
+                        'is_owner': is_owner,
+                        'is_empty': empty,
+                        'dir_hier': dir_hier,
+                        'is_editor': is_editor,
             }
 
         except:
             # no files, no initial commit so no head hex
             main_list = {
-                'files': tuplet,
-                'hex': None,
-                'message': None,
-                'author': None,
-                'committer': None,
-                'time': None,
-                'branches': [],
-                'is_owner': is_owner,
-                'is_empty': empty
+                        'files': tuplet,
+                        'hex': None,
+                        'message': None,
+                        'author': None,
+                        'committer': None,
+                        'time': None,
+                        'branches': [],
+                        'is_owner': is_owner,
+                        'is_empty': empty,
+                        'is_editor': is_editor,
+                        'dir_hier': dir_hier,
             }
 
         return Response(main_list, status=status.HTTP_200_OK)
@@ -171,6 +179,9 @@ class FilesView(APIView):
         data4 = data3['name']
         for data in request.data.getlist('name'):
             data_name = str(data)
+            if '..' in data_name:
+                consequitivedots = re.compile(r'\.{2,}')
+                data_name = consequitivedots.sub('', data_name)
             print('data_name', data_name)
             print('data', data)
             file = Path(os.path.join(specific_repo.get_repo_path(), directory, data_name))
@@ -183,7 +194,7 @@ class FilesView(APIView):
             print('path', path)
             b = this_repo.create_blob_fromworkdir(os.path.join(directory, data_name))
             bld = this_repo.TreeBuilder()
-            bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), directory, data_name)).st_mode)
+            bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), directory, data_name)).st_mode )
             t = bld.write()
             # this_repo.index.read()
             # this_repo.index.add(data_name)
@@ -192,14 +203,12 @@ class FilesView(APIView):
             if self.request.user.email:
                 email = self.request.user.email
             # s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
-            # s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
-            # c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
+            #s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
+            #c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
             commit_message = "Uploaded file " + data_name
 
             create_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
-        return HttpResponseRedirect(
-            reverse(
-                'gitusers:repo_detail',
-                args=(request.user.username, specific_repo.slug)
-            )
+        return HttpResponseRedirect(reverse(
+            'gitusers:repo_detail',
+            args=(request.user.username, specific_repo.slug))
         )

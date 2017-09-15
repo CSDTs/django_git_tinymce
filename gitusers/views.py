@@ -932,6 +932,12 @@ class RenameFileView(FormView):
 		# Have to directly change the actually file in file system
 		new_filename = form.cleaned_data['new_filename']
 		filename = self.kwargs.get('filename')
+		if ".." in new_filename:
+			form.add_error(None, "Can't have '..' anywhere in rename")
+			return self.form_invalid(form)
+		if "/" in new_filename:
+			form.add_error(None, "Can't have '/' anywhere in rename")
+			return self.form_invalid(form)
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
 		directory = ""
