@@ -23,6 +23,8 @@ from . import models
 from . import serializers
 from os import path
 import os
+import re
+
 
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -79,13 +81,14 @@ class FilesView(APIView):
         time = None
         user = request.user
         is_owner = False
+        is_editor = False
         if specific_repo.owner == user:
+            is_owner = True
+        if user.is_superuser:
             is_owner = True
         for editor in specific_repo.editors.all():
             if editor == user.id:
-                is_owner = True
-        if user.is_superuser:
-            is_owner = True
+                is_editor = True
 
         empty = False
         if this_repo.is_empty:
@@ -139,7 +142,8 @@ class FilesView(APIView):
                         'branches': list(this_repo.branches),
                         'is_owner': is_owner,
                         'is_empty': empty,
-                        'dir_hier': dir_hier
+                        'dir_hier': dir_hier,
+                        'is_editor': is_editor,
             }
 
         except:
@@ -153,7 +157,9 @@ class FilesView(APIView):
                         'time': None,
                         'branches': [],
                         'is_owner': is_owner,
-                        'is_empty': empty
+                        'is_empty': empty,
+                        'is_editor': is_editor,
+                        'dir_hier': dir_hier,
             }
 
         return Response(main_list, status=status.HTTP_200_OK)
@@ -173,6 +179,9 @@ class FilesView(APIView):
         data4 = data3['name']
         for data in request.data.getlist('name'):
             data_name = str(data)
+            if '..' in data_name:
+                consequitivedots = re.compile(r'\.{2,}')
+                data_name = consequitivedots.sub('', data_name)
             print('data_name', data_name)
             print('data', data)
             file = Path(os.path.join(specific_repo.get_repo_path(), directory, data_name))
