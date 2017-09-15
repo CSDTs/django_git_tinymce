@@ -10,12 +10,6 @@ from tags.models import Tag
 
 
 class RepositoryModelForm(forms.ModelForm):
-	# tags = forms.CharField(label='Related tags', required=False)
-	# tags = forms.ModelMultipleChoiceField(
-	# 	widget=forms.CheckboxSelectMultiple,
-	# 	queryset=Tag.objects.all())
-	# tags = forms.CheckboxSelectMultiple(choices=Tag.objects.all())
-
 	class Meta:
 		model = Repository
 		fields = ['name', 'description', 'image', 'tags']
@@ -56,19 +50,19 @@ class RepositoryModelForm(forms.ModelForm):
 
 
 class RepositoryUpdateModelForm(forms.ModelForm):
-	tags = forms.CharField(label='Related tags', required=False)
 	request = None
 	old_name = None
 
 	class Meta:
 		model = Repository
-		fields = ['name', 'description', 'image']
+		fields = ['name', 'description', 'image', 'tags']
 
 		widgets = {
 			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),
 			"description": forms.Textarea(
 				attrs={"placeholder": "Repository description"}
-			)
+			),
+			"tags": forms.CheckboxSelectMultiple(),
 		}
 
 	def __init__(self, *args, **kwargs):
@@ -76,7 +70,6 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 		self.old_name = kwargs.pop('old_name')
 		super(RepositoryUpdateModelForm, self).__init__(*args, **kwargs)
 		self.fields['image'].label = 'Image (400x300px)'
-
 
 	def clean_name(self):
 		name = self.cleaned_data['name']
