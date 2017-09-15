@@ -96,7 +96,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 
 
 class TinyMCEFileEditForm(forms.Form):
-	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
+	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': '100%'}))
 	commit_message = forms.CharField(
 		required=False,
 		empty_value="edited on {}".format(
@@ -107,7 +107,7 @@ class TinyMCEFileEditForm(forms.Form):
 
 class FileCreateForm(forms.Form):
 	filename = forms.CharField(label='File name', required=True)
-	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': 800}))
+	content = forms.CharField(widget=TinyMCE(mce_attrs={'width': '100%'}))
 	commit_message = forms.CharField(
 		required=False,
 		empty_value="Created on {}".format(
