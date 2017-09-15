@@ -239,7 +239,7 @@ export default class Layout extends React.Component {
           <p className="dir-tree"><a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{`${window.props.repo_name}`}</a> {folders()}</p>
 
           <div class="panel panel-success">
-            {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a></div> : <div class="panel-heading">No Files Yet</div> }
+            {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a><a className="pull-right" href={`/${window.props.repo_owner}/${window.props.repo_name}/commit`}>Commit Log</a></div> : <div class="panel-heading">No Files Yet</div> }
             <table class="table">
               <thead>
                 <tr>
