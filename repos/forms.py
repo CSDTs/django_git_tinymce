@@ -6,20 +6,26 @@ from django.utils.text import slugify
 from tinymce.widgets import TinyMCE
 
 from .models import Repository
+from tags.models import Tag
 
 
 class RepositoryModelForm(forms.ModelForm):
-	tags = forms.CharField(label='Related tags', required=False)
+	# tags = forms.CharField(label='Related tags', required=False)
+	# tags = forms.ModelMultipleChoiceField(
+	# 	widget=forms.CheckboxSelectMultiple,
+	# 	queryset=Tag.objects.all())
+	# tags = forms.CheckboxSelectMultiple(choices=Tag.objects.all())
 
 	class Meta:
 		model = Repository
-		fields = ['name', 'description']
+		fields = ['name', 'description', 'image', 'tags']
 
 		widgets = {
 			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),
 			"description": forms.Textarea(
 				attrs={"placeholder": "Repository description"}
-			)
+			),
+			"tags": forms.CheckboxSelectMultiple(),
 		}
 
 	def __init__(self, *args, **kwargs):

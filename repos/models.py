@@ -9,13 +9,11 @@ import os
 from os.path import join
 from shutil import rmtree
 
+from . import imglib
+from tags.models import Tag
 import pygit2
 import time
 from pygit2 import init_repository
-
-
-from . import imglib
-
 
 
 class RepositoryManager(models.Manager):
@@ -24,7 +22,7 @@ class RepositoryManager(models.Manager):
 
 
 def my_awesome_upload_function(instance, filename):
-    return os.path.join('profile/%s/' % instance.id, filename)
+	return os.path.join('profile/%s/' % instance.id, filename)
 
 
 class Repository(models.Model):
@@ -36,6 +34,7 @@ class Repository(models.Model):
 	editors = models.ManyToManyField(
 		settings.AUTH_USER_MODEL, related_name='editors', blank=True)
 	image = models.ImageField(null=True, blank=True, upload_to=my_awesome_upload_function)
+	tags = models.ManyToManyField(Tag, blank=True)
 
 	def __str__(self):
 		return "{} - {}".format(self.name, self.owner.username)
@@ -55,11 +54,8 @@ class Repository(models.Model):
 
 	@property
 	def image_url(self):
-	    if self.image and hasattr(self.image, 'url'):
-	        return self.image.url
-
-
-
+		if self.image and hasattr(self.image, 'url'):
+			return self.image.url
 
 
 # Django Signals
@@ -91,7 +87,8 @@ def repository_post_save(sender, instance, **kwagrs):
 		f.close()
 		b = repo.create_blob_fromworkdir(fn)
 		bld = repo.TreeBuilder()
-		bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+		# bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+		bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
 		t = bld.write()
 		repo.index.read()
 		repo.index.add(fn)
@@ -107,13 +104,6 @@ def repository_post_delete(sender, instance, **kwargs):
 		rmtree(path)
 	except:
 		pass  # for now
-	from tags.models import Tag
-	for tag in Tag.objects.all():
-		if tag.repos.count() == 0:
-			tag.delete()
-		else:
-			pass
-
 
 
 class ForkedRepository(models.Model):
@@ -121,7 +111,7 @@ class ForkedRepository(models.Model):
 	fork = models.ForeignKey(Repository)
 
 	def save(self, *args, **kwargs):
-	    if not self.id:
-	        super(ForkedRepository, self).save(*args, **kwargs)
-	    # process self.parent_subject (should be called ...subjects, semantically)
-	    super(ForkedRepository, self).save(*args, **kwargs)
+		if not self.id:
+			super(ForkedRepository, self).save(*args, **kwargs)
+		# process self.parent_subject (should be called ...subjects, semantically)
+		super(ForkedRepository, self).save(*args, **kwargs)
