@@ -32,9 +32,9 @@ export default class Branches extends React.Component {
           {this.props.is_owner &&
           <div style={{margin: '0px 0px 10px 0px'}} className="text-right">
             <div className="btn-group" role="group" aria-label="...">
-              <a type="button" href={`create`} className="btn btn-default button-link">Create New File</a>
+              <a type="button" href={`create`} className="btn btn-default button-link">Create New File/Directory</a>
 
-              <button type="button" className="btn btn-default disabled">Find Files</button>
+              {/* <button type="button" className="btn btn-default disabled">Find Files</button> */}
             </div>
           </div>
         }

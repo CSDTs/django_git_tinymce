@@ -527,7 +527,11 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		    except OSError as exc: # Guard against race condition
 		        if exc.errno != errno.EEXIST:
 		            raise
-		file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
+		try:
+			file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
+		except IsADirectoryError:
+			form.add_error(None, "Can't add just a directory, must add a file too.")
+			return self.form_invalid(form)
 		file.write(filecontent)
 		file.close()
 
