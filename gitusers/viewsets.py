@@ -81,7 +81,7 @@ class FilesView(APIView):
         if specific_repo.owner == user:
             is_owner = True
         for editor in specific_repo.editors.all():
-            if editor == user:
+            if editor == user.id:
                 is_owner = True
         if user.is_superuser:
             is_owner = True
