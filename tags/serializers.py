@@ -7,7 +7,7 @@ class Tag(serializers.ModelSerializer):
         fields = (
             'id',
             'title',
-            'repos',
+            'repository_set',
             'slug',
             'active',
         )
