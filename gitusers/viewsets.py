@@ -28,8 +28,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 
+from pathlib import Path
 
-from .utils import create_commit, create_commit_folders
+from .utils import create_commit, create_commit_folders, delete_commit_folders
 
 
 class OwnerViewSet(viewsets.ModelViewSet):
@@ -172,10 +173,16 @@ class FilesView(APIView):
         data4 = data3['name']
         for data in request.data.getlist('name'):
             data_name = str(data)
-            data2 = data
-            path = default_storage.save(os.path.join(specific_repo.get_repo_path(), directory, data_name), ContentFile(data2.read()))
-            tmp_file = os.path.join(specific_repo.get_repo_path(), path)
-
+            print('data_name', data_name)
+            print('data', data)
+            file = Path(os.path.join(specific_repo.get_repo_path(), directory, data_name))
+            if file.is_file():
+                os.remove(os.path.join(specific_repo.get_repo_path(), directory, data_name))
+                commit_message = "Clobbered " + data_name + " via upload of same file name to directory"
+                delete_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
+            path = default_storage.save(os.path.join(specific_repo.get_repo_path(), directory, data_name), ContentFile(data.read()))
+            # tmp_file = os.path.join(specific_repo.get_repo_path(), path)
+            print('path', path)
             b = this_repo.create_blob_fromworkdir(os.path.join(directory, data_name))
             bld = this_repo.TreeBuilder()
             bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), directory, data_name)).st_mode )
