@@ -83,8 +83,8 @@ def repository_post_save(sender, instance, **kwagrs):
 	repo = init_repository(instance.get_repo_path())
 	if repo.head_is_unborn:
 		s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
-		data = '# {}'.format(instance)
-		fn = 'README.md'
+		data = '<p><h1>{}</h1></p>'.format(instance)
+		fn = 'README.html'
 		bld = repo.TreeBuilder()
 		f = open(os.path.join(repo.workdir,fn), 'w')
 		f.write(data)
@@ -97,7 +97,7 @@ def repository_post_save(sender, instance, **kwagrs):
 		repo.index.add(fn)
 		repo.index.write()
 		# head = repo.lookup_reference('HEAD').resolve()
-		c = repo.create_commit('HEAD', s,s, 'Initialized repo with a README.md', t, [])
+		c = repo.create_commit('HEAD', s,s, 'Initialized repo with a README.html', t, [])
 
 
 @receiver(post_delete, sender=Repository)
