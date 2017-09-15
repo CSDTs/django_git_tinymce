@@ -13,6 +13,7 @@ import pygit2
 import time
 from pygit2 import init_repository
 
+
 from . import imglib
 
 
@@ -106,6 +107,13 @@ def repository_post_delete(sender, instance, **kwargs):
 		rmtree(path)
 	except:
 		pass  # for now
+	from tags.models import Tag
+	for tag in Tag.objects.all():
+		if tag.repos.count() == 0:
+			tag.delete()
+		else:
+			pass
+
 
 
 class ForkedRepository(models.Model):

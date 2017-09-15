@@ -459,14 +459,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		)
 		)
 
-def remove_all_tags_without_objects():
-	for tag in Tag.objects.all():
-		if tag.repos.count() == 0:
-			tag.delete()
-		else:
-			pass
-
-
 
 class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
@@ -479,7 +471,6 @@ class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 		return queryset.filter(owner__username=self.kwargs.get('username'))
 
 	def get_success_url(self):
-		remove_all_tags_without_objects()
 		return reverse_lazy('index')
 
 
