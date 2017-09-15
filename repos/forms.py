@@ -12,7 +12,7 @@ from tags.models import Tag
 class RepositoryModelForm(forms.ModelForm):
 	class Meta:
 		model = Repository
-		fields = ['name', 'description', 'tags', 'grade_level', 'subjects', 'cultures', 'image',]
+		fields = ['name', 'description', 'tags', 'grade_level', 'subject', 'culture', 'image',]
 
 		widgets = {
 			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),

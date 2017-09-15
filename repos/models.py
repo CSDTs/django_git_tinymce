@@ -37,8 +37,8 @@ class Repository(models.Model):
 	image = models.ImageField(null=True, blank=True, upload_to=my_awesome_upload_function)
 	tags = models.ManyToManyField(Tag, blank=True)
 	grade_level = models.CharField(max_length=2, choices=c.GRADE_LEVEL, blank=True)
-	subjects = models.CharField(max_length=100, choices=c.SUBJECTS, blank=True)
-	cultures = models.CharField(max_length=100, choices=c.CULTURES, blank=False)
+	subject = models.CharField(max_length=100, choices=c.SUBJECTS, blank=True)
+	culture = models.CharField(max_length=100, choices=c.CULTURES, blank=False)
 
 
 	def __str__(self):
