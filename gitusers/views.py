@@ -105,17 +105,6 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 
 		valid_data = super(RepositoryCreateView, self).form_valid(form)
 
-		tags = form.cleaned_data.get("tags")
-		if tags:
-			tags_list = tags.split(',')
-
-			for tag in tags_list:
-				tag = str(tag).strip()
-				if tag == '' or tag is None:
-					continue
-				new_tag, created = Tag.objects.get_or_create(title=tag)
-				new_tag.repos.add(form.instance)
-
 		return valid_data
 
 
@@ -404,15 +393,9 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		kwargs.update({'old_name': self.object.name})
 		return kwargs
 
-	def get_initial(self):
-		initial = super(RepositoryUpdateView, self).get_initial()
-		tags = self.get_object().tag_set.all()
-		initial['tags'] = ", ".join([tag.title for tag in tags])
-		return initial
-
 	def form_valid(self, form):
 		valid_data = super(RepositoryUpdateView, self).form_valid(form)
-		tags = form.cleaned_data.get("tags")
+
 		# de-associate all associated tags and re-create them
 		# so that we don't have to go through and compare with get_initial()
 		# all again.
@@ -421,18 +404,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		slug = slugify(form.cleaned_data.get("name"))
 		obj.slug = slug
 
-
-		obj.tag_set.clear()
-
-		if tags:
-			tags_list = tags.split(',')
-
-			for tag in tags_list:
-				tag = str(tag).strip()
-				if tag == '' or tag is None:
-					continue
-				new_tag, created = Tag.objects.get_or_create(title=tag)
-				new_tag.repos.add(self.get_object())
 		obj.save()
 		form.save()
 
