@@ -159,7 +159,7 @@ class FilesView(APIView):
                         'is_owner': is_owner,
                         'is_empty': empty,
                         'is_editor': is_editor,
-                        'dir_hier': dir_hier,
+                        'dir_hier': None,
             }
 
         return Response(main_list, status=status.HTTP_200_OK)
