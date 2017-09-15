@@ -13,6 +13,7 @@ import pygit2
 import time
 from pygit2 import init_repository
 
+
 from . import imglib
 
 
@@ -75,29 +76,26 @@ def repository_pre_save(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Repository)
 def repository_post_save(sender, instance, **kwagrs):
-    # init repo after model object created
-    repo = init_repository(instance.get_repo_path())
-    if repo.head_is_unborn:
-        s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
-        print('instance', instance)
-        print('sender', sender)
-        print('repo', repo)
-        data = '# {}'.format(instance)
-        fn = 'README.md'
-        bld = repo.TreeBuilder()
-        f = open(os.path.join(repo.workdir,fn), 'w')
-        f.write(data)
-        f.close()
-        b = repo.create_blob_fromworkdir(fn)
-        bld = repo.TreeBuilder()
-        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode)
+	# init repo after model object created
+	repo = init_repository(instance.get_repo_path())
+	if repo.head_is_unborn:
+		s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
+		data = '<p><h1>{}</h1></p>'.format(instance)
+		fn = 'README.html'
+		bld = repo.TreeBuilder()
+		f = open(os.path.join(repo.workdir,fn), 'w')
+		f.write(data)
+		f.close()
+		b = repo.create_blob_fromworkdir(fn)
+		bld = repo.TreeBuilder()
+		# bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
-        repo.index.read()
-        repo.index.add(fn)
-        repo.index.write()
-        # head = repo.lookup_reference('HEAD').resolve()
-        c = repo.create_commit('HEAD', s,s, 'Initialized repo with a README.md', t, [])
+		t = bld.write()
+		repo.index.read()
+		repo.index.add(fn)
+		repo.index.write()
+		# head = repo.lookup_reference('HEAD').resolve()
+		c = repo.create_commit('HEAD', s,s, 'Initialized repo with a README.html', t, [])
 
 
 @receiver(post_delete, sender=Repository)

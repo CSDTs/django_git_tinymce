@@ -97,12 +97,11 @@ class RepositoryUpdateModelForm(forms.ModelForm):
             )
         }
 
-    def __init__(self, *args, **kwargs):
-        print(kwargs, 'kwargs *************************')
-        self.request = kwargs.pop('request')
-        self.old_name = kwargs.pop('old_name')
-        super(RepositoryUpdateModelForm, self).__init__(*args, **kwargs)
-        self.fields['image'].label = 'Image (400x300px)'
+	def __init__(self, *args, **kwargs):
+		self.request = kwargs.pop('request')
+		self.old_name = kwargs.pop('old_name')
+		super(RepositoryUpdateModelForm, self).__init__(*args, **kwargs)
+		self.fields['image'].label = 'Image (400x300px)'
 
 
     def clean_name(self):

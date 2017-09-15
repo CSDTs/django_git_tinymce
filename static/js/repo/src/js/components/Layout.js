@@ -239,7 +239,7 @@ export default class Layout extends React.Component {
           <p className="dir-tree"><a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{`${window.props.repo_name}`}</a> {folders()}</p>
 
           <div class="panel panel-success">
-            {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a></div> : <div class="panel-heading">No Files Yet</div> }
+            {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a><a className="pull-right" href={`/${window.props.repo_owner}/${window.props.repo_name}/commit`}>Commit Log</a></div> : <div class="panel-heading">No Files Yet</div> }
             <table class="table">
               <thead>
                 <tr>
@@ -256,7 +256,9 @@ export default class Layout extends React.Component {
                 const renameLink = (files.is_owner) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/rename`} style={{fontSize: '.75em', color: '#444'}}>rename</a>: null : null
                 const fileLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${window.props.directory}/blob/${file.name}`}>{ file.name }</a> : (file.type == 'blob') ? <a href={`blob/${file.name}`}>{ file.name }</a> : <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}${file.name}`}>{ file.name }</a>
                 const deleteLink = (files.is_owner && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a> : null
-                return <tr key={file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink} &nbsp;{renameLink}</th><td>{deleteLink}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
+                const downloadLink = (files.is_owner && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}`} download={`${file.name}`}><font style={{fontSize: '.75em', color: '#999'}}>download</font></a> : null
+
+                return <tr key={file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink} &nbsp;{renameLink} &nbsp;{downloadLink}</th><td>{deleteLink}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
               })}
 
               </tbody>
@@ -268,7 +270,7 @@ export default class Layout extends React.Component {
             {(this.props.readme) ? <div>
               <div class="panel panel-info">
                 <div class="panel-heading">
-                <b><i class="glyphicon glyphicon-book"/> README.md</b>
+                <b><i class="glyphicon glyphicon-book"/> README.html</b>
                 </div>
                 <div class="panel-body">
                     <ReactMarkdown source={this.props.readme}/>

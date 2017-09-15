@@ -65,8 +65,8 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 	template_name = 'gituser/index.html'
 
 	def get_queryset(self):
-		user = self.kwargs['username']
-		user_specific = User.objects.get(username=user)
+		owner_name = self.kwargs['username']
+		user_specific = User.objects.get(username=owner_name)
 		queryset = Repository.objects.filter(owner=user_specific.id)
 
 		search_query = self.request.GET.get('search')
@@ -177,13 +177,11 @@ class ReduxRepositoryDetailView(View):
 		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		fork_count = len(forked_repos)
-		print('repo.id', repo.id)
 		try:
 			orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
 			if orig_fork:
 				is_fork = True
 			orig = orig_fork.original
-			print('orig_fork', orig_fork)
 			fork_name = orig.name
 			fork_owner = orig.owner.username
 		except:
@@ -240,7 +238,6 @@ class ReduxRepositoryFolderDetailView(View):
 			if orig_fork:
 				is_fork = True
 			orig = orig_fork.original
-			print('orig_fork', orig_fork)
 			fork_name = orig.name
 			fork_owner = orig.owner.username
 		except:
@@ -462,14 +459,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		)
 		)
 
-def remove_all_tags_without_objects():
-	for tag in Tag.objects.all():
-		if tag.repos.count() == 0:
-			tag.delete()
-		else:
-			pass
-
-
 
 class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 	model = Repository
@@ -482,7 +471,6 @@ class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
 		return queryset.filter(owner__username=self.kwargs.get('username'))
 
 	def get_success_url(self):
-		remove_all_tags_without_objects()
 		return reverse_lazy('index')
 
 
@@ -539,9 +527,11 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		    except OSError as exc: # Guard against race condition
 		        if exc.errno != errno.EEXIST:
 		            raise
-		print('dirname', dirname)
-		print('filename2', filename2)
-		file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
+		try:
+			file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
+		except IsADirectoryError:
+			form.add_error(None, "Can't add just a directory, must add a file too.")
+			return self.form_invalid(form)
 		file.write(filecontent)
 		file.close()
 
@@ -644,9 +634,6 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 					dir += folder + "/"
 					item = tree.__getitem__(str(dir))
 					index_tree.read_tree(item.id)
-					print('index_tree_int', index_tree)
-
-			print('find_file_oid_in_tree_using_index(filename, index_tree)', find_file_oid_in_tree_using_index(filename, index_tree))
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			blob = self.repo[blob_id]
 
@@ -674,7 +661,6 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			directory += "/" + self.kwargs.get('directories_ext')
 
 		user = self.request.user
-		print('user', user.email)
 
 		try:
 			repo_path = self.repo_obj.get_repo_path()
@@ -688,8 +674,6 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			commit_message = form.cleaned_data['commit_message']
 			commit_message = str(filename) + ' ' + commit_message
 			# sha = create_commit(user, self.repo, commit_message, filename)
-			print ('filename', filename)
-			print('directory', directory)
 			create_commit_folders(user, self.repo, commit_message, filename, directory)
 
 		except OSError:
@@ -719,7 +703,6 @@ class BlobRawView(View):
 			repo = pygit2.Repository(repo_obj.get_repo_path())
 
 			if repo.is_empty:
-				print('asdfasdfasdfasfd')
 				raise Http404("The repository is empty")
 
 		except:
@@ -736,14 +719,16 @@ class BlobRawView(View):
 					dir += folder + "/"
 					item = tree.__getitem__(str(dir))
 					index_tree.read_tree(item.id)
-					print('index_tree_int', index_tree)
 			# if directory != "":
 			# 	item = tree.__getitem__(path.join(directory, filename))
 			# 	index_tree.read_tree(item.id)
 			# 	print('index_tree_int', index_tree)
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			if blob_id != 404:
-				return HttpResponse(repo[blob_id].data)
+				if self.kwargs.get('extension') in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
+					return HttpResponse(repo[blob_id].data, content_type="image/png")
+				else:
+					return HttpResponse(repo[blob_id].data)
 			else:
 				raise Http404("Read raw data error")
 
@@ -773,7 +758,6 @@ class BlobDeleteView(DeleteView):
 			repo = pygit2.Repository(repo_obj.get_repo_path())
 
 			if repo.is_empty:
-				print('asdfasdfasdfasfd')
 				raise Http404("The repository is empty")
 
 		except:
@@ -822,7 +806,6 @@ class BlobDeleteFolderView(DeleteView):
 			repo = pygit2.Repository(repo_obj.get_repo_path())
 
 			if repo.is_empty:
-				print('asdfasdfasdfasfd')
 				raise Http404("The repository is empty")
 
 		except:
@@ -831,8 +814,6 @@ class BlobDeleteFolderView(DeleteView):
 		index_tree = repo.index
 		commit = repo.revparse_single('HEAD')
 		tree = commit.tree
-		print('str(directory)', str(directory))
-		print('directory.split("/")', directory.split("/"))
 		folders = directory.split("/")
 		for folder in folders:
 			try:
@@ -841,7 +822,6 @@ class BlobDeleteFolderView(DeleteView):
 			except:
 				pass
 		blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
-		print('index_tree.__contains__(filename)', index_tree.__contains__(filename))
 		# index_tree.remove(str(filename))
 		# index_tree.write()
 		# for entry in index_tree:
@@ -849,7 +829,6 @@ class BlobDeleteFolderView(DeleteView):
 
 
 		file_name = str(filename)
-		print('file_name', file_name)
 		commit_message = str(filename) + ' deleted'
 		delete_commit_folders(self.request.user, repo, commit_message, file_name, directory)
 		try:
@@ -934,8 +913,6 @@ class RenameFileView(FormView):
 					item = tree.__getitem__(str(dir))
 					index_tree.read_tree(item.id)
 					print('index_tree_int', index_tree)
-
-			print('find_file_oid_in_tree_using_index(filename, index_tree)', find_file_oid_in_tree_using_index(filename, index_tree))
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			blob = self.repo[blob_id]
 
@@ -954,7 +931,6 @@ class RenameFileView(FormView):
 		# Base object is immutable and Blob doesn't have a constructor
 		# Have to directly change the actually file in file system
 		new_filename = form.cleaned_data['new_filename']
-		print('new_filename', new_filename)
 		filename = self.kwargs.get('filename')
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
@@ -963,13 +939,7 @@ class RenameFileView(FormView):
 			directory = self.kwargs.get('directories')
 		if self.kwargs.get('directories_ext'):
 			directory += "/" + self.kwargs.get('directories_ext')
-
-
-
 		user = self.request.user
-		print('user', user.email)
-
-
 		repo_path = self.repo_obj.get_repo_path()
 		# file = open(path.join(repo_path, directory, filename), 'w')
 		# os.rename('a.txt', 'b.kml')
@@ -993,8 +963,6 @@ class RenameFileView(FormView):
 		commit_message = form.cleaned_data['commit_message']
 		commit_message = 'Renamed ' + str(filename) + ' to ' + str(new_filename) + ' - ' + commit_message
 		# sha = create_commit(user, self.repo, commit_message, filename)
-		print ('filename', filename)
-		print('directory', directory)
 		delete_commit_folders(user, self.repo, commit_message, filename, directory)
 		create_commit_folders(user, self.repo, commit_message, new_filename, directory)
 
@@ -1069,7 +1037,6 @@ class ForkedReposView(ListView):
 		for repo in forked_repos:
 			repo = Repository.objects.get(owner=repo.fork.owner,name=repo.fork.name)
 			repos.append(repo)
-		print('repos', repos)
 		context['orig_repo'] = self.repo_name
 		context['orig_author'] = self.owner_name
 		context['repos'] = repos
