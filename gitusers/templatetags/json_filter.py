@@ -7,6 +7,7 @@ from django import template
 
 register = template.Library()
 
+
 @register.filter
 def json(value):
     """safe jsonify filter, bleaches the json string using the bleach html tag remover"""

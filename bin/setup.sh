@@ -31,14 +31,6 @@ sudo -u postgres psql -U postgres -d postgres -c "alter user postgres with passw
 # Create the database
 sudo -u postgres createdb django_git_tinymce
 
-# Install libgit2
-wget https://github.com/libgit2/libgit2/archive/v0.25.1.tar.gz
-tar xzf v0.25.1.tar.gz
-cd libgit2-0.25.1/
-cmake .
-make
-sudo make install
-
 sudo pip3 install --upgrade pip
 sudo pip3 install -r /vagrant/requirements.txt
 

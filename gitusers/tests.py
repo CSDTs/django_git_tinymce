@@ -27,13 +27,12 @@ class RepositoryListViewTests(TestCase):
 		'''
 		response = self.client.get(reverse('index'))
 		self.assertEqual(response.status_code, 200)
-		self.assertContains(response, 'No repositories')
+		# self.assertContains(response, 'No repositories')
 		self.assertQuerysetEqual(response.context['repository_list'], [])
 
-	def test_index_view_with_a_repo(self):
+	def test_index_view_with_one_repo(self):
 		"""
-		Questions with a pub_date in the past should be displayed on the
-		index page.
+		Test output with one repo.
 		"""
 		create_repo(name="testrepo1", username="bob")
 		response = self.client.get(reverse('index'))

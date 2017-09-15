@@ -4,8 +4,6 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.text import slugify
 
-from repos.models import Repository
-
 
 class TagManager(models.Manager):
 	# Override all to only show active tags.
@@ -18,7 +16,7 @@ class TagManager(models.Manager):
 
 class Tag(models.Model):
 	title = models.CharField(max_length=100, unique=True)
-	repos = models.ManyToManyField(Repository, blank=True)
+	# repos = models.ManyToManyField(Repository, blank=True)
 	slug = models.SlugField(unique=True)
 	active = models.BooleanField(default=True)
 

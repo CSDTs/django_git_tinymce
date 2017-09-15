@@ -202,13 +202,13 @@ class FilesView(APIView):
             email = "nonegiven@nonegiven.com"
             if self.request.user.email:
                 email = self.request.user.email
-    		# s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
-    		#s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
-    		#c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
+            # s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
+            #s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
+            #c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
             commit_message = "Uploaded file " + data_name
 
             create_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
         return HttpResponseRedirect(reverse(
-			'gitusers:repo_detail',
-			args=(request.user.username, specific_repo.slug))
+            'gitusers:repo_detail',
+            args=(request.user.username, specific_repo.slug))
         )

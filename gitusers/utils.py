@@ -1,16 +1,19 @@
 from os import path
 
+
 def find_file_oid_in_tree(filename, tree):
 	for entry in tree:
 		if entry.name.lower() == filename.lower():
 			return entry.id
 	return 404
 
+
 def find_file_oid_in_tree_using_index(filename, index_tree):
 	for entry in index_tree:
 		if entry.path.lower() == filename.lower():
 			return entry.hex
 	return 404
+
 
 def create_commit(user, repo, message, filename):
 	from pygit2 import Signature
@@ -53,6 +56,7 @@ def create_commit(user, repo, message, filename):
 	sha = repo.create_commit(ref, author, committer, message, tree, parents)
 	return sha
 
+
 def create_commit_folders(user, repo, message, filename, directory):
 	from pygit2 import Signature
 	# example:
@@ -85,7 +89,7 @@ def create_commit_folders(user, repo, message, filename, directory):
 	index_tree = repo.index
 	commit = repo.revparse_single('HEAD')
 	tree = commit.tree
-	#folders = directory.split("/")
+	# folders = directory.split("/")
 	index_tree.read()
 	folders = directory.split("/")
 	# for folder in folders:
@@ -114,6 +118,7 @@ def create_commit_folders(user, repo, message, filename, directory):
 
 	sha = repo.create_commit(ref, author, committer, message, tree2, parents)
 	return sha
+
 
 def delete_commit(user, repo, message, filename):
 	from pygit2 import Signature
@@ -156,6 +161,7 @@ def delete_commit(user, repo, message, filename):
 	sha = repo.create_commit(ref, author, committer, message, tree, parents)
 	return sha
 
+
 def delete_commit_folders(user, repo, message, filename, directory):
 	from pygit2 import Signature
 	# example:
@@ -185,9 +191,9 @@ def delete_commit_folders(user, repo, message, filename, directory):
 	index_tree = repo.index
 	commit = repo.revparse_single('HEAD')
 	tree = commit.tree
-	#folders = directory.split("/")
+	# folders = directory.split("/")
 	index_tree.read()
-	index_tree.remove(path.join( directory, filename))
+	index_tree.remove(path.join(directory, filename))
 	index_tree.write()
 	index_tree = repo.index
 
