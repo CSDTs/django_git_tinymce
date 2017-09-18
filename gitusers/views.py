@@ -24,7 +24,8 @@ from repos.forms import (
 	TinyMCEFileEditForm,
 	FileCreateForm,
 	FileRenameForm,
-	RepoForkRenameForm
+	RepoForkRenameForm,
+	AddEditorsForm
 )
 from repos.models import Repository, ForkedRepository
 from tags.models import Tag
@@ -381,6 +382,17 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 	template_name = 'repo/setting.html'
 	form_class = RepositoryUpdateModelForm
 	id = None
+
+	def editors(self):
+		username = self.kwargs.get('username')
+		slug = self.kwargs.get('slug')
+		repo = Repository.objects.get(owner__username=username, slug=slug)
+		editors = repo.editors.all()
+		list_to_return = []
+		for editor in editors:
+			add = User.objects.get(username=editor.username)
+			list_to_return.append(add.username)
+		return list_to_return
 
 	def get_object(self):
 		queryset = super(RepositoryUpdateView, self).get_queryset()
@@ -1120,3 +1132,90 @@ class CommitView(ListView):
 		# context['hunks'] = hunks_files
 
 		return context
+
+class AddEditors(LoginRequiredMixin, FormView):
+	template_name = 'repo/add_editors.html'
+	form_class = AddEditorsForm
+
+	def get_form_kwargs(self):
+		kwargs = super(AddEditors, self).get_form_kwargs()
+		kwargs.update({'request': self.request})
+		# kwargs.update({'old_name': self.object.name})
+		return kwargs
+
+	def get(self, request, *args, **kwargs):
+		User = get_user_model()
+		username_in_url = self.kwargs.get("username")
+		# prevents forking your own repo:
+		origin_user = User.objects.get(username=username_in_url)
+		origin_repo = self.kwargs.get("slug")
+		origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+
+		context = {}
+		context['form'] = AddEditorsForm()
+
+		return render(request, self.template_name, context)
+
+	def form_valid(self, form):
+		valid_data = super(AddEditors, self).form_valid(form)
+		new_editor_username = form.cleaned_data.get("new_editor_username")
+		new_editor_email = form.cleaned_data.get("new_editor_username")
+		username_in_url = self.kwargs.get("username")
+		origin_user = User.objects.get(username=username_in_url)
+		origin_repo = self.kwargs.get("slug")
+
+		origin_repo_for_id = Repository.objects.get(slug=origin_repo, owner=origin_user,)
+		user_pull = None
+		try:
+			user_pull = User.objects.get(username=new_editor_username)
+		except:
+			user_pull = User.objects.get(email=new_editor_email)
+		if not user_pull:
+			form.add_error(None, "User not found")
+			return self.form_invalid(form)
+		#repo = Repository(id=origin_repo_for_id.id, slug=origin_repo, owner=origin_user, editors=user_pull)
+		origin_repo_for_id.editors.add(user_pull)
+		origin_repo_for_id.save()
+
+		return HttpResponseRedirect(reverse(
+			"gitusers:setting",
+			kwargs={
+				'username': self.kwargs.get("username"),
+				'slug': self.kwargs.get('slug')
+
+			}
+		))
+
+	def get_success_url(self):
+		return reverse(
+			"gitusers:setting",
+			kwargs={
+				'username': self.kwargs.get("username"),
+				'slug': self.kwargs.get('slug')
+
+			}
+		)
+
+class EditorDeleteView(DeleteView):
+
+	template_name = 'repo/delete.html'
+
+	def get(self, request, **kwargs):
+
+		username_in_url = self.kwargs.get("username")
+		# prevents forking your own repo:
+		origin_user = User.objects.get(username=username_in_url)
+		origin_repo = self.kwargs.get("slug")
+		editor_to_delete = self.kwargs.get("editor")
+		origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+		origin_repo.editors.remove(User.objects.get(username=editor_to_delete))
+		origin_repo.save()
+
+		return HttpResponseRedirect(reverse(
+			"gitusers:setting",
+			kwargs={
+				'username': self.kwargs.get("username"),
+				'slug': self.kwargs.get('slug')
+
+			}
+		))
