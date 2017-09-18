@@ -218,7 +218,7 @@ export default class Layout extends React.Component {
               <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu">
-              <li><a href={`setting/`}>Edit Description</a></li>
+              <li><a href={`setting/`}>Edit Settings</a></li>
               <li role="separator" class="divider"></li>
               <li><a href={`/${window.props.repo_owner}/${window.props.repo_name}/delete`}><font style={{color: '#f33'}}>Delete Repo</font></a></li>
             </ul>
