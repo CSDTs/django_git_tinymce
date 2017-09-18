@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -394,8 +395,22 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 			list_to_return.append(add.username)
 		return list_to_return
 
-	def get_object(self):
+	def get_object(self, **kwargs):
 		queryset = super(RepositoryUpdateView, self).get_queryset()
+		obj = super(RepositoryUpdateView, self).get_object(**kwargs)
+		user = self.request.user
+		owner = False
+		if user.is_superuser:
+			owner = True
+		if obj.owner == user:
+			owner = True
+		else:
+			for editor in obj.editors.all():
+				if editor.id == user.id:
+					owner = True
+
+		if owner == False:
+			raise PermissionDenied
 		queryset = queryset.get(owner__username=self.kwargs.get('username'),slug=self.kwargs.get('slug'))
 		return queryset
 
@@ -463,6 +478,27 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 
 	def get_initial(self, **kwargs):
 		initial = super(RepositoryCreateFileView, self).get_initial()
+		try:
+			self.repo_obj = Repository.objects.get(
+				owner__username=self.kwargs['username'],
+				slug=self.kwargs['slug']
+			)
+		except:
+			pass
+		user = self.request.user
+		owner = False
+		if user.is_superuser:
+			owner = True
+		if self.repo_obj.owner == user:
+			owner = True
+
+		else:
+			for editor in self.repo_obj.editors.all():
+				if editor.id == user.id:
+					owner = True
+
+		if owner == False:
+			raise PermissionDenied
 		directory = ""
 		if 'directories' in self.kwargs:
 			directory = self.kwargs['directories']
@@ -577,6 +613,27 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 
 	def get_initial(self, **kwargs):
 		self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
+		try:
+			self.repo_obj = Repository.objects.get(
+				owner__username=self.kwargs['username'],
+				slug=self.kwargs['slug']
+			)
+		except:
+			pass
+		user = self.request.user
+		owner = False
+		if user.is_superuser:
+			owner = True
+		if self.repo_obj.owner == user:
+			owner = True
+
+		else:
+			for editor in self.repo_obj.editors.all():
+				if editor.id == user.id:
+					owner = True
+
+		if owner == False:
+			raise PermissionDenied
 
 		initial = super(BlobEditView, self).get_initial()
 
@@ -589,10 +646,10 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 		if 'directories_ext' in self.kwargs:
 			directory += "/" + self.kwargs.get('directories_ext')
 		try:
-			self.repo_obj = Repository.objects.get(
-				owner__username=self.kwargs['username'],
-				slug=self.kwargs['slug']
-			)
+			# self.repo_obj = Repository.objects.get(
+			# 	owner__username=self.kwargs['username'],
+			# 	slug=self.kwargs['slug']
+			# )
 
 			self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
 
@@ -725,6 +782,27 @@ class BlobDeleteView(OwnerRequiredMixin, DeleteView):
 	# success_url = reverse_lazy('index')
 
 	def get(self, request, **kwargs):
+		user = self.request.user
+		try:
+			repo_obj = Repository.objects.get(
+				owner__username=self.kwargs.get('username'),
+				slug=self.kwargs['slug']
+			)
+		except:
+			pass
+		owner = False
+		if user.is_superuser:
+			owner = True
+		if repo_obj.owner == user:
+			owner = True
+
+		else:
+			for editor in repo_obj.editors.all():
+				if editor.id == user.id:
+					owner = True
+
+		if owner == False:
+			raise PermissionDenied
 
 		filename = self.kwargs.get('filename')
 
@@ -734,10 +812,10 @@ class BlobDeleteView(OwnerRequiredMixin, DeleteView):
 		repo_obj = None
 
 		try:
-			repo_obj = Repository.objects.get(
-				owner__username=self.kwargs.get('username'),
-				slug=self.kwargs['slug']
-			)
+			# repo_obj = Repository.objects.get(
+			# 	owner__username=self.kwargs.get('username'),
+			# 	slug=self.kwargs['slug']
+			# )
 			repo = pygit2.Repository(repo_obj.get_repo_path())
 
 			if repo.is_empty:
@@ -769,6 +847,28 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
 
 	def get(self, request, **kwargs):
 
+		user = self.request.user
+		try:
+			repo_obj = Repository.objects.get(
+				owner__username=self.kwargs.get('username'),
+				slug=self.kwargs['slug']
+			)
+		except:
+			pass
+		owner = False
+		if user.is_superuser:
+			owner = True
+		if repo_obj.owner == user:
+			owner = True
+
+		else:
+			for editor in repo_obj.editors.all():
+				if editor.id == user.id:
+					owner = True
+
+		if owner == False:
+			raise PermissionDenied
+
 		filename = self.kwargs.get('filename')
 		directory = ""
 		if 'directories' in self.kwargs:
@@ -782,10 +882,10 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
 		repo_obj = None
 
 		try:
-			repo_obj = Repository.objects.get(
-				owner__username=self.kwargs.get('username'),
-				slug=self.kwargs['slug']
-			)
+			# repo_obj = Repository.objects.get(
+			# 	owner__username=self.kwargs.get('username'),
+			# 	slug=self.kwargs['slug']
+			# )
 			repo = pygit2.Repository(repo_obj.get_repo_path())
 
 			if repo.is_empty:
@@ -857,6 +957,27 @@ class RenameFileView(OwnerRequiredMixin, FormView):
 		self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
 
 		initial = super(RenameFileView, self).get_initial()
+		user = self.request.user
+		try:
+			self.repo_obj = Repository.objects.get(
+				owner__username=self.kwargs.get('username'),
+				slug=self.kwargs['slug']
+			)
+		except:
+			pass
+		owner = False
+		if user.is_superuser:
+			owner = True
+		if self.repo_obj.owner == user:
+			owner = True
+
+		else:
+			for editor in self.repo_obj.editors.all():
+				if editor.id == user.id:
+					owner = True
+
+		if owner == False:
+			raise PermissionDenied
 
 		filename = self.kwargs.get('filename')
 		if self.kwargs.get('extension'):
@@ -867,10 +988,10 @@ class RenameFileView(OwnerRequiredMixin, FormView):
 		if 'directories_ext' in self.kwargs:
 			directory += "/" + self.kwargs.get('directories_ext')
 		try:
-			self.repo_obj = Repository.objects.get(
-				owner__username=self.kwargs.get('username'),
-				slug=self.kwargs['slug']
-			)
+			# self.repo_obj = Repository.objects.get(
+			# 	owner__username=self.kwargs.get('username'),
+			# 	slug=self.kwargs['slug']
+			# )
 
 			self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
 
