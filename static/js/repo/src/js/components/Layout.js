@@ -63,6 +63,8 @@ export default class Layout extends React.Component {
 
 
   onDrop(files) {
+    if (!this.props.files.is_owner && !this.props.files.is_editor)
+      throw 'Not owner or editor'
     this.setState({
       files: files,
       dropzoneActive: false
