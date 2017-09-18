@@ -164,7 +164,7 @@ class ReduxRepositoryDetailView(View):
 		if 'directories' in self.kwargs:
 			directory = self.kwargs['directories']
 		user = User.objects.get(username=owner_name)
-		repo = Repository.objects.get(owner=user.id,name__iexact=repo_name)
+		repo = Repository.objects.get(owner=user.id,slug=repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		fork_count = len(forked_repos)
 		try:
@@ -412,12 +412,12 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		# so that we don't have to go through and compare with get_initial()
 		# all again.
 		obj = self.get_object()
-
+		form.save()
 		slug = slugify(form.cleaned_data.get("name"))
 		obj.slug = slug
 
 		obj.save()
-		form.save()
+
 
 		# return HttpResponseRedirect(reverse(
 		# 	"gitusers:repo_detail",
@@ -436,7 +436,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 			"gitusers:repo_detail",
 			kwargs={
 				'username': self.kwargs.get('username'),
-				'slug': slug
+				'slug': self.kwargs.get('slug')
 
 			}
 		)
@@ -480,7 +480,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		commit_message = form.cleaned_data['commit_message']
 
 		repo = Repository.objects.get(
-			owner=self.request.user,
+			owner__username=self.kwargs['username'],
 			slug=self.kwargs['slug']
 		)
 		git_repo = pygit2.Repository(repo.get_repo_path())
@@ -543,7 +543,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 			return reverse(
 				"gitusers:repo_detail_folder",
 				kwargs={
-					'username': self.request.user.username,
+					'username': self.kwargs.get('username'),
 					'slug': self.kwargs.get('slug'),
 					'directories': self.kwargs.get('directories'),
 					'directories_ext': self.kwargs.get('directories_ext')
@@ -553,7 +553,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 			return reverse(
 				"gitusers:repo_detail_folder",
 				kwargs={
-					'username': self.request.user.username,
+					'username': self.kwargs.get('username'),
 					'slug': self.kwargs.get('slug'),
 					'directories': self.kwargs.get('directories')
 				}
@@ -561,7 +561,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		return reverse(
 			"gitusers:repo_detail",
 			kwargs={
-				'username': self.request.user.username,
+				'username': self.kwargs.get('username'),
 				'slug': self.kwargs.get('slug')
 
 			}
@@ -576,7 +576,7 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 	repo_obj = None
 
 	def get_initial(self, **kwargs):
-		self.success_url = '/{}/{}'.format(self.request.user, self.kwargs['slug'])
+		self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
 
 		initial = super(BlobEditView, self).get_initial()
 
@@ -590,7 +590,7 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 			directory += "/" + self.kwargs.get('directories_ext')
 		try:
 			self.repo_obj = Repository.objects.get(
-				owner=self.request.user,
+				owner__username=self.kwargs['username'],
 				slug=self.kwargs['slug']
 			)
 
@@ -758,7 +758,7 @@ class BlobDeleteView(OwnerRequiredMixin, DeleteView):
 			pass
 		return HttpResponseRedirect(reverse(
 			'gitusers:repo_detail',
-			args=(request.user.username, repo_obj.slug))
+			args=(self.kwargs.get('username'), repo_obj.slug))
 		)
 
 
@@ -822,7 +822,7 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
 			return HttpResponseRedirect(reverse(
 				"gitusers:repo_detail_folder",
 				kwargs={
-					'username': self.request.user.username,
+					'username': self.kwargs.get('username'),
 					'slug': self.kwargs.get('slug'),
 					'directories': self.kwargs.get('directories'),
 					'directories_ext': self.kwargs.get('directories_ext')
@@ -833,7 +833,7 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
 			return HttpResponseRedirect(reverse(
 				"gitusers:repo_detail_folder",
 				kwargs={
-					'username': self.request.user.username,
+					'username': self.kwargs.get('username'),
 					'slug': self.kwargs.get('slug'),
 					'directories': self.kwargs.get('directories')
 				}
@@ -842,7 +842,7 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
 		return HttpResponseRedirect(reverse(
 			"gitusers:repo_detail",
 			kwargs={
-				'username': self.request.user.username,
+				'username': self.kwargs.get('username'),
 				'slug': self.kwargs.get('slug')
 
 			}
@@ -854,7 +854,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/rename_file.html'
 	form_class = FileRenameForm
 	def get_initial(self, **kwargs):
-		self.success_url = '/{}/{}'.format(self.request.user, self.kwargs['slug'])
+		self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
 
 		initial = super(RenameFileView, self).get_initial()
 
@@ -868,7 +868,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
 			directory += "/" + self.kwargs.get('directories_ext')
 		try:
 			self.repo_obj = Repository.objects.get(
-				owner=self.request.user,
+				owner__username=self.kwargs.get('username'),
 				slug=self.kwargs['slug']
 			)
 
@@ -963,7 +963,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
 			return HttpResponseRedirect(reverse(
 				"gitusers:repo_detail_folder",
 				kwargs={
-					'username': self.request.user.username,
+					'username': self.kwargs.get('username'),
 					'slug': self.kwargs.get('slug'),
 					'directories': self.kwargs.get('directories'),
 					'directories_ext': self.kwargs.get('directories_ext')
@@ -974,7 +974,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
 			return HttpResponseRedirect(reverse(
 				"gitusers:repo_detail_folder",
 				kwargs={
-					'username': self.request.user.username,
+					'username': self.kwargs.get('username'),
 					'slug': self.kwargs.get('slug'),
 					'directories': self.kwargs.get('directories')
 				}
@@ -983,7 +983,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
 		return HttpResponseRedirect(reverse(
 			"gitusers:repo_detail",
 			kwargs={
-				'username': self.request.user.username,
+				'username': self.kwargs.get('username'),
 				'slug': self.kwargs.get('slug')
 
 			}
