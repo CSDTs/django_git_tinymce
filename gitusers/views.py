@@ -17,7 +17,7 @@ from django.views.generic.list import ListView
 from django.urls import reverse, reverse_lazy
 
 from .utils import find_file_oid_in_tree, create_commit, create_commit_folders, delete_commit, delete_commit_folders, find_file_oid_in_tree_using_index
-from django_git.mixins import OwnerRequiredMixin
+from django_git.mixins import OwnerRequiredMixin, OwnerOnlyRequiredMixin
 from repos.forms import (
 	RepositoryModelForm,
 	RepositoryUpdateModelForm,
@@ -329,7 +329,7 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
 
 			new_entry = ForkedRepository(original=origin_repo, fork=obj)
 			# not sure why this isn't needed:
-			# new_entry.save()
+			new_entry.save()
 
 
 			return HttpResponseRedirect(reverse(
@@ -443,7 +443,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		)
 
 
-class RepositoryDeleteView(OwnerRequiredMixin, DeleteView):
+class RepositoryDeleteView(OwnerOnlyRequiredMixin, DeleteView):
 	model = Repository
 	template_name = 'repo/delete.html'
 
@@ -719,7 +719,7 @@ class BlobRawView(View):
 			raise Http404("Failed to open or read file")
 
 # Not Working:
-class BlobDeleteView(DeleteView):
+class BlobDeleteView(OwnerRequiredMixin, DeleteView):
 
 	template_name = 'repo/delete.html'
 	# success_url = reverse_lazy('index')
@@ -762,7 +762,7 @@ class BlobDeleteView(DeleteView):
 		)
 
 
-class BlobDeleteFolderView(DeleteView):
+class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
 
 	template_name = 'repo/delete.html'
 	success_url = reverse_lazy('index')
@@ -850,7 +850,7 @@ class BlobDeleteFolderView(DeleteView):
 		)
 
 
-class RenameFileView(FormView):
+class RenameFileView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/rename_file.html'
 	form_class = FileRenameForm
 	def get_initial(self, **kwargs):
@@ -1133,7 +1133,7 @@ class CommitView(ListView):
 
 		return context
 
-class AddEditors(LoginRequiredMixin, FormView):
+class AddEditors(OwnerRequiredMixin, FormView):
 	template_name = 'repo/add_editors.html'
 	form_class = AddEditorsForm
 
@@ -1196,7 +1196,7 @@ class AddEditors(LoginRequiredMixin, FormView):
 			}
 		)
 
-class EditorDeleteView(DeleteView):
+class EditorDeleteView(OwnerRequiredMixin, DeleteView):
 
 	template_name = 'repo/delete.html'
 

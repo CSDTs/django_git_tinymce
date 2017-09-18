@@ -18,6 +18,7 @@ export function fetchFiles() {
         dispatch({type: "FETCH_COMMITTER_FULFILLED", payload: response.data.committer})
         dispatch({type: "FETCH_HEX_FULFILLED", payload: response.data.hex})
         dispatch({type: "FETCH_TIME_FULFILLED", payload: response.data.time})
+        dispatch({type: "FETCH_EDITORS_FULFILLED", payload: response.data.is_editor})
 
       })
       .catch((err) => {

@@ -135,7 +135,7 @@ export default class Layout extends React.Component {
     console.log('files', files)
     console.log('this.props.files.fetched',this.props.files.fetched)
 
-    const editShow = (files.is_owner) ? <a href={`setting/`} style={{color: '#999', fontSize: '.75em'}}>edit</a> : null
+    const editShow = (files.is_owner || files.is_editor) ? <a href={`setting/`} style={{color: '#999', fontSize: '.75em'}}>edit</a> : null
 
     // function folderShow() {
     //   const directory = window.props.directory
@@ -210,7 +210,7 @@ export default class Layout extends React.Component {
             <a href={`/${window.props.repo_owner}/${window.props.repo_name}/forked`} class="btn btn-default">{`${window.props.fork_count}`}</a>
           </div>
           &nbsp;&nbsp;&nbsp;&nbsp;
-          {files.is_owner &&
+          {(files.is_owner || files.is_editor) &&
           <div class="btn-group ">
             <button type="button" class="btn btn-danger"><i className="glyphicon glyphicon-cog"/></button>
             <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -219,8 +219,8 @@ export default class Layout extends React.Component {
             </button>
             <ul class="dropdown-menu">
               <li><a href={`setting/`}>Edit Settings</a></li>
-              <li role="separator" class="divider"></li>
-              <li><a href={`/${window.props.repo_owner}/${window.props.repo_name}/delete`}><font style={{color: '#f33'}}>Delete Repo</font></a></li>
+              {(files.is_owner) ? <li role="separator" class="divider"></li> : null }
+              {(files.is_owner) ? <li><a href={`/${window.props.repo_owner}/${window.props.repo_name}/delete`}><font style={{color: '#f33'}}>Delete Repo</font></a></li> : null}
             </ul>
           </div>
         }
@@ -234,7 +234,7 @@ export default class Layout extends React.Component {
 
           </p>
 
-          <Branches branches={files.branches} is_owner={files.is_owner} />
+          <Branches branches={files.branches} is_owner={files.is_owner} is_editor={files.is_editor} />
 
           <p className="dir-tree"><a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{`${window.props.repo_name}`}</a> {folders()}</p>
 
@@ -252,11 +252,11 @@ export default class Layout extends React.Component {
 
               {this.props.files.files.map((file) => {
                 const icon = this.getIcon(file.type)
-                const editLink = (files.is_owner) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}edit/${file.name}`} style={{fontSize: '.75em', color: '#999'}}>edit</a>: null : null
-                const renameLink = (files.is_owner) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/rename`} style={{fontSize: '.75em', color: '#444'}}>rename</a>: null : null
+                const editLink = (files.is_owner || files.is_editor) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}edit/${file.name}`} style={{fontSize: '.75em', color: '#999'}}>edit</a>: null : null
+                const renameLink = (files.is_owner || files.is_editor) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/rename`} style={{fontSize: '.75em', color: '#444'}}>rename</a>: null : null
                 const fileLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${window.props.directory}/blob/${file.name}`}>{ file.name }</a> : (file.type == 'blob') ? <a href={`blob/${file.name}`}>{ file.name }</a> : <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}${file.name}`}>{ file.name }</a>
-                const deleteLink = (files.is_owner && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a> : null
-                const downloadLink = (files.is_owner && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}`} download={`${file.name}`}><font style={{fontSize: '.75em', color: '#999'}}>download</font></a> : null
+                const deleteLink = ((files.is_owner || files.is_editor) && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a> : null
+                const downloadLink = ((files.is_owner || files.is_editor) && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}`} download={`${file.name}`}><font style={{fontSize: '.75em', color: '#999'}}>download</font></a> : null
 
                 return <tr key={file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink} &nbsp;{renameLink} &nbsp;{downloadLink}</th><td>{deleteLink}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
               })}
@@ -282,7 +282,7 @@ export default class Layout extends React.Component {
       </div>
       <div className="row">
         <div className="col-md-12">
-          { files.is_owner &&
+          { (files.is_owner || files.is_editor) &&
             <div>
           <section>
             <div className="dropzone">

@@ -3,16 +3,33 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
 
-class OwnerRequiredMixin(LoginRequiredMixin, object):
+class OwnerOnlyRequiredMixin(LoginRequiredMixin, object):
 	def get_object(self, **kwargs):
 		user = self.request.user
-		obj = super(OwnerRequiredMixin, self).get_object(**kwargs)
+		obj = super(OwnerOnlyRequiredMixin, self).get_object(**kwargs)
 
 		if not obj.owner == user:
 			raise PermissionDenied
 
 		return obj
 
+class OwnerRequiredMixin(LoginRequiredMixin, object):
+	def get_object(self, **kwargs):
+		user = self.request.user
+		obj = super(OwnerRequiredMixin, self).get_object(**kwargs)
+
+		owner = False
+		if obj.owner == user:
+			owner = True
+		else:
+			for editor in obj.editors.all():
+				if editor.id == user.id:
+					owner = True
+
+		if owner == False:
+			raise PermissionDenied
+
+		return obj
 
 class MultiSlugMixin(object):
 	model = None

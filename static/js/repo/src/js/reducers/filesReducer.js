@@ -4,6 +4,7 @@ export default function reducer(state={
     fetched: false,
     error: null,
     is_owner: null,
+    is_editor: null,
     message: null,
     committer: null,
     hex: null,
@@ -54,6 +55,12 @@ export default function reducer(state={
         return {
           ...state,
           hex: action.payload
+        }
+      }
+      case "FETCH_EDITORS_FULFILLED": {
+        return {
+          ...state,
+          is_editor: action.payload
         }
       }
       case "FETCH_TIME_FULFILLED": {
