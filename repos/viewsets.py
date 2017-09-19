@@ -1,7 +1,6 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
-# from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from . import models
 from .api.permissions import IsOwnerOrReadOnly
@@ -12,8 +11,8 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     queryset = models.Repository.objects.all()
     serializer_class = serializers.Repository
     permission_classes = (IsOwnerOrReadOnly,)
-    # filter_backends = (SearchFilter, OrderingFilter, DjangoFilterBackend,)
-    # search_fields = ('name', 'description', 'subject', 'grade_level', 'culture',)
+    filter_backends = (SearchFilter, OrderingFilter, DjangoFilterBackend,)
+    search_fields = ('name', 'description', 'subject', 'grade_level', 'culture',)
     filter_fields = ('name', 'description', 'subject', 'grade_level', 'culture',)
 
 # search filter and ordering filter USAGE
