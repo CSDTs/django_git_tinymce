@@ -15,7 +15,7 @@ User = get_user_model()
 class RepositoryModelForm(forms.ModelForm):
 	class Meta:
 		model = Repository
-		fields = ['name', 'description', 'image', 'tags']
+		fields = ['name', 'description', 'tags', 'grade_level', 'subject', 'culture', 'image',]
 
 		widgets = {
 			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),
@@ -58,7 +58,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 
 	class Meta:
 		model = Repository
-		fields = ['name', 'description', 'image', 'tags']
+		fields = ['name', 'description', 'image', 'tags',]
 
 		widgets = {
 			"name": forms.TextInput(attrs={"placeholder": "Repository name"}),

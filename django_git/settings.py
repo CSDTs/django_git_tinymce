@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_cleanup',
-
+    'django_filters',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -167,7 +167,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    )
+    ),
 }
 #
 # TINYMCE_DEFAULT_CONFIG = {
