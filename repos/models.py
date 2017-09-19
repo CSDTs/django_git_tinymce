@@ -35,11 +35,10 @@ class Repository(models.Model):
 	editors = models.ManyToManyField(
 		settings.AUTH_USER_MODEL, related_name='editors', blank=True)
 	image = models.ImageField(null=True, blank=True, upload_to=my_awesome_upload_function)
-	tags = models.ManyToManyField(Tag, blank=True)
+	tags = models.ManyToManyField(Tag, blank=True, related_name="repos")
 	grade_level = models.CharField(max_length=2, choices=c.GRADE_LEVEL, blank=True)
 	subject = models.CharField(max_length=100, choices=c.SUBJECTS, blank=True)
 	culture = models.CharField(max_length=100, choices=c.CULTURES, blank=False)
-
 
 	def __str__(self):
 		return "{} - {}".format(self.name, self.owner.username)

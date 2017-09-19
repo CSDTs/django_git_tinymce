@@ -18,7 +18,9 @@ from .views import (
 	ForkedReposView,
 	IndividualIndexView,
 	CommitLogView,
-	CommitView
+	CommitView,
+	AddEditors,
+	EditorDeleteView,
 )
 
 app_name = "gitusers"
@@ -32,6 +34,8 @@ urlpatterns = [
 	url(r'^(?P<slug>[-\w]+)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
 	url(r'^(?P<slug>[-\w]+)/commit/(?P<commit>[-\w]+)', CommitView.as_view(), name='commit'),
 	url(r'^(?P<slug>[-\w]+)/commit/', CommitLogView.as_view(), name='commits'),
+	url(r'^(?P<slug>[-\w]+)/addeditor/$', AddEditors.as_view(), name='add_editor'),
+	url(r'^(?P<slug>[-\w]+)/deleteeditor/(?P<editor>[-\w]+)/$', EditorDeleteView.as_view(), name='remove_editor'),
 
 	url(r'^(?P<slug>[-\w]+)/(?P<directories_ext>.*)/setting/$', RepositoryUpdateView.as_view(), name='setting'),
 
@@ -47,6 +51,7 @@ urlpatterns = [
 
 
 	url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/$', ReduxRepositoryFolderDetailView.as_view(), name='repo_detail_folder'),
+
 
 
 
