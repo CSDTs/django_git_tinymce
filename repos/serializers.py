@@ -32,6 +32,9 @@ class Repository(serializers.ModelSerializer):
             'owner',
             'owner_username',
             'editors',
+            'grade_level',
+            'subject',
+            'culture',
             'photo_url'
         )
         model = models.Repository
