@@ -79,6 +79,10 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 			).order_by('name')
 		return queryset
 
+	def edited_repos(self):
+		owner_name = self.kwargs['username']
+		user_specific = User.objects.get(username=owner_name)
+		return Repository.objects.filter(editors__id=user_specific.id)
 
 # User's repo list view - profile/dashboard
 class RepositoryListView(LoginRequiredMixin, ListView):

@@ -12,6 +12,15 @@
 	<p>No repositories</p>
 {% endfor %}
 </ul>
+<p></p>
+<h1>Repository Editor:</h1>
+<ul>
+{% for repo in view.edited_repos %}
+
+<li><a href="{{ repo.get_absolute_url }}">{{ repo.owner }}/{{ repo.name }}</a></li>
+{% empty %}
+{% endfor %}
+</ul>
 
 
 {% endblock %}
