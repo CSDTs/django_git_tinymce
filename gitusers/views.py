@@ -1163,7 +1163,7 @@ class ForkedReposView(ListView):
 		self.owner_name = self.kwargs['username']
 		self.repo_name = self.kwargs['slug']
 		user = User.objects.get(username=self.owner_name)
-		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		repo = Repository.objects.get(owner=user.id,slug=self.repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		return forked_repos
 
@@ -1172,7 +1172,7 @@ class ForkedReposView(ListView):
 		forked_repos = self.get_queryset()
 		repos = []
 		for repo in forked_repos:
-			repo = Repository.objects.get(owner=repo.fork.owner,name=repo.fork.name)
+			repo = Repository.objects.get(owner=repo.fork.owner,slug=repo.fork.name)
 			repos.append(repo)
 		context['orig_repo'] = self.repo_name
 		context['orig_author'] = self.owner_name
@@ -1191,7 +1191,7 @@ class CommitLogView(ListView):
 		self.owner_name = self.kwargs['username']
 		self.repo_name = self.kwargs['slug']
 		user = User.objects.get(username=self.owner_name)
-		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		repo = Repository.objects.get(owner=user.id,slug=self.repo_name)
 		try:
 			git_repo = pygit2.Repository(repo.get_repo_path())
 		except IOError:
