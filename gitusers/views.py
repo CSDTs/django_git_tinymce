@@ -777,6 +777,22 @@ class BlobRawView(View):
 					return HttpResponse(repo[blob_id].data, content_type="application/msword")
 				elif self.kwargs.get('extension') in ('.docx'):
 					return HttpResponse(repo[blob_id].data, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+				elif self.kwargs.get('extension') in ('.zip'):
+					return HttpResponse(repo[blob_id].data, content_type="application/zip")
+				elif self.kwargs.get('extension') in ('.rar'):
+					return HttpResponse(repo[blob_id].data, content_type="application/x-rar-compressed")
+				elif self.kwargs.get('extension') in ('.avi'):
+					return HttpResponse(repo[blob_id].data, content_type="video/x-msvideo")
+				elif self.kwargs.get('extension') in ('.aac'):
+					return HttpResponse(repo[blob_id].data, content_type="audio/aac")
+				elif self.kwargs.get('extension') in ('.mpeg'):
+					return HttpResponse(repo[blob_id].data, content_type="video/mpeg")
+				elif self.kwargs.get('extension') in ('.wav'):
+					return HttpResponse(repo[blob_id].data, content_type="audio/x-wav")
+				elif self.kwargs.get('extension') in ('.mp3'):
+					return HttpResponse(repo[blob_id].data, content_type="audio/mp3")
+				elif self.kwargs.get('extension') in ('.mp4'):
+					return HttpResponse(repo[blob_id].data, content_type="video/mp4")
 				else:
 					return HttpResponse(repo[blob_id].data)
 			else:
