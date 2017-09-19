@@ -451,7 +451,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 			"gitusers:repo_detail",
 			kwargs={
 				'username': self.kwargs.get('username'),
-				'slug': self.kwargs.get('slug')
+				'slug': slug
 
 			}
 		)
