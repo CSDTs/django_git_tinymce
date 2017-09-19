@@ -767,6 +767,16 @@ class BlobRawView(View):
 			if blob_id != 404:
 				if self.kwargs.get('extension') in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
 					return HttpResponse(repo[blob_id].data, content_type="image/png")
+				elif self.kwargs.get('extension') in ('.pdf'):
+					return HttpResponse(repo[blob_id].data, content_type="application/pdf")
+				elif self.kwargs.get('extension') in ('.ppt'):
+					return HttpResponse(repo[blob_id].data, content_type="application/vnd.ms-powerpoint")
+				elif self.kwargs.get('extension') in ('.pptx'):
+					return HttpResponse(repo[blob_id].data, content_type="application/vnd.openxmlformats-officedocument.presentationml.presentation")
+				elif self.kwargs.get('extension') in ('.doc'):
+					return HttpResponse(repo[blob_id].data, content_type="application/msword")
+				elif self.kwargs.get('extension') in ('.docx'):
+					return HttpResponse(repo[blob_id].data, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 				else:
 					return HttpResponse(repo[blob_id].data)
 			else:
