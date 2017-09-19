@@ -765,33 +765,34 @@ class BlobRawView(View):
 			# 	print('index_tree_int', index_tree)
 			blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
 			if blob_id != 404:
-				if self.kwargs.get('extension') in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
+				extension = self.kwargs.get('extension')
+				if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
 					return HttpResponse(repo[blob_id].data, content_type="image/png")
-				elif self.kwargs.get('extension') in ('.pdf'):
+				elif extension in ('.pdf'):
 					return HttpResponse(repo[blob_id].data, content_type="application/pdf")
-				elif self.kwargs.get('extension') in ('.ppt'):
+				elif extension in ('.ppt'):
 					return HttpResponse(repo[blob_id].data, content_type="application/vnd.ms-powerpoint")
-				elif self.kwargs.get('extension') in ('.pptx'):
+				elif extension in ('.pptx'):
 					return HttpResponse(repo[blob_id].data, content_type="application/vnd.openxmlformats-officedocument.presentationml.presentation")
-				elif self.kwargs.get('extension') in ('.doc'):
+				elif extension in ('.doc'):
 					return HttpResponse(repo[blob_id].data, content_type="application/msword")
-				elif self.kwargs.get('extension') in ('.docx'):
+				elif extension in ('.docx'):
 					return HttpResponse(repo[blob_id].data, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-				elif self.kwargs.get('extension') in ('.zip'):
+				elif extension in ('.zip'):
 					return HttpResponse(repo[blob_id].data, content_type="application/zip")
-				elif self.kwargs.get('extension') in ('.rar'):
+				elif extension in ('.rar'):
 					return HttpResponse(repo[blob_id].data, content_type="application/x-rar-compressed")
-				elif self.kwargs.get('extension') in ('.avi'):
+				elif extension in ('.avi'):
 					return HttpResponse(repo[blob_id].data, content_type="video/x-msvideo")
-				elif self.kwargs.get('extension') in ('.aac'):
+				elif extension in ('.aac'):
 					return HttpResponse(repo[blob_id].data, content_type="audio/aac")
-				elif self.kwargs.get('extension') in ('.mpeg'):
+				elif extension in ('.mpeg'):
 					return HttpResponse(repo[blob_id].data, content_type="video/mpeg")
-				elif self.kwargs.get('extension') in ('.wav'):
+				elif extension in ('.wav'):
 					return HttpResponse(repo[blob_id].data, content_type="audio/x-wav")
-				elif self.kwargs.get('extension') in ('.mp3'):
+				elif extension in ('.mp3'):
 					return HttpResponse(repo[blob_id].data, content_type="audio/mp3")
-				elif self.kwargs.get('extension') in ('.mp4'):
+				elif extension in ('.mp4'):
 					return HttpResponse(repo[blob_id].data, content_type="video/mp4")
 				else:
 					return HttpResponse(repo[blob_id].data)
