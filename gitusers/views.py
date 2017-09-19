@@ -1251,7 +1251,7 @@ class CommitView(ListView):
 		context['orig_repo'] = self.repo_name
 		context['orig_author'] = self.owner_name
 		user = User.objects.get(username=self.owner_name)
-		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		repo = Repository.objects.get(owner=user.id,slug=self.repo_name)
 		try:
 			git_repo = pygit2.Repository(repo.get_repo_path())
 		except IOError:
