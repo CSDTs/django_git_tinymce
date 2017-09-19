@@ -15,6 +15,10 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name', 'description', 'subject', 'grade_level', 'culture',)
     filter_fields = ('name', 'description', 'subject', 'grade_level', 'culture',)
 
+# filter field USAGE
+# api/v1/repository/?name=repo1
+# api/v1/repository/?grade_level=2
+
 # search filter and ordering filter USAGE
 # api/v1/repository/?search=repo&ordering=name
 # api/?search=repo&ordering=-owner   # reverse ordering
