@@ -835,7 +835,7 @@ class BlobDeleteView(OwnerRequiredMixin, DeleteView):
 		if self.kwargs.get('extension'):
 			filename += self.kwargs.get('extension')
 
-		repo_obj = None
+		# repo_obj = None
 
 		try:
 			# repo_obj = Repository.objects.get(
