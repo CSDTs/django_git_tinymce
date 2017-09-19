@@ -79,6 +79,11 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 			).order_by('name')
 		return queryset
 
+	def get_context_data(self):
+		context = {}
+		context['username'] = self.kwargs['username']
+		return context
+
 	def edited_repos(self):
 		owner_name = self.kwargs['username']
 		user_specific = User.objects.get(username=owner_name)
