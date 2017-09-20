@@ -31,6 +31,7 @@ class OwnerRequiredMixin(LoginRequiredMixin, object):
 
 		return obj
 
+
 class MultiSlugMixin(object):
 	model = None
 

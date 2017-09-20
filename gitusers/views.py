@@ -475,30 +475,26 @@ class RepositoryDeleteView(OwnerOnlyRequiredMixin, DeleteView):
 class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 	template_name = 'repo/create_file.html'
 	form_class = FileCreateForm
+	repo_obj = None
 
 	def get_initial(self, **kwargs):
 		initial = super(RepositoryCreateFileView, self).get_initial()
-		try:
-			self.repo_obj = Repository.objects.get(
-				owner__username=self.kwargs['username'],
-				slug=self.kwargs['slug']
-			)
-		except:
-			pass
+
 		user = self.request.user
-		owner = False
-		if user.is_superuser:
-			owner = True
-		if self.repo_obj.owner == user:
-			owner = True
+		self.repo_obj = Repository.objects.get(
+			owner__username=self.kwargs['username'],
+			slug=self.kwargs['slug']
+		)
 
-		else:
-			for editor in self.repo_obj.editors.all():
-				if editor.id == user.id:
-					owner = True
-
-		if owner == False:
+		if not user.is_superuser:
 			raise PermissionDenied
+
+		if note self.repo_obj.owner == user:
+			raise PermissionDenied
+
+		if not user in self.repo_obj.editors.all():
+			raise PermissionDenied
+
 		directory = ""
 		if 'directories' in self.kwargs:
 			directory = self.kwargs['directories']
@@ -511,28 +507,30 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		return initial
 
 	def form_valid(self, form):
+		if self.repo_obj is None:
+			raise Repository.DoesNotExist
+
+		repo = self.repo_obj
+		git_repo = pygit2.Repository(repo.get_repo_path())
+
 		filename = form.cleaned_data['filename']
 		filecontent = form.cleaned_data['content']
 		commit_message = form.cleaned_data['commit_message']
-
-		repo = Repository.objects.get(
-			owner__username=self.kwargs['username'],
-			slug=self.kwargs['slug']
-		)
-		git_repo = pygit2.Repository(repo.get_repo_path())
 
 		if not git_repo.is_empty:
 			commit = git_repo.revparse_single('HEAD')
 			tree = commit.tree
 
 			if find_file_oid_in_tree(filename, tree) != 404:
-				form.add_error(None, "File named {} already exists".format(filename))
+				form.add_error('filename', "File named {} already exists".format(filename))
 				return self.form_invalid(form)
+
+		if ".." in filename:
+			form.add_error('filename', "Can't have '..' anywhere in directories structure")
+			return self.form_invalid(form)
+
 		dirname = ""
 		filename2 = filename
-		if ".." in filename:
-			form.add_error(None, "Can't have '..' anywhere in directories structure")
-			return self.form_invalid(form)
 		if "/" in filename:
 			# import re
 			# pattern = re.compile(r"^(.+)/([^/]+)$")
@@ -549,8 +547,9 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		try:
 			file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
 		except IsADirectoryError:
-			form.add_error(None, "Can't add just a directory, must add a file too.")
+			form.add_error('filename', "Can't add just a directory, must add a file too.\nexemple: foldername/filename.html")
 			return self.form_invalid(form)
+		
 		file.write(filecontent)
 		file.close()
 

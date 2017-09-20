@@ -122,7 +122,7 @@ class FileCreateForm(forms.Form):
 		filename = self.cleaned_data['filename']
 		if filename == ('.html'.strip()):
 			raise forms.ValidationError(
-				'Please enter file name, i.e. "example.html"'
+				'Please enter file name, i.e. "example.html" or dir/example.html'
 			)
 
 		return filename
