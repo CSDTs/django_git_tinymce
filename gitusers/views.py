@@ -183,18 +183,15 @@ class ReduxRepositoryDetailView(View):
 			fork_owner = None
 
 		props = {
-					'repo_name': repo_name,
-					'repo_owner': owner_name,
-					'repo_owner_id' : user.id,
-					'repo_id': repo.id,
-					'directory': directory,
-					'fork_count': fork_count,
-					'is_fork': is_fork,
-					'fork_name': fork_name,
-					'fork_owner': fork_owner,
-
-
-
+			'repo_name': repo_name,
+			'repo_owner': owner_name,
+			'repo_owner_id' : user.id,
+			'repo_id': repo.id,
+			'directory': directory,
+			'fork_count': fork_count,
+			'is_fork': is_fork,
+			'fork_name': fork_name,
+			'fork_owner': fork_owner,
 		}
 
 		context = {
@@ -248,12 +245,9 @@ class ReduxRepositoryFolderDetailView(View):
 					'is_fork': is_fork,
 					'fork_name': fork_name,
 					'fork_owner': fork_owner,
-
-
 		}
 
 		context = {
-
         	'component': self.component,
         	'props': props,
 		}
@@ -261,88 +255,19 @@ class ReduxRepositoryFolderDetailView(View):
 		return render(request, self.template_name, context)
 
 
-
 # Fork Already Named Fork
 class RepositoryForkView(LoginRequiredMixin, FormView):
 	template_name = 'repo/rename_forked_repo.html'
 	form_class = RepoForkRenameForm
 
-
-	def get_success_url(self):
-		return reverse(
-			"gitusers:repo_detail",
-			kwargs={
-				'username': self.request.user.username,
-				'slug': self.kwargs.get('slug')
-
-			}
-		)
-
 	def get_form_kwargs(self):
 		kwargs = super(RepositoryForkView, self).get_form_kwargs()
 		kwargs.update({'request': self.request})
-		# kwargs.update({'old_name': self.object.name})
 		return kwargs
-
-
-	def get(self, request, *args, **kwargs):
-
-		User = get_user_model()
-		username_in_url = self.kwargs.get("username")
-		# prevents forking your own repo:
-		if username_in_url == request.user.username:
-			raise Http404("You cannot fork your own repo")
-		origin_user = User.objects.get(username=username_in_url)
-		origin_repo = self.kwargs.get("slug")
-		origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
-
-		context = {}
-		context['form'] = RepoForkRenameForm()
-
-		try:
-			obj = Repository.objects.get(
-				slug=origin_repo.name,
-				owner=request.user
-			)
-
-			context['message'] = "You already have a repo with the same name. Please rename your fork:"
-
-		except Repository.DoesNotExist:
-
-			obj = Repository.objects.create(
-				name=origin_repo.name,
-				description=origin_repo.description,
-				owner=request.user
-			)
-			src = origin_repo.get_repo_path()
-			dst = obj.get_repo_path()
-			try:
-			    #if path already exists, remove it before copying with copytree()
-			    if os.path.exists(dst):
-			        shutil.rmtree(dst)
-			        shutil.copytree(src, dst)
-			except OSError as e:
-			    # If the error was caused because the source wasn't a directory
-			    if e.errno == errno.ENOTDIR:
-			       shutil.copy(source_dir_prompt, destination_dir_prompt)
-			    else:
-			        print('Directory not copied. Error: %s' % e)
-
-			new_entry = ForkedRepository(original=origin_repo, fork=obj)
-			# not sure why this isn't needed:
-			new_entry.save()
-
-
-			return HttpResponseRedirect(reverse(
-				'gitusers:repo_detail',
-				args=(request.user.username, obj.slug))
-			)
-
-
-		return render(request, self.template_name, context)
 
 	def form_valid(self, form):
 		valid_data = super(RepositoryForkView, self).form_valid(form)
+		
 		User = get_user_model()
 		username_in_url = self.kwargs.get("username")
 		origin_user = User.objects.get(username=username_in_url)
@@ -376,6 +301,96 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
 			args=(self.request.user.username, obj.slug))
 		)
 
+	def get_context_data(self, **kwargs):
+		context = super(RepositoryForkView, self).get_context_data(**kwargs)
+
+		username_in_url = self.kwargs.get("username")
+		# prevents forking your own repo:
+		if username_in_url == self.request.user.username:
+			raise Http404("You cannot fork your own repo")
+
+		origin_user = User.objects.get(username=username_in_url)
+		origin_repo = self.kwargs.get("slug")
+		origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+
+		try:
+			obj = Repository.objects.get(
+				slug=origin_repo.name,
+				owner=self.request.user
+			)
+
+			context['message'] = "You already have a repo with the same name. Please rename your fork:"
+
+		except Repository.DoesNotExist:
+			pass
+
+		return context
+
+	def get_success_url(self):
+		return reverse(
+			"gitusers:repo_detail",
+			kwargs={
+				'username': self.request.user.username,
+				'slug': self.kwargs.get('slug')
+			}
+		)
+
+	# def get(self, request, *args, **kwargs):
+
+	# 	User = get_user_model()
+	# 	username_in_url = self.kwargs.get("username")
+	# 	prevents forking your own repo:
+	# 	if username_in_url == request.user.username:
+	# 		raise Http404("You cannot fork your own repo")
+
+	# 	origin_user = User.objects.get(username=username_in_url)
+	# 	origin_repo = self.kwargs.get("slug")
+	# 	origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+
+	# 	context = {}
+	# 	context['form'] = RepoForkRenameForm()
+
+	# 	try:
+	# 		obj = Repository.objects.get(
+	# 			slug=origin_repo.name,
+	# 			owner=request.user
+	# 		)
+
+	# 		# context['message'] = "You already have a repo with the same name. Please rename your fork:"
+
+	# 	except Repository.DoesNotExist:
+
+	# 		obj = Repository.objects.create(
+	# 			name=origin_repo.name,
+	# 			description=origin_repo.description,
+	# 			owner=request.user
+	# 		)
+	# 		src = origin_repo.get_repo_path()
+	# 		dst = obj.get_repo_path()
+	# 		try:
+	# 		    #if path already exists, remove it before copying with copytree()
+	# 		    if os.path.exists(dst):
+	# 		        shutil.rmtree(dst)
+	# 		        shutil.copytree(src, dst)
+	# 		except OSError as e:
+	# 		    # If the error was caused because the source wasn't a directory
+	# 		    if e.errno == errno.ENOTDIR:
+	# 		       shutil.copy(source_dir_prompt, destination_dir_prompt)
+	# 		    else:
+	# 		        print('Directory not copied. Error: %s' % e)
+
+	# 		new_entry = ForkedRepository(original=origin_repo, fork=obj)
+	# 		# not sure why this isn't needed:
+	# 		new_entry.save()
+
+
+	# 		return HttpResponseRedirect(reverse(
+	# 			'gitusers:repo_detail',
+	# 			args=(request.user.username, obj.slug))
+	# 		)
+
+
+	# 	return render(request, self.template_name, context)
 
 
 class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
@@ -433,26 +448,11 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 		obj.save()
 
-
-		# return HttpResponseRedirect(reverse(
-		# 	"gitusers:repo_detail",
-		# 	kwargs={
-		# 		'username': self.kwargs.get('username'),
-		# 		'slug': slug
-		#
-		# 	}
-		# )
-		# )
-
-
-		# return valid_data
-
 		return HttpResponseRedirect(reverse(
 			"gitusers:repo_detail",
 			kwargs={
 				'username': self.kwargs.get('username'),
 				'slug': slug
-
 			}
 		)
 		)
@@ -489,7 +489,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		if not user.is_superuser:
 			raise PermissionDenied
 
-		if note self.repo_obj.owner == user:
+		if not self.repo_obj.owner == user:
 			raise PermissionDenied
 
 		if not user in self.repo_obj.editors.all():
@@ -565,9 +565,8 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 		if self.request.user.email:
 			email = self.request.user.email
 		# s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
-		#s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
-		#c = git_repo.create_commit('HEAD', s,s, commit_message, t, [git_repo.head.target])
-
+		# s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
+		# c = git_repo.create_commit('HEAD', s,s, commit_message, t, [git_repo.head.target])
 
 		create_commit_folders(self.request.user, git_repo, commit_message, filename2, dirname)
 
