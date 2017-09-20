@@ -19,6 +19,7 @@
 
 <li><a href="{{ repo.get_absolute_url }}">{{ repo.owner }}/{{ repo.name }}</a></li>
 {% empty %}
+	<p>No repositories</p>
 {% endfor %}
 </ul>
 

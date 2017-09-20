@@ -70,7 +70,6 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 		owner_name = self.kwargs['username']
 		user_specific = User.objects.get(username=owner_name)
 		queryset = Repository.objects.filter(owner=user_specific.id)
-
 		search_query = self.request.GET.get('search')
 		if search_query:
 			queryset = queryset.filter(
@@ -79,8 +78,9 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 			).order_by('name')
 		return queryset
 
-	def get_context_data(self):
-		context = {}
+
+	def get_context_data(self, *args, **kwargs):
+		context = super(IndividualIndexView, self).get_context_data(**kwargs)
 		context['username'] = self.kwargs['username']
 		return context
 
@@ -405,7 +405,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		return list_to_return
 
 	def get_object(self, **kwargs):
-		queryset = super(RepositoryUpdateView, self).get_queryset()
 		obj = super(RepositoryUpdateView, self).get_object(**kwargs)
 		user = self.request.user
 		owner = False
@@ -420,7 +419,11 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 		if owner == False:
 			raise PermissionDenied
-		queryset = queryset.get(owner__username=self.kwargs.get('username'),slug=self.kwargs.get('slug'))
+		return obj
+
+	def get_queryset(self):
+		queryset = super(RepositoryUpdateView, self).get_queryset()
+		queryset = queryset.filter(owner__username=self.kwargs.get('username'),slug=self.kwargs.get('slug'))
 		return queryset
 
 	def get_form_kwargs(self):
