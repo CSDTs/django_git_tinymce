@@ -92,12 +92,39 @@ export default class Layout extends React.Component {
       req.end(function(err,response){
           console.log("upload done!!!!!");
     })
+  }
+
+  onDrop2(files2) {
+    if (!this.props.files.is_owner && !this.props.files.is_editor)
+      throw 'Not owner or editor'
+    this.setState({
+      files: files2,
+      dropzoneActive: false
+    });
+    var file = new FormData();
+    const Throttle = require('superagent-throttle')
+    let throttle = new Throttle({
+      active: true,     // set false to pause queue
+      rate: 1,          // how many requests can be sent every `ratePer`
+      ratePer: 1000,   // number of ms in which `rate` requests may be sent
+      concurrent: 1     // how many requests can be sent concurrently
+    })
+    console.log('files2', files2)
+    var req=request
+              .post(`/api/v1/files/${window.props.repo_id}/${window.props.directory}`)
+              .use(throttle.plugin())
+    files2.map((dropped_file) => {
 
 
 
+      req.attach('name', dropped_file);
+      //file.append('name',dropped_file)
 
-
-
+      });
+      req.send
+      req.end(function(err,response){
+          console.log("upload done!!!!!");
+    })
   }
   onDragEnter() {
     this.setState({
@@ -288,6 +315,7 @@ export default class Layout extends React.Component {
             <div>
           <section>
             <div className="dropzone">
+
               <Dropzone
                 onDrop={this.onDrop.bind(this)}
                 className="dropzone"
@@ -317,6 +345,12 @@ export default class Layout extends React.Component {
         </div>
       </div>
       </Dropzone>
+      <form action={`/api/v1/files/${window.props.repo_id}/${window.props.directory}`}
+        method="post"
+        class="dropzone"
+        id="my-awesome-dropzone"
+        enctype="multipart/form-data"
+        ><p></p><p>hello</p></form>
     </div>
   }
 }
