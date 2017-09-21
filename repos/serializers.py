@@ -5,7 +5,6 @@ import os
 from . import models
 
 
-
 class Repository(serializers.ModelSerializer):
     owner_username = serializers.ReadOnlyField(source='owner.username')
     photo_url = serializers.SerializerMethodField()
@@ -19,8 +18,6 @@ class Repository(serializers.ModelSerializer):
         else:
             link = os.path.join('/static', 'img', 'default_repo.png')
             return request.build_absolute_uri(link)
-
-
 
     class Meta:
         fields = (
