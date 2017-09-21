@@ -20,9 +20,8 @@ install:
   - sudo ldconfig
 
 before_script:
-  # W191: indentation contains tabs
 
-  # - flake8 --exclude=migrations --ignore=W191 --max-line-length=122 .
+  - flake8 --exclude=migrations --max-line-length=122 .
 
 script:
   - python manage.py migrate
