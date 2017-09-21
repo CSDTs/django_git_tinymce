@@ -18,6 +18,5 @@ node_modules/
 package-lock.json
 .coverage
 git_repos/
-
-/flake8.txt
-/to-do.txt
+flake8.txt
+to-do.txt

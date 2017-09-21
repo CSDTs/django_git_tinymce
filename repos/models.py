@@ -98,7 +98,7 @@ def repository_post_save(sender, instance, **kwagrs):
         repo.index.add(fn)
         repo.index.write()
         # head = repo.lookup_reference('HEAD').resolve()
-        c = repo.create_commit('HEAD', s, s, 'Initialized repo with a README.html', t, [])
+        repo.create_commit('HEAD', s, s, 'Initialized repo with a README.html', t, [])
 
 
 @receiver(post_delete, sender=Repository)

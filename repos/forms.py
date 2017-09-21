@@ -7,7 +7,6 @@ from django.utils.text import slugify
 from tinymce.widgets import TinyMCE
 
 from .models import Repository
-# from tawgs.models import Tag
 
 User = get_user_model()
 
@@ -44,10 +43,10 @@ class RepositoryModelForm(forms.ModelForm):
 
         slugified = slugify(name)
         if Repository.objects.filter(
-            slug=slugified, owner=self.request.user).exists():
-            raise forms.ValidationError(
-                "Slugified repo named '{}' already exists".format(slugified)
-            )
+                        slug=slugified, owner=self.request.user).exists():
+                raise forms.ValidationError(
+                    "Slugified repo named '{}' already exists".format(slugified)
+                )
 
         return name
 
@@ -89,11 +88,10 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 
             slugified = slugify(name)
             if Repository.objects.filter(
-                slug=slugified, owner=self.request.user).exists():
-                raise forms.ValidationError(
-                    "Slugified repo named '{}' already exists".format(slugified)
-                )
-
+                        slug=slugified, owner=self.request.user).exists():
+                    raise forms.ValidationError(
+                        "Slugified repo named '{}' already exists".format(slugified)
+                    )
         return name
 
 
@@ -169,17 +167,15 @@ class RepoForkRenameForm(forms.Form):
 
         slugified = slugify(new_reponame)
         if Repository.objects.filter(
-            slug=slugified, owner=self.request.user).exists():
+                        slug=slugified, owner=self.request.user).exists():
             raise forms.ValidationError(
                 "Slugified repo named '{}' already exists".format(slugified)
             )
-
         return new_reponame
 
 
 class AddEditorsForm(forms.Form):
     new_editor_username = forms.CharField(label='Username', required=False)
-    # new_editor_email = forms.CharField(label='Or enter email address', required=False)
 
     def clean_new_editor_username(self):
         new_editor_username = self.cleaned_data['new_editor_username']
