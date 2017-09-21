@@ -22,10 +22,8 @@ class OwnerRequiredMixin(LoginRequiredMixin, object):
         owner = False
         if obj.owner == user:
             owner = True
-        else:
-            for editor in obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
+        if user in obj.editors.all():
+            owner = True
 
         if not owner:
             raise PermissionDenied

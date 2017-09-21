@@ -325,16 +325,21 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
         origin_repo = self.kwargs.get("slug")
         origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
 
-        try:
-            Repository.objects.get(
-                slug=origin_repo.name,
-                owner=self.request.user
-            )
+        if Repository.objects.filter(
+            slug=origin_repo.slug, owner=self.request.user).exists():
+            context['message'] = "You already have a repo with the same name. \
+                                Please rename your fork:" 
 
-            context['message'] = "You already have a repo with the same name. Please rename your fork:"
+        # try:
+        #     Repository.objects.get(
+        #         slug=origin_repo.name,
+        #         owner=self.request.user
+        #     )
 
-        except Repository.DoesNotExist:
-            pass
+        #     context['message'] = "You already have a repo with the same name. Please rename your fork:"
+
+        # except Repository.DoesNotExist:
+        #     pass
 
         return context
 
@@ -364,23 +369,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
             add = User.objects.get(username=editor.username)
             list_to_return.append(add.username)
         return list_to_return
-
-    def get_object(self, **kwargs):
-        obj = super(RepositoryUpdateView, self).get_object(**kwargs)
-        user = self.request.user
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if obj.owner == user:
-            owner = True
-        else:
-            for editor in obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if owner is False:
-            raise PermissionDenied
-        return obj
 
     def get_queryset(self):
         queryset = super(RepositoryUpdateView, self).get_queryset()
@@ -568,7 +556,8 @@ class BlobEditView(OwnerRequiredMixin, FormView):
                 slug=self.kwargs['slug']
             )
         except:
-            pass
+            raise Repository.DoesNotExist
+
         user = self.request.user
         owner = False
         if user.is_superuser:
