@@ -70,7 +70,6 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 		owner_name = self.kwargs['username']
 		user_specific = User.objects.get(username=owner_name)
 		queryset = Repository.objects.filter(owner=user_specific.id)
-
 		search_query = self.request.GET.get('search')
 		if search_query:
 			queryset = queryset.filter(
@@ -79,6 +78,16 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 			).order_by('name')
 		return queryset
 
+
+	def get_context_data(self, *args, **kwargs):
+		context = super(IndividualIndexView, self).get_context_data(**kwargs)
+		context['username'] = self.kwargs['username']
+		return context
+
+	def edited_repos(self):
+		owner_name = self.kwargs['username']
+		user_specific = User.objects.get(username=owner_name)
+		return Repository.objects.filter(editors__id=user_specific.id)
 
 # User's repo list view - profile/dashboard
 class RepositoryListView(LoginRequiredMixin, ListView):
@@ -411,7 +420,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 		return list_to_return
 
 	def get_object(self, **kwargs):
-		queryset = super(RepositoryUpdateView, self).get_queryset()
 		obj = super(RepositoryUpdateView, self).get_object(**kwargs)
 		user = self.request.user
 		owner = False
@@ -426,7 +434,11 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
 
 		if owner == False:
 			raise PermissionDenied
-		queryset = queryset.get(owner__username=self.kwargs.get('username'),slug=self.kwargs.get('slug'))
+		return obj
+
+	def get_queryset(self):
+		queryset = super(RepositoryUpdateView, self).get_queryset()
+		queryset = queryset.filter(owner__username=self.kwargs.get('username'),slug=self.kwargs.get('slug'))
 		return queryset
 
 	def get_form_kwargs(self):
@@ -1161,7 +1173,7 @@ class ForkedReposView(ListView):
 		self.owner_name = self.kwargs['username']
 		self.repo_name = self.kwargs['slug']
 		user = User.objects.get(username=self.owner_name)
-		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		repo = Repository.objects.get(owner=user.id,slug=self.repo_name)
 		forked_repos = ForkedRepository.objects.filter(original=repo)
 		return forked_repos
 
@@ -1170,7 +1182,7 @@ class ForkedReposView(ListView):
 		forked_repos = self.get_queryset()
 		repos = []
 		for repo in forked_repos:
-			repo = Repository.objects.get(owner=repo.fork.owner,name=repo.fork.name)
+			repo = Repository.objects.get(owner=repo.fork.owner,slug=repo.fork.name)
 			repos.append(repo)
 		context['orig_repo'] = self.repo_name
 		context['orig_author'] = self.owner_name
@@ -1189,7 +1201,7 @@ class CommitLogView(ListView):
 		self.owner_name = self.kwargs['username']
 		self.repo_name = self.kwargs['slug']
 		user = User.objects.get(username=self.owner_name)
-		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		repo = Repository.objects.get(owner=user.id,slug=self.repo_name)
 		try:
 			git_repo = pygit2.Repository(repo.get_repo_path())
 		except IOError:
@@ -1249,7 +1261,7 @@ class CommitView(ListView):
 		context['orig_repo'] = self.repo_name
 		context['orig_author'] = self.owner_name
 		user = User.objects.get(username=self.owner_name)
-		repo = Repository.objects.get(owner=user.id,name=self.repo_name)
+		repo = Repository.objects.get(owner=user.id,slug=self.repo_name)
 		try:
 			git_repo = pygit2.Repository(repo.get_repo_path())
 		except IOError:
