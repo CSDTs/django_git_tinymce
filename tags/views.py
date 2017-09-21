@@ -6,18 +6,18 @@ from .models import Tag
 
 
 class TagListView(ListView):
-	model = Tag
+    model = Tag
 
 
 class TagDetailView(DetailView):
-	model = Tag
+    model = Tag
 
-	def get_context_data(self, **kwargs):
-		context = super(TagDetailView, self).get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(TagDetailView, self).get_context_data(**kwargs)
 
-		# if self.request.user.is_authenticated():
-		# 	user = self.request.user
-		# 	tag = self.get_object()
-		# 	tag_analytics_obj = TagAnalytics.objects.add_count(user, tag)
+        # if self.request.user.is_authenticated():
+        #     user = self.request.user
+        #     tag = self.get_object()
+        #     tag_analytics_obj = TagAnalytics.objects.add_count(user, tag)
 
-		return context
+        return context
