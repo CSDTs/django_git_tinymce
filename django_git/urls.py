@@ -20,7 +20,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
 
-from dashboard.views import DashboardAllRepoIndexView, MenuView
+from dashboard.views import MenuView
+# from dashboard.views import DashboardAllRepoIndexView, MenuView
 # from dashboard.views import DashboardView
 # from gitusers.views import IndexView
 

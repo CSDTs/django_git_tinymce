@@ -1,20 +1,20 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+# from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
-from rest_framework import generics
-from rest_framework import mixins
+# from rest_framework import generics
+# from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework import status
-from rest_framework.decorators import detail_route
-from rest_framework.permissions import AllowAny
+# from rest_framework.decorators import detail_route
+# from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from repos.models import Repository as repo_model
-from pygit2 import Repository, Signature
+from pygit2 import Repository
 from time import time
 import json
 import datetime
@@ -28,11 +28,15 @@ import re
 
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from django.conf import settings
+# from django.conf import settings
 
 from pathlib import Path
 
-from .utils import create_commit, create_commit_folders, delete_commit_folders
+from .utils import (
+    # create_commit,
+    create_commit_folders,
+    delete_commit_folders,
+)
 
 
 class OwnerViewSet(viewsets.ModelViewSet):
@@ -46,7 +50,6 @@ class UserView(viewsets.ModelViewSet):
     model = User
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = User.objects.all()
-
 
 
 class FilesView(APIView):
@@ -66,16 +69,13 @@ class FilesView(APIView):
         dir_path = path.join(specific_repo.get_repo_path(), directory)
         os.chdir(dir_path)
 
-
         index_tree = this_repo.index
         # commit = this_repo.revparse_single('HEAD')
         # tree10 = commit.tree
 
         # index_tree.read_tree(item.id)
-        #print('item', item)
-        #print('index_tree', list(index_tree))
-
-
+        # print('item', item)
+        # print('index_tree', list(index_tree))
 
         tuplet = []
         time = None
@@ -119,11 +119,22 @@ class FilesView(APIView):
                             continue
                         folders.append(name)
 
-
-                    tuplet.append({'name': name, 'id': entry.hex, 'type': type, 'filemode': filemode})
+                    tuplet.append({
+                        'name': name,
+                        'id': entry.hex,
+                        'type': type,
+                        'filemode': filemode
+                        }
+                    )
             else:
                 for entry in tree:
-                    tuplet.append({'name': entry.name, 'id': entry.id.hex, 'type': entry.type, 'filemode': entry.filemode})
+                    tuplet.append({
+                        'name': entry.name,
+                        'id': entry.id.hex,
+                        'type': entry.type,
+                        'filemode': entry.filemode
+                        }
+                    )
             date_handler = lambda obj: (
                 obj.isoformat()
                 if isinstance(obj, (datetime.datetime, datetime.date))
@@ -194,7 +205,8 @@ class FilesView(APIView):
             print('path', path)
             b = this_repo.create_blob_fromworkdir(os.path.join(directory, data_name))
             bld = this_repo.TreeBuilder()
-            bld.insert(data_name, b, os.stat(os.path.join(specific_repo.get_repo_path(), directory, data_name)).st_mode )
+            filemode = os.stat(os.path.join(specific_repo.get_repo_path(), directory, data_name)).st_mode
+            bld.insert(data_name, b, filemode)
             t = bld.write()
             # this_repo.index.read()
             # this_repo.index.add(data_name)
@@ -203,8 +215,8 @@ class FilesView(APIView):
             if self.request.user.email:
                 email = self.request.user.email
             # s = pygit2.Signature(self.request.user.username, email, int(time()), 0)
-            #s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
-            #c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
+            # s = pygit2.Signature('Alice Author', 'alice@authors.tld', int(time()), 0)
+            # c = this_repo.create_commit('HEAD', s,s, commit_message, t, [this_repo.head.target])
             commit_message = "Uploaded file " + data_name
 
             create_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
