@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span>&nbsp;Back to Repo</a>
+<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>&nbsp;Back to Repo</a>
 
 <h1>Commit Log of "<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}">{{ orig_author }}/{{ orig_repo }}</a>"</h1>
 
