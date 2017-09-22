@@ -27,7 +27,7 @@ class OwnerRequiredMixin(LoginRequiredMixin, object):
                 if editor.id == user.id:
                     owner = True
 
-        if owner is False:
+        if not owner:
             raise PermissionDenied
 
         return obj
