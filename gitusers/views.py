@@ -442,7 +442,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
                 if editor.id == user.id:
                     owner = True
 
-        if owner is False:
+        if not owner:
             raise PermissionDenied
 
         directory = ""
@@ -568,7 +568,7 @@ class BlobEditView(OwnerRequiredMixin, FormView):
             for editor in self.repo_obj.editors.all():
                 if editor.id == user.id:
                     owner = True
-        if owner is False:
+        if not owner:
             raise PermissionDenied
         initial = super(BlobEditView, self).get_initial()
         filename = self.kwargs.get('filename')
@@ -749,7 +749,7 @@ class BlobDeleteView(OwnerRequiredMixin, DeleteView):
                 if editor.id == user.id:
                     owner = True
 
-        if owner is False:
+        if not owner:
             raise PermissionDenied
 
         filename = self.kwargs.get('filename')
@@ -810,7 +810,7 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
                 if editor.id == user.id:
                     owner = True
 
-        if owner is False:
+        if not owner:
             raise PermissionDenied
 
         filename = self.kwargs.get('filename')
@@ -914,7 +914,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
                 if editor.id == user.id:
                     owner = True
 
-        if owner is False:
+        if not owner:
             raise PermissionDenied
 
         filename = self.kwargs.get('filename')
