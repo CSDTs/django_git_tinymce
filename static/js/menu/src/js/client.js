@@ -17,7 +17,7 @@ const app = document.getElementById('app')
 
 
 ReactDOM.render(<Provider store={store}>
-  <Router history={history}>
+  <Router>
     <Route path='/' component={Layout}/>
   </Router>
 </Provider>, app);

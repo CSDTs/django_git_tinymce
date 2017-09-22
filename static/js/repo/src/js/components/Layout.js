@@ -201,10 +201,8 @@ export default class Layout extends React.Component {
       >
       <div className="row">
         <div className="col-md-6 col-xs-8">
-          <p>
             <h2 className="repo-header"><a href={`/${window.props.repo_owner}`}>{window.props.repo_owner}</a> / <a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{window.props.repo_name}</a> </h2>
             <div>{(window.props.is_fork) ? <div><font className="small-fork-text">Forked from <a href={`/${window.props.fork_owner}/${window.props.fork_name}/`}>{`${window.props.fork_owner}/${window.props.fork_name}`}</a></font></div> : null }</div>
-          </p>
         </div>
         <div className="col-md-6 text-right col-xs-4">
           <div class="btn-group" role="group" aria-label="...">
@@ -230,11 +228,7 @@ export default class Layout extends React.Component {
       </div>
       <div className="row">
         <div className="col-md-12">
-          <p>
             <h4 className="repo-header">{repo.description} {editShow}</h4>
-
-
-          </p>
 
           <Branches branches={files.branches} is_owner={files.is_owner} is_editor={files.is_editor} />
 
