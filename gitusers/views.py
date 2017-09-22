@@ -186,6 +186,9 @@ class ReduxRepositoryDetailView(TemplateView):
         repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
+        print(user, 'user')
+        print(repo_name, 'repo_name')
+        print('repo', repo)
         try:
             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
             if orig_fork:

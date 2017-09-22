@@ -39,6 +39,7 @@ urlpatterns = [
     # url(r'^$', DashboardView.as_view(), name='index'),
     url(r'^$', MenuView.as_view(), name='index'),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
+    url(r'^favicon\.ico/$', RedirectView.as_view(url='/static/img/favicon.ico')),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
