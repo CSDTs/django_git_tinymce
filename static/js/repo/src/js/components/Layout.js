@@ -202,7 +202,7 @@ export default class Layout extends React.Component {
       <div className="row">
         <div className="col-md-6 col-xs-8">
             <h2 className="repo-header"><a href={`/${window.props.repo_owner}`}>{window.props.repo_owner}</a> / <a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{window.props.repo_name}</a> </h2>
-            <div style={{marginBottom: '15px'}}>{(window.props.is_fork) ? <div><font className="small-fork-text">Forked from <a href={`/${window.props.fork_owner}/${window.props.fork_name}/`}>{`${window.props.fork_owner}/${window.props.fork_name}`}</a></font></div> : null }</div>
+            <div style={{marginBottom: '10px'}}>{(window.props.is_fork) ? <div><font className="small-fork-text">Forked from <a href={`/${window.props.fork_owner}/${window.props.fork_name}/`}>{`${window.props.fork_owner}/${window.props.fork_name}`}</a></font></div> : null }</div>
         </div>
         <div className="col-md-6 text-right col-xs-4">
           <div class="btn-group" role="group" aria-label="...">
