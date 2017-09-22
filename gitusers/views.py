@@ -186,9 +186,6 @@ class ReduxRepositoryDetailView(TemplateView):
         repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
-        print(user, 'user')
-        print(repo_name, 'repo_name')
-        print('repo', repo)
         try:
             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
             if orig_fork:
@@ -227,7 +224,7 @@ class ReduxRepositoryFolderDetailView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
-        
+
         owner_name = self.kwargs['username']
         repo_name = self.kwargs['slug']
         directory = ""
@@ -332,7 +329,7 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
         if Repository.objects.filter(
             slug=origin_repo.slug, owner=self.request.user).exists():
             context['message'] = "You already have a repo with the same name. \
-                                Please rename your fork:" 
+                                Please rename your fork:"
 
         # try:
         #     Repository.objects.get(

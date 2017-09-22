@@ -90,13 +90,8 @@ export default class Layout extends React.Component {
       });
       req.send
       req.end(function(err,response){
-          console.log("upload done!!!!!");
+        window.location.reload();
     })
-
-
-
-
-
 
   }
   onDragEnter() {
