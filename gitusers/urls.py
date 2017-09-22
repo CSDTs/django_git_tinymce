@@ -84,5 +84,4 @@ urlpatterns = [
 
     # testing this out: (need to keep last in list)
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/$', ReduxRepositoryFolderDetailView.as_view(), name='repo_detail_folder'),  # noqa: E501
-
 ]

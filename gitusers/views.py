@@ -7,6 +7,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.views import View
+from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (
     CreateView,
@@ -17,9 +18,14 @@ from django.views.generic.edit import (
 from django.views.generic.list import ListView
 from django.urls import reverse, reverse_lazy
 
-from .utils import find_file_oid_in_tree,\
-    create_commit_folders, delete_commit, delete_commit_folders,\
-    find_file_oid_in_tree_using_index
+from .utils import (
+    find_file_oid_in_tree,
+    create_commit_folders,
+    delete_commit,
+    delete_commit_folders,
+    find_file_oid_in_tree_using_index,
+)
+
 from django_git.mixins import OwnerRequiredMixin, OwnerOnlyRequiredMixin
 from repos.forms import (
     RepositoryModelForm,
@@ -161,11 +167,13 @@ class RepositoryDetailView(DetailView):
         return context
 
 
-class ReduxRepositoryDetailView(View):
+class ReduxRepositoryDetailView(TemplateView):
     template_name = 'repo/redux_repo.html'
     component = 'repo/src/client.min.js'
 
-    def get(self, request, slug, username):
+    def get_context_data(self, **kwargs):
+        context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
+
         # gets passed to react via window.props
         owner_name = self.kwargs['username']
         repo_name = self.kwargs['slug']
@@ -173,6 +181,8 @@ class ReduxRepositoryDetailView(View):
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         user = User.objects.get(username=owner_name)
+        print(owner_name)
+        print(user, repo_name)
         repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
@@ -205,21 +215,19 @@ class ReduxRepositoryDetailView(View):
             'fork_owner': fork_owner,
         }
 
-        context = {
+        context['component'] = self.component
+        context['props'] = props
 
-            'component': self.component,
-            'props': props,
-        }
-
-        return render(request, self.template_name, context)
+        return context
 
 
-class ReduxRepositoryFolderDetailView(View):
+class ReduxRepositoryFolderDetailView(TemplateView):
     template_name = 'repo/redux_repo.html'
     component = 'repo/src/client.min.js'
 
-    def get(self, request, slug, username, directories, directories_ext=None):
-        # gets passed to react via window.props
+    def get_context_data(self, **kwargs):
+        context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
+        
         owner_name = self.kwargs['username']
         repo_name = self.kwargs['slug']
         directory = ""
@@ -246,23 +254,21 @@ class ReduxRepositoryFolderDetailView(View):
             fork_owner = None
 
         props = {
-                    'repo_name': repo_name,
-                    'repo_owner': owner_name,
-                    'repo_owner_id': user.id,
-                    'repo_id': repo.id,
-                    'directory': directory,
-                    'fork_count': fork_count,
-                    'is_fork': is_fork,
-                    'fork_name': fork_name,
-                    'fork_owner': fork_owner,
+            'repo_name': repo_name,
+            'repo_owner': owner_name,
+            'repo_owner_id': user.id,
+            'repo_id': repo.id,
+            'directory': directory,
+            'fork_count': fork_count,
+            'is_fork': is_fork,
+            'fork_name': fork_name,
+            'fork_owner': fork_owner,
         }
 
-        context = {
-            'component': self.component,
-            'props': props,
-        }
+        context['component'] = self.component
+        context['props'] = props
 
-        return render(request, self.template_name, context)
+        return context
 
 
 # Fork Already Named Fork
@@ -323,16 +329,21 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
         origin_repo = self.kwargs.get("slug")
         origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
 
-        try:
-            Repository.objects.get(
-                slug=origin_repo.name,
-                owner=self.request.user
-            )
+        if Repository.objects.filter(
+            slug=origin_repo.slug, owner=self.request.user).exists():
+            context['message'] = "You already have a repo with the same name. \
+                                Please rename your fork:" 
 
-            context['message'] = "You already have a repo with the same name. Please rename your fork:"
+        # try:
+        #     Repository.objects.get(
+        #         slug=origin_repo.name,
+        #         owner=self.request.user
+        #     )
 
-        except Repository.DoesNotExist:
-            pass
+        #     context['message'] = "You already have a repo with the same name. Please rename your fork:"
+
+        # except Repository.DoesNotExist:
+        #     pass
 
         return context
 
@@ -362,23 +373,6 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
             add = User.objects.get(username=editor.username)
             list_to_return.append(add.username)
         return list_to_return
-
-    def get_object(self, **kwargs):
-        obj = super(RepositoryUpdateView, self).get_object(**kwargs)
-        user = self.request.user
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if obj.owner == user:
-            owner = True
-        else:
-            for editor in obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if not owner:
-            raise PermissionDenied
-        return obj
 
     def get_queryset(self):
         queryset = super(RepositoryUpdateView, self).get_queryset()
@@ -513,10 +507,10 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             return self.form_invalid(form)
         file.write(filecontent)
         file.close()
-        b = git_repo.create_blob_fromworkdir(path.join(dirname, filename2))
-        bld = git_repo.TreeBuilder()
-        bld.insert(filename2, b, os.stat(os.path.join(repo.get_repo_path(), dirname, filename2)).st_mode)
-        bld.write()
+        # b = git_repo.create_blob_fromworkdir(path.join(dirname, filename2))
+        # bld = git_repo.TreeBuilder()
+        # bld.insert(filename2, b, os.stat(os.path.join(repo.get_repo_path(), dirname, filename2)).st_mode)
+        # bld.write()
         create_commit_folders(self.request.user, git_repo, commit_message, filename2, dirname)
 
         return super(RepositoryCreateFileView, self).form_valid(form)
@@ -566,7 +560,8 @@ class BlobEditView(OwnerRequiredMixin, FormView):
                 slug=self.kwargs['slug']
             )
         except:
-            pass
+            raise Repository.DoesNotExist
+
         user = self.request.user
         owner = False
         if user.is_superuser:

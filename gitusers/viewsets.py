@@ -57,6 +57,7 @@ class FilesView(APIView):
             directory = self.kwargs['directories']
         dir_path = path.join(specific_repo.get_repo_path(), directory)
         os.chdir(dir_path)
+
         index_tree = this_repo.index
         tuplet = []
         time2 = None
@@ -98,6 +99,7 @@ class FilesView(APIView):
                         if name in folders:
                             continue
                         folders.append(name)
+
                     tuplet.append({'name': name, 'id': entry.hex, 'type': type, 'filemode': filemode})
             else:
                 for entry in tree:
@@ -172,14 +174,13 @@ class FilesView(APIView):
                 specific_repo.get_repo_path(), directory, data_name), ContentFile(data.read()))
             # tmp_file = os.path.join(specific_repo.get_repo_path(), path)
             print('path', path)
-            b = this_repo.create_blob_fromworkdir(os.path.join(directory, data_name))
-            bld = this_repo.TreeBuilder()
-            bld.insert(data_name, b, os.stat(os.path.join(
-                specific_repo.get_repo_path(), directory, data_name)).st_mode)
-            bld.write()
+            # b = this_repo.create_blob_fromworkdir(os.path.join(directory, data_name))
+            # bld = this_repo.TreeBuilder()
+            # bld.insert(data_name, b, os.stat(os.path.join(
+            #     specific_repo.get_repo_path(), directory, data_name)).st_mode)
+            # bld.write()
             commit_message = "Uploaded file " + data_name
 
             create_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
-        # does not work, shouldn't be request.user.username:
         return HttpResponseRedirect('/')
         # return HttpResponseRedirect(reverse('gitusers:repo_detail', args=(request.user.username, specific_repo.slug)))
