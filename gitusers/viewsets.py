@@ -163,8 +163,6 @@ class FilesView(APIView):
             if '..' in data_name:
                 consequitivedots = re.compile(r'\.{2,}')
                 data_name = consequitivedots.sub('', data_name)
-            print('data_name', data_name)
-            print('data', data)
             file = Path(os.path.join(specific_repo.get_repo_path(), directory, data_name))
             if file.is_file():
                 os.remove(os.path.join(specific_repo.get_repo_path(), directory, data_name))
@@ -182,5 +180,4 @@ class FilesView(APIView):
             commit_message = "Uploaded file " + data_name
 
             create_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
-        return HttpResponseRedirect('/')
-        # return HttpResponseRedirect(reverse('gitusers:repo_detail', args=(request.user.username, specific_repo.slug)))
+        return HttpResponseRedirect()
