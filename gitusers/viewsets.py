@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from django.urls import reverse
 
 from rest_framework import permissions
 from rest_framework import viewsets

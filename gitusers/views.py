@@ -326,8 +326,8 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
         origin_repo = self.kwargs.get("slug")
         origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
 
-        if Repository.objects.filter(
-            slug=origin_repo.slug, owner=self.request.user).exists():
+        if Repository.objects.filter(slug=origin_repo.slug,
+                                     owner=self.request.user).exists():
             context['message'] = "You already have a repo with the same name. \
                                 Please rename your fork:"
 
