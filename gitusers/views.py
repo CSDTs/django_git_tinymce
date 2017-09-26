@@ -233,7 +233,7 @@ class ReduxRepositoryFolderDetailView(TemplateView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs['directories_ext']
         user = User.objects.get(username=owner_name)
-        repo = Repository.objects.get(owner=user.id, name__iexact=repo_name)
+        repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
         try:

@@ -1,0 +1,140 @@
+
+
+
+
+
+#welcome-logo {
+    text-align: center;
+    margin-bottom: 75px;
+    margin-top: 75px;
+
+
+}
+
+
+.logo-text {
+    fill: #FF5EAA;
+    font-family: 'Quicksand', sans-serif;
+
+
+
+}
+
+#welcome-logo-svg {
+    transform: scale(3.0);
+
+}
+
+/* CSDT Toolbar */
+#toolbar-logo {
+
+    height: 45px;
+    margin-top: -8%;
+
+}
+
+/* CSDT Toolbar Logo Color */
+.toolbar-logo-text {
+    fill: #888;
+    transition: .5s;
+
+}
+
+/* CSDT Logo hover color/animation #661441;*/
+#toolbar-logo:hover .toolbar-logo-text {
+    fill: #ffffff;
+
+    /* transform: rotate(0.5deg); */
+
+
+
+}
+
+
+
+.navbar{
+    background-image: none;
+
+}
+
+nav .btn {
+    color: #333;
+
+}
+
+/* background */
+.navbar-custom {
+
+	background-color: #4e4456;
+    color:#ccc;
+  	border-radius:0;
+}
+
+
+/* fontsize for titlebar */
+.navbar ul li {
+    font-size: 1.3em;
+    margin-top: 5px;
+    margin-right: 10px;
+    font-family: 'Khula';
+}
+
+.navbar-custom .navbar-nav > li > a {
+  	color:#eee;
+
+}
+.navbar-custom .navbar-nav > .active > a, .navbar-nav > .active > a:hover, .navbar-nav > .active > a:focus {
+    color: #ffffff;
+	background-color:transparent;
+}
+
+/* hover background */
+.navbar-custom .navbar-nav > li > a:hover, .nav > li > a:focus {
+    text-decoration: none;
+    background-color: #4e4456;
+}
+
+.navbar-custom .navbar-brand {
+  	color:#eeeeee;
+}
+
+
+.navbar-custom .navbar-toggle:hover {
+    background-color: #391466;
+}
+
+/* hamburger color */
+.navbar-custom .navbar-toggle {
+  	background-color:black;
+}
+.navbar-custom .icon-bar {
+  	background-color:#33aa33;
+}
+
+.navbar-custom  {
+  	border: 0px black;
+}
+
+
+/* overrides bootstrap.less so they don't move */
+.navbar-nav > li > a:hover {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+.navbar-local {
+        position: fixed;
+        width: 100%;
+        z-index: 1029;
+    }
+
+
+@media only screen and (min-width: 768px) {
+
+    .navbar-custom svg {
+        padding-left: 20%;
+    }
+
+
+}
+
+
