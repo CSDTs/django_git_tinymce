@@ -327,20 +327,10 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
         origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
 
         if Repository.objects.filter(
-            slug=origin_repo.slug, owner=self.request.user).exists():
-            context['message'] = "You already have a repo with the same name. \
-                                Please rename your fork:"
-
-        # try:
-        #     Repository.objects.get(
-        #         slug=origin_repo.name,
-        #         owner=self.request.user
-        #     )
-
-        #     context['message'] = "You already have a repo with the same name. Please rename your fork:"
-
-        # except Repository.DoesNotExist:
-        #     pass
+                slug=origin_repo.slug, owner=self.request.user
+        ).exists():
+                context['message'] = "You already have a repo with the same name.\
+                                        Please rename your fork:"
 
         return context
 
@@ -1273,8 +1263,7 @@ class SSIFolderView(TemplateView):
     template_name = 'repo/view_ssi.html'
 
     def get_object(self):
-
-        obj = Repository.objects.get(owner__username=self.kwargs.get('username'),slug=self.kwargs.get('slug'))
+        obj = Repository.objects.get(owner__username=self.kwargs.get('username'), slug=self.kwargs.get('slug'))
         return obj
 
     def get_context_data(self, **kwargs):
