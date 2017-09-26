@@ -145,7 +145,7 @@ export default class Layout extends React.Component {
       mappedRepos = filteredRepos.map((repo, index) => {
         if (index >= start_offset && start_count < per_page) {
           start_count++;
-          return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
+          return  <a href={`/${repo.owner_username}/${repo.slug}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
         }
 
       })
@@ -156,7 +156,7 @@ export default class Layout extends React.Component {
         mappedRepos = this.props.copy.map((repo, index) => {
           if (index >= start_offset && start_count < per_page) {
             start_count++;
-            return  <a href={`/${repo.owner_username}/${repo.name}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
+            return  <a href={`/${repo.owner_username}/${repo.slug}`.toLowerCase()} key={repo.id}><div className="col-md-4 box" ><img src={repo.photo_url} width="100%" className="img-responsive"/>{repo.name} by { repo.owner_username }</div></a>
           }
 
         })

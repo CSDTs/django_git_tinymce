@@ -133,7 +133,6 @@ def delete_commit(user, repo, message, filename):
         parent = repo.revparse_single('HEAD')
     except KeyError:
         pass
-
     parents = []
     if parent:
         parents.append(parent.oid.hex)

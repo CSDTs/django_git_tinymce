@@ -78,7 +78,7 @@ export default class Layout extends React.Component {
       concurrent: 1     // how many requests can be sent concurrently
     })
     var req=request
-              .post(`/api/v1/files/${window.props.repo_id}/${window.props.directory}`)
+              .post(`/api/v1/files/${window.props.repo_id}/${(window.props.directory !== "") ? `${window.props.directory}/` : null}`)
               .use(throttle.plugin())
     files.forEach((dropped_file) => {
 
@@ -90,7 +90,9 @@ export default class Layout extends React.Component {
       });
       req.send
       req.end(function(err,response){
-        window.location.reload();
+        if (!err) {
+          window.location.reload();
+        }
     })
 
   }
