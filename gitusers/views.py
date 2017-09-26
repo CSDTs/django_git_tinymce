@@ -186,9 +186,6 @@ class ReduxRepositoryDetailView(TemplateView):
         repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
-        print(user, 'user')
-        print(repo_name, 'repo_name')
-        print('repo', repo)
         try:
             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
             if orig_fork:
@@ -227,7 +224,7 @@ class ReduxRepositoryFolderDetailView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
-        
+
         owner_name = self.kwargs['username']
         repo_name = self.kwargs['slug']
         directory = ""
@@ -330,20 +327,10 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
         origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
 
         if Repository.objects.filter(
-            slug=origin_repo.slug, owner=self.request.user).exists():
-            context['message'] = "You already have a repo with the same name. \
-                                Please rename your fork:" 
-
-        # try:
-        #     Repository.objects.get(
-        #         slug=origin_repo.name,
-        #         owner=self.request.user
-        #     )
-
-        #     context['message'] = "You already have a repo with the same name. Please rename your fork:"
-
-        # except Repository.DoesNotExist:
-        #     pass
+                slug=origin_repo.slug, owner=self.request.user
+        ).exists():
+                context['message'] = "You already have a repo with the same name.\
+                                        Please rename your fork:"
 
         return context
 
@@ -1270,3 +1257,25 @@ class EditorDeleteView(OwnerRequiredMixin, DeleteView):
 
             }
         ))
+
+
+class SSIFolderView(TemplateView):
+    template_name = 'repo/view_ssi.html'
+
+    def get_object(self):
+        obj = Repository.objects.get(owner__username=self.kwargs.get('username'), slug=self.kwargs.get('slug'))
+        return obj
+
+    def get_context_data(self, **kwargs):
+        context = super(SSIFolderView, self).get_context_data(**kwargs)
+        filename = self.kwargs.get('filename')
+        if self.kwargs.get('extension'):
+            filename += self.kwargs.get('extension')
+        directory = ""
+        if 'directories' in self.kwargs:
+            directory = self.kwargs.get('directories')
+        if 'directories_ext' in self.kwargs:
+            directory += "/" + self.kwargs.get('directories_ext')
+        repo = self.get_object()
+        context['url'] = str(path.join(repo.get_repo_path_media(), directory, filename))
+        return context
