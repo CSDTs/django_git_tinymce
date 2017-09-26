@@ -51,6 +51,9 @@ class Repository(models.Model):
     def get_repo_path(self):
         return join(settings.REPO_DIR, self.owner.username, str(self.pk))
 
+    def get_repo_path_media(self):
+        return join(self.owner.username, str(self.pk))
+
     def save(self, *args, **kwargs):
         super(Repository, self).save(*args, **kwargs)
         if self.image:

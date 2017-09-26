@@ -20,6 +20,7 @@ from .views import (
     CommitView,
     AddEditors,
     EditorDeleteView,
+    SSIFolderView
 )
 
 app_name = "gitusers"
@@ -53,6 +54,10 @@ urlpatterns = [
 
 
 
+    # blob ssi
+    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi_folder'),  # noqa: E501
 
 
 
