@@ -7,6 +7,7 @@ from django.utils.text import slugify
 from tinymce.widgets import TinyMCE
 
 from .models import Repository
+from gitusers.utils import find_folder_oid_in_tree
 
 User = get_user_model()
 
@@ -145,28 +146,28 @@ class FileRenameForm(forms.Form):
         return new_filename
 
 
-# class FolderCreateForm(forms.Form):
-#     folder_name = forms.CharField(label='New folder name', required=True)
-#     commit_message = forms.CharField(
-#         required=False,
-#         empty_value="folder {} Created on {}".format(
-#             folder_name,
-#             datetime.now().strftime("%A, %d. %B %Y %I:%M%p"),
-#         )
-#     )
+class FolderCreateForm(forms.Form):
+    folder_name = forms.CharField(label='New folder name', required=True)
+    commit_message = forms.CharField(
+        required=False,
+        empty_value="folder {} Created on {}".format(
+            folder_name,
+            datetime.now().strftime("%A, %d. %B %Y %I:%M%p"),
+        )
+    )
 
-#     def __init__(self, *args, **kwargs):
-#         self.repo_tree = kwargs.pop('tree')
-#         super(RepositoryUpdateModelForm, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        self.repo_tree = kwargs.pop('tree')
+        super(FolderCreateForm, self).__init__(*args, **kwargs)
 
-#     def clean_folder_name(self):
-#         new_filename = self.cleaned_data['new_filename']
-#         if new_filename == ('.html'.strip()):
-#             raise forms.ValidationError(
-#                 'Please enter file name, i.e. "example.html"'
-#             )
+    def clean_folder_name(self):
+        folder_name = self.cleaned_data['folder_name']
 
-#         return new_filename
+        folder_exist = find_folder_oid_in_tree(folder_name, self.repo_tree)
+        if  folder_exist != 404:
+            raise forms.ValidationError('folder already exists')
+
+        return folder_name
 
 
 class RepoForkRenameForm(forms.Form):

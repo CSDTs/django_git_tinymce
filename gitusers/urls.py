@@ -5,7 +5,8 @@ from .views import (
     BlobRawView,
     RepositoryCreateView,
     RepositoryCreateFileView,
-    # RepositoryDetailView,
+    RepositoryCreateFolderView,
+    RepositoryDetailView,
     RepositoryDeleteView,
     RepositoryForkView,
     RepositoryUpdateView,
@@ -27,6 +28,7 @@ app_name = "gitusers"
 urlpatterns = [
     url(r'^$', IndividualIndexView.as_view(), name='index'),
     url(r'^create/$', RepositoryCreateView.as_view(), name='create'),
+    url(r'^(?P<slug>[-\w]+)/$', RepositoryDetailView.as_view(), name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/$', ReduxRepositoryDetailView.as_view(), name='repo_detail'),
 
     url(r'^(?P<slug>[-\w]+)/fork/$', RepositoryForkView.as_view(), name='fork'),
@@ -42,6 +44,7 @@ urlpatterns = [
     url(r'^(?P<slug>[-\w]+)/delete/$', RepositoryDeleteView.as_view(), name='delete'),
 
     url(r'^(?P<slug>[-\w]+)/create/$', RepositoryCreateFileView.as_view(), name='create_file'),
+    url(r'^(?P<slug>[-\w]+)/createfolder/$', RepositoryCreateFolderView.as_view(), name='create_folder'),
 
 
 

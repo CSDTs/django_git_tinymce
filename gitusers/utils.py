@@ -3,15 +3,25 @@ from os import path
 
 def find_file_oid_in_tree(filename, tree):
     for entry in tree:
-        if entry.name.lower() == filename.lower():
-            return entry.id
+        if entry.type == 'blob':
+            if entry.name.lower() == filename.lower():
+                return entry.id
     return 404
 
 
 def find_file_oid_in_tree_using_index(filename, index_tree):
     for entry in index_tree:
-        if entry.path.lower() == filename.lower():
-            return entry.hex
+        if entry.type == 'blob':
+            if entry.path.lower() == filename.lower():
+                return entry.hex
+    return 404
+
+
+def find_folder_oid_in_tree(foldername, tree):
+    for entry in tree:
+        if entry.type == 'tree':
+            if entry.name.lower() == foldername.lower():
+                return entry.id
     return 404
 
 
