@@ -55,9 +55,9 @@ urlpatterns = [
 
 
     # blob ssi
-    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi_dir'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi_folder'),  # noqa: E501
 
 
 
@@ -76,9 +76,15 @@ urlpatterns = [
 
 
     # Blob raw view
+    # FIXME changed from blob:
+    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),  # noqa: E501
+
     url(r'^(?P<slug>[-\w]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/blob/(?P<directories>[\w-]+)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/blob/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),  # noqa: E501
+
 
     # blob edit - must be after blob raw view
     url(r'^(?P<slug>[-\w]+)/edit/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobEditView.as_view(), name='blob_edit'),  # noqa: E501

@@ -1269,8 +1269,9 @@ class SSIFolderView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(SSIFolderView, self).get_context_data(**kwargs)
         filename = self.kwargs.get('filename')
-        if self.kwargs.get('extension'):
-            filename += self.kwargs.get('extension')
+        # if self.kwargs.get('extension'):
+        #     filename += self.kwargs.get('extension')
+        filename += ".html"
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs.get('directories')
