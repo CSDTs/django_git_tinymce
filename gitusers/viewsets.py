@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -179,4 +180,4 @@ class FilesView(APIView):
             commit_message = "Uploaded file " + data_name
 
             create_commit_folders(self.request.user, this_repo, commit_message, data_name, directory)
-        return HttpResponseRedirect()
+        return HttpResponseRedirect(reverse('gitusers:repo_detail', args=(request.user.username, specific_repo.slug)))
