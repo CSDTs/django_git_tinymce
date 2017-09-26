@@ -416,26 +416,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
     def get_initial(self, **kwargs):
         initial = super(RepositoryCreateFileView, self).get_initial()
 
-        user = self.request.user
-        self.repo_obj = Repository.objects.get(
-            owner__username=self.kwargs['username'],
-            slug=self.kwargs['slug']
-        )
-
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if self.repo_obj.owner == user:
-            owner = True
-
-        else:
-            for editor in self.repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if not owner:
-            raise PermissionDenied
-
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
@@ -502,6 +482,31 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
 
         return super(RepositoryCreateFileView, self).form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(RepositoryCreateFileView, self).get_context_data(**kwargs)
+
+        user = self.request.user
+        self.repo_obj = Repository.objects.get(
+            owner__username=self.kwargs['username'],
+            slug=self.kwargs['slug']
+        )
+
+        owner = False
+        if user.is_superuser:
+            owner = True
+        if self.repo_obj.owner == user:
+            owner = True
+
+        else:
+            for editor in self.repo_obj.editors.all():
+                if editor.id == user.id:
+                    owner = True
+
+        if not owner:
+            raise PermissionDenied
+
+        return context
+
     def get_success_url(self):
         if 'directories_ext' in self.kwargs:
             return reverse(
@@ -531,8 +536,17 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             }
         )
 
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+##############################################################################################################################################################
+# class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
+#     template_name = 'repo/create_file.html'
+#     form_class = FolderCreateForm
+#     repo_obj = None
 
-class BlobEditView(OwnerRequiredMixin, FormView):
+
+class BlobEditView(FormView):
     template_name = 'repo/file_edit.html'
     form_class = TinyMCEFileEditForm
     blob = None
@@ -540,27 +554,6 @@ class BlobEditView(OwnerRequiredMixin, FormView):
     repo_obj = None
 
     def get_initial(self, **kwargs):
-        self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
-        try:
-            self.repo_obj = Repository.objects.get(
-                owner__username=self.kwargs['username'],
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Repository.DoesNotExist
-
-        user = self.request.user
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if self.repo_obj.owner == user:
-            owner = True
-        else:
-            for editor in self.repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-        if not owner:
-            raise PermissionDenied
         initial = super(BlobEditView, self).get_initial()
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
@@ -628,6 +621,30 @@ class BlobEditView(OwnerRequiredMixin, FormView):
             raise form.ValidationError("Save error, please check the file.")
 
         return super(BlobEditView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(BlobEditView, self).get_context_data(**kwargs)
+        self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
+        try:
+            self.repo_obj = Repository.objects.get(
+                owner__username=self.kwargs['username'],
+                slug=self.kwargs['slug']
+            )
+        except:
+            raise Repository.DoesNotExist
+
+        user = self.request.user
+        owner = False
+        if user.is_superuser:
+            owner = True
+        if self.repo_obj.owner == user:
+            owner = True
+        else:
+            for editor in self.repo_obj.editors.all():
+                if editor.id == user.id:
+                    owner = True
+        if not owner:
+            raise PermissionDenied
 
 
 class BlobRawView(View):

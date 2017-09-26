@@ -145,6 +145,30 @@ class FileRenameForm(forms.Form):
         return new_filename
 
 
+# class FolderCreateForm(forms.Form):
+#     folder_name = forms.CharField(label='New folder name', required=True)
+#     commit_message = forms.CharField(
+#         required=False,
+#         empty_value="folder {} Created on {}".format(
+#             folder_name,
+#             datetime.now().strftime("%A, %d. %B %Y %I:%M%p"),
+#         )
+#     )
+
+#     def __init__(self, *args, **kwargs):
+#         self.repo_tree = kwargs.pop('tree')
+#         super(RepositoryUpdateModelForm, self).__init__(*args, **kwargs)
+
+#     def clean_folder_name(self):
+#         new_filename = self.cleaned_data['new_filename']
+#         if new_filename == ('.html'.strip()):
+#             raise forms.ValidationError(
+#                 'Please enter file name, i.e. "example.html"'
+#             )
+
+#         return new_filename
+
+
 class RepoForkRenameForm(forms.Form):
     new_reponame = forms.CharField(label='New fork name', required=True)
 
