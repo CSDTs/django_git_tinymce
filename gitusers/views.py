@@ -233,7 +233,7 @@ class ReduxRepositoryFolderDetailView(TemplateView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs['directories_ext']
         user = User.objects.get(username=owner_name)
-        repo = Repository.objects.get(owner=user.id, name__iexact=repo_name)
+        repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
         try:
@@ -1328,8 +1328,9 @@ class SSIFolderView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(SSIFolderView, self).get_context_data(**kwargs)
         filename = self.kwargs.get('filename')
-        if self.kwargs.get('extension'):
-            filename += self.kwargs.get('extension')
+        # if self.kwargs.get('extension'):
+        #     filename += self.kwargs.get('extension')
+        filename += ".html"
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs.get('directories')

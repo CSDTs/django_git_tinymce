@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.views.generic.base import RedirectView
 
 from .views import (
     BlobEditView,
@@ -27,9 +28,17 @@ from .views import (
 app_name = "gitusers"
 urlpatterns = [
     url(r'^$', IndividualIndexView.as_view(), name='index'),
+    # Hacky css fix so don't have to change website
+    url(r'^template\.css/$', RedirectView.as_view(url='/static/css/template.css')),
+    url(r'^tutorial\.css/$', RedirectView.as_view(url='/static/css/tutorial.css')),
+    url(r'^csdt\.css/$', RedirectView.as_view(url='/static/css/csdt.css')),
+
     url(r'^create/$', RepositoryCreateView.as_view(), name='create'),
     url(r'^(?P<slug>[-\w]+)/$', RepositoryDetailView.as_view(), name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/$', ReduxRepositoryDetailView.as_view(), name='repo_detail'),
+    # Hacky css fix so don't have to change website
+    url(r'^(?P<slug>[-\w]+)/csdt\.css/$', RedirectView.as_view(url='/static/css/csdt.css')),
+
 
     url(r'^(?P<slug>[-\w]+)/fork/$', RepositoryForkView.as_view(), name='fork'),
     url(r'^(?P<slug>[-\w]+)/forked/$', ForkedReposView.as_view(), name='forked'),
@@ -58,9 +67,9 @@ urlpatterns = [
 
 
     # blob ssi
-    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi_dir'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?$', SSIFolderView.as_view(), name='blob_ssi_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi_folder'),  # noqa: E501
 
 
 
@@ -79,9 +88,15 @@ urlpatterns = [
 
 
     # Blob raw view
+    # FIXME changed from blob:
+    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),  # noqa: E501
+
     url(r'^(?P<slug>[-\w]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/blob/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/blob/(?P<directories>[\w-]+)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/blob/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),  # noqa: E501
+
 
     # blob edit - must be after blob raw view
     url(r'^(?P<slug>[-\w]+)/edit/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobEditView.as_view(), name='blob_edit'),  # noqa: E501
