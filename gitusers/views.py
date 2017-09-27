@@ -541,6 +541,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
     form_class = FolderCreateForm
     repo_obj = None
     git_repo = None
+    folder = None
 
     def get_form_kwargs(self):
         kwargs = super(RepositoryCreateFolderView, self).get_form_kwargs()
@@ -565,6 +566,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
     def form_valid(self, form):
         folder_name = form.cleaned_data['folder_name']
         commit_message = form.cleaned_data['commit_message']
+        self.folder = folder_name
 
         # create the folder
         dir = os.path.join(self.repo_obj.get_repo_path(), folder_name)
@@ -574,16 +576,17 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         placeholder = open(os.path.join(dir, '.placeholder'), 'w')
         placeholder.close()
 
-        create_commit_folders(self.request.user, self.git_repo, commit_message, '.placeholder', dir)
+        create_commit_folders(self.request.user, self.git_repo, commit_message, '.placeholder', folder_name)
 
-        return super(RepositoryCreateFileView, self).form_valid(form)
+        return super(RepositoryCreateFolderView, self).form_valid(form)
 
     def get_success_url(self):
          return reverse(
-            "gitusers:repo_detail",
+            "gitusers:repo_detail_folder",
             kwargs={
                 'username': self.kwargs.get('username'),
-                'slug': self.kwargs.get('slug')
+                'slug': self.kwargs.get('slug'),
+                'directories': self.folder
             }
         )
 
