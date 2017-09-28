@@ -100,8 +100,8 @@ def repository_post_save(sender, instance, **kwagrs):
         repo.index.add(fn)
         repo.index.write()
         # head = repo.lookup_reference('HEAD').resolve()
+
         # Nav bar:
-        s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
         data = """
         <nav class="navbar navbar-inverse navbar-local visible-xs">\
     <div class="container-fluid">\
@@ -156,8 +156,149 @@ def repository_post_save(sender, instance, **kwagrs):
         repo.index.add(fn)
         repo.index.write()
 
+        # index.html
+        data = """
+        <h1>{0}</h1>
+        <p><img src="./img/{1}.png"></p>
+        <p>Index.html</p>
+        """.format(instance.name, instance.slug)
+        fn = "index.html"
+        f = open(os.path.join(repo.workdir, fn), 'w')
+        f.write(data)
+        f.close()
+        b = repo.create_blob_fromworkdir(fn)
+        # bld = repo.TreeBuilder()
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        t = bld.write()
+        repo.index.read()
+        repo.index.add(fn)
+        repo.index.write()
+
+        # origin.html
+        data = """
+        <h1>Origins</h1>
+        <p><img src="./img/{0}.png"></p>
+        <p>Origins.html</p>
+        """.format(instance.slug)
+        fn = "origins.html"
+        f = open(os.path.join(repo.workdir, fn), 'w')
+        f.write(data)
+        f.close()
+        b = repo.create_blob_fromworkdir(fn)
+        # bld = repo.TreeBuilder()
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        t = bld.write()
+        repo.index.read()
+        repo.index.add(fn)
+        repo.index.write()
+
+        # tutorial.html
+        data = """
+        <h1>Tutorial</h1>
+        <p><img src="./img/{0}.png"></p>
+        <p>Tutorial.html</p>
+        """.format(instance.slug)
+        fn = "tutorial.html"
+        f = open(os.path.join(repo.workdir, fn), 'w')
+        f.write(data)
+        f.close()
+        b = repo.create_blob_fromworkdir(fn)
+        # bld = repo.TreeBuilder()
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        t = bld.write()
+        repo.index.read()
+        repo.index.add(fn)
+        repo.index.write()
+
+        # software.html
+        data = """
+        <h1>Software</h1>
+        <p><img src="./img/{0}.png"></p>
+        <p>Software.html</p>
+        """.format(instance.slug)
+        fn = "software.html"
+        f = open(os.path.join(repo.workdir, fn), 'w')
+        f.write(data)
+        f.close()
+        b = repo.create_blob_fromworkdir(fn)
+        # bld = repo.TreeBuilder()
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        t = bld.write()
+        repo.index.read()
+        repo.index.add(fn)
+        repo.index.write()
+
+        # teaching.html
+        data = """
+        <h1>Teaching Materials</h1>
+        <p><img src="./img/{0}.png"></p>
+        <p>Teaching.html</p>
+        """.format(instance.slug)
+        fn = "teaching.html"
+        f = open(os.path.join(repo.workdir, fn), 'w')
+        f.write(data)
+        f.close()
+        b = repo.create_blob_fromworkdir(fn)
+        # bld = repo.TreeBuilder()
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        t = bld.write()
+        repo.index.read()
+        repo.index.add(fn)
+        repo.index.write()
+
+        # img/repo.png
+
+
+        with open(os.path.join(settings.STATIC_ROOT, '../img/default_image.png'), 'rb') as f:
+            data = f.read()
+
+        fn = "{}.png".format(instance.slug)
+        # f = open(os.path.join(repo.workdir, 'img', fn), 'w')
+        # f.write(data)
+        # f.close()
+
+        if not os.path.exists(os.path.join(instance.get_repo_path(), 'img')):
+            try:
+                os.makedirs(os.path.dirname(os.path.join(instance.get_repo_path(), 'img', fn)))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:  # noqa: F821
+                    raise
+        try:
+            file = open(os.path.join(instance.get_repo_path(), 'img', fn), 'wb')
+        except OSError:
+            form.add_error('filename',
+                           "Can't add just a directory, must add a file too.\
+                           \nExample: foldername/filename.html")
+            return self.form_invalid(form)
+        # with open(fn, 'wb') as f:
+        #     f.write(data)
+        file.write(data)
+        file.close()
+
+        b = repo.create_blob_fromworkdir(os.path.join('img', fn))
+        bld = repo.TreeBuilder()
+        bld.insert(fn, b, os.stat(os.path.join(instance.get_repo_path(), 'img', fn)).st_mode)
+        # bld.write()
+        # b = repo.create_blob_fromworkdir(fn)
+        # bld = repo.TreeBuilder()
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        # bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        t = bld.write()
+
+        repo.index.read()
+        repo.index.add(os.path.join('img', fn))
+        repo.index.write()
+        tree2 = repo.index.write_tree()
+
+
+
         repo.create_commit('HEAD', s, s, 'Initialized repo\
-            with a nav_{}.html and README.html'.format(instance.slug), t, [])
+            with a nav_{}.html, README.html, and pages'.format(instance.slug), tree2, [])
 
 
 @receiver(post_delete, sender=Repository)
