@@ -95,7 +95,7 @@ def repository_post_save(sender, instance, **kwagrs):
         bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
@@ -151,7 +151,7 @@ def repository_post_save(sender, instance, **kwagrs):
         # bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
@@ -170,7 +170,7 @@ def repository_post_save(sender, instance, **kwagrs):
         # bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
@@ -189,7 +189,7 @@ def repository_post_save(sender, instance, **kwagrs):
         # bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
@@ -208,7 +208,7 @@ def repository_post_save(sender, instance, **kwagrs):
         # bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
@@ -227,7 +227,7 @@ def repository_post_save(sender, instance, **kwagrs):
         # bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
@@ -246,14 +246,12 @@ def repository_post_save(sender, instance, **kwagrs):
         # bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
         repo.index.read()
         repo.index.add(fn)
         repo.index.write()
 
         # img/repo.png
-
-
         with open(os.path.join(settings.STATIC_ROOT, '../img/default_image.png'), 'rb') as f:
             data = f.read()
 
@@ -271,10 +269,7 @@ def repository_post_save(sender, instance, **kwagrs):
         try:
             file = open(os.path.join(instance.get_repo_path(), 'img', fn), 'wb')
         except OSError:
-            form.add_error('filename',
-                           "Can't add just a directory, must add a file too.\
-                           \nExample: foldername/filename.html")
-            return self.form_invalid(form)
+            pass
         # with open(fn, 'wb') as f:
         #     f.write(data)
         file.write(data)
@@ -288,14 +283,12 @@ def repository_post_save(sender, instance, **kwagrs):
         # bld = repo.TreeBuilder()
         # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
         # bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
-        t = bld.write()
+        bld.write()
 
         repo.index.read()
         repo.index.add(os.path.join('img', fn))
         repo.index.write()
         tree2 = repo.index.write_tree()
-
-
 
         repo.create_commit('HEAD', s, s, 'Initialized repo\
             with a nav_{}.html, README.html, and pages'.format(instance.slug), tree2, [])
