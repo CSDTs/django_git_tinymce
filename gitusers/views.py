@@ -1278,5 +1278,13 @@ class SSIFolderView(TemplateView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
         repo = self.get_object()
+        git_repo = pygit2.Repository(repo.get_repo_path())
+        commit = git_repo.revparse_single('HEAD')
+        tree = commit.tree
+        try:
+            tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
+            context['nav'] = str(path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
+        except KeyError:
+            context['nav'] = None
         context['url'] = str(path.join(repo.get_repo_path_media(), directory, filename))
         return context

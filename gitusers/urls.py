@@ -86,7 +86,7 @@ urlpatterns = [
 
     # Blob raw view
     # FIXME changed from blob:
-    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),
+    url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw'),  # noqa: E501
     url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_dir'),  # noqa: E501
     url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/(?P<filename>.*?)(?P<extension>\.[^.]*)?/$', BlobRawView.as_view(), name='blob_raw_folder'),  # noqa: E501
 

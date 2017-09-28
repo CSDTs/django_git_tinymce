@@ -88,7 +88,6 @@ def repository_post_save(sender, instance, **kwagrs):
         s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
         data = '<p><h1>{}</h1></p>'.format(instance)
         fn = 'README.html'
-        bld = repo.TreeBuilder()
         f = open(os.path.join(repo.workdir, fn), 'w')
         f.write(data)
         f.close()
@@ -101,7 +100,64 @@ def repository_post_save(sender, instance, **kwagrs):
         repo.index.add(fn)
         repo.index.write()
         # head = repo.lookup_reference('HEAD').resolve()
-        repo.create_commit('HEAD', s, s, 'Initialized repo with a README.html', t, [])
+        # Nav bar:
+        s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
+        data = """
+        <nav class="navbar navbar-inverse navbar-local visible-xs">\
+    <div class="container-fluid">\
+    <div class="navbar-header">\
+        <a class="navbar-brand" href="./index.html">{0}</a>
+        <button aria-expanded="false" class="navbar-toggle collapsed"
+        data-target="#nav-menu" data-toggle="collapse" type="button">
+        <span class="sr-only">Toggle navigation</span> <span class="icon-bar">
+        </span> <span class="icon-bar"></span> <span class="icon-bar">
+        </span></button>\
+    </div>\
+    <div class="collapse navbar-collapse navbar-right" id="nav-menu">\
+        <ul class="nav navbar-nav">\
+            <li class="visible-xs">\
+                <a href="./index.html">Background</a>\
+            </li>\
+            <li class="visible-xs">\
+                <a href="./origins.html">Origins</a>\
+            </li>\
+            <li class="visible-xs">\
+                <a href="./teaching.html">Teaching Materials</a>\
+            </li>\
+        </ul>\
+\
+    </div>\
+    </div>\
+</nav>\
+\
+\
+<!-- sidebar -->\
+        <div class="stuck">\
+            <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">\
+                <ul class="nav">\
+                    <li class="active"><a href="./index.html">Background</a></li>\
+                    <li class="indented"><a href="./origins.html">Origins</a></li>\
+                    <li><a href="./tutorial.html">Tutorial</a></li>\
+                    <li><a href="./software.html">Software</a></li>\
+                    <li><a href="./teaching.html">Teaching Materials</a></li>\
+                </ul>\
+            </div>\
+        </div>""".format(instance.name)
+        fn = "nav_" + instance.slug + ".html"
+        f = open(os.path.join(repo.workdir, fn), 'w')
+        f.write(data)
+        f.close()
+        b = repo.create_blob_fromworkdir(fn)
+        # bld = repo.TreeBuilder()
+        # bld.insert(fn, b, os.stat(os.path.join(repo.workdir, fn)).st_mode )
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
+        t = bld.write()
+        repo.index.read()
+        repo.index.add(fn)
+        repo.index.write()
+
+        repo.create_commit('HEAD', s, s, 'Initialized repo\
+            with a nav_{}.html and README.html'.format(instance.slug), t, [])
 
 
 @receiver(post_delete, sender=Repository)
