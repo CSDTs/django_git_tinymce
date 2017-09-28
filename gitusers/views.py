@@ -1281,12 +1281,10 @@ class SSIFolderView(TemplateView):
         git_repo = pygit2.Repository(repo.get_repo_path())
         commit = git_repo.revparse_single('HEAD')
         tree = commit.tree
-        item = ""
         try:
-            item = tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
+            tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
             context['nav'] = str(path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
         except KeyError:
             context['nav'] = None
         context['url'] = str(path.join(repo.get_repo_path_media(), directory, filename))
-        
         return context

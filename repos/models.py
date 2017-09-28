@@ -100,15 +100,18 @@ def repository_post_save(sender, instance, **kwagrs):
         repo.index.add(fn)
         repo.index.write()
         # head = repo.lookup_reference('HEAD').resolve()
-
-
-        #Nav bar:
+        # Nav bar:
         s = pygit2.Signature('Repo_Init', 'csdtrpi@gmail.com', int(time.time()), 0)
         data = """
         <nav class="navbar navbar-inverse navbar-local visible-xs">\
     <div class="container-fluid">\
     <div class="navbar-header">\
-        <a class="navbar-brand" href="./index.html">{0}</a> <button aria-expanded="false" class="navbar-toggle collapsed" data-target="#nav-menu" data-toggle="collapse" type="button"><span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button>\
+        <a class="navbar-brand" href="./index.html">{0}</a>
+        <button aria-expanded="false" class="navbar-toggle collapsed"
+        data-target="#nav-menu" data-toggle="collapse" type="button">
+        <span class="sr-only">Toggle navigation</span> <span class="icon-bar">
+        </span> <span class="icon-bar"></span> <span class="icon-bar">
+        </span></button>\
     </div>\
     <div class="collapse navbar-collapse navbar-right" id="nav-menu">\
         <ul class="nav navbar-nav">\
@@ -153,8 +156,8 @@ def repository_post_save(sender, instance, **kwagrs):
         repo.index.add(fn)
         repo.index.write()
 
-        repo.create_commit('HEAD', s, s, 'Initialized repo with a nav_{}.html and README.html'.format(instance.slug), t, [])
-
+        repo.create_commit('HEAD', s, s, 'Initialized repo\
+            with a nav_{}.html and README.html'.format(instance.slug), t, [])
 
 
 @receiver(post_delete, sender=Repository)
