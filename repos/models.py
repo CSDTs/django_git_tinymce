@@ -277,7 +277,8 @@ def repository_post_save(sender, instance, **kwagrs):
 
         b = repo.create_blob_fromworkdir(os.path.join('img', fn))
         bld = repo.TreeBuilder()
-        bld.insert(fn, b, os.stat(os.path.join(instance.get_repo_path(), 'img', fn)).st_mode)
+        # bld.insert(fn, b, os.stat(os.path.join(instance.get_repo_path(), 'img', fn)).st_mode)
+        bld.insert(fn, b, pygit2.GIT_FILEMODE_BLOB)
         # bld.write()
         # b = repo.create_blob_fromworkdir(fn)
         # bld = repo.TreeBuilder()
