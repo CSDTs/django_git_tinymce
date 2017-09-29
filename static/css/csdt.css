@@ -127,6 +127,9 @@ nav .btn {
         z-index: 1029;
     }
 
+/*.navbar-opens {
+  margin-top: 56px;
+}*/
 
 @media only screen and (min-width: 768px) {
 
