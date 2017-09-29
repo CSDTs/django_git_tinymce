@@ -1277,24 +1277,10 @@ class AddEditors(OwnerRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super(AddEditors, self).get_form_kwargs()
         kwargs.update({'request': self.request})
-        # kwargs.update({'old_name': self.object.name})
         return kwargs
 
-    def get(self, request, *args, **kwargs):
-        User = get_user_model()
-        username_in_url = self.kwargs.get("username")
-        # prevents forking your own repo:
-        origin_user = User.objects.get(username=username_in_url)
-        origin_repo = self.kwargs.get("slug")
-        origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
-
-        context = {}
-        context['form'] = AddEditorsForm()
-
-        return render(request, self.template_name, context)
-
     def form_valid(self, form):
-        super(AddEditors, self).form_valid(form)
+        valid_data = super(AddEditors, self).form_valid(form)
         new_editor_username = form.cleaned_data.get("new_editor_username")
         new_editor_email = form.cleaned_data.get("new_editor_username")
         username_in_url = self.kwargs.get("username")
@@ -1313,14 +1299,7 @@ class AddEditors(OwnerRequiredMixin, FormView):
         origin_repo_for_id.editors.add(user_pull)
         origin_repo_for_id.save()
 
-        return HttpResponseRedirect(reverse(
-            "gitusers:setting",
-            kwargs={
-                'username': self.kwargs.get("username"),
-                'slug': self.kwargs.get('slug')
-
-            }
-        ))
+        return valid_data
 
     def get_success_url(self):
         return reverse(
@@ -1328,7 +1307,6 @@ class AddEditors(OwnerRequiredMixin, FormView):
             kwargs={
                 'username': self.kwargs.get("username"),
                 'slug': self.kwargs.get('slug')
-
             }
         )
 
