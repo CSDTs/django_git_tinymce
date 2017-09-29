@@ -467,6 +467,10 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:  # noqa: F821
                     raise
+        else:
+            form.add_error("filename", "path already exists")
+            return self.form_invalid(form)
+
         try:
             file = open(os.path.join(repo.get_repo_path(), dirname, filename2), 'w')
         except OSError:
@@ -532,10 +536,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             }
         )
 
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
-##############################################################################################################################################################
+
 class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
     template_name = 'repo/create_folder.html'
     form_class = FolderCreateForm
@@ -568,25 +569,61 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         commit_message = form.cleaned_data['commit_message']
         self.folder = folder_name
 
-        # create the folder
-        dir = os.path.join(self.repo_obj.get_repo_path(), folder_name)
-        os.mkdir(dir)
+        url_directories = ""
+        url_directories_ext = ""
+        if 'directories' in self.kwargs:
+            directories = self.kwargs['directories']
+        if 'directories_ext' in self.kwargs:
+            directories_ext = self.kwargs['directories_ext']
+
+        absolute_dir = os.path.join(
+            self.repo_obj.get_repo_path(),
+            url_directories,
+            url_directories_ext,
+            folder_name
+        )
+        if not os.path.exists(absolute_dir):
+            dir = os.path.join(absolute_dir)
+            os.mkdir(dir)
+        else:
+            form.add_error("folder_name", "folder alrady exists")
+            return self.form_invalid(form)
 
         # Create a placeholder file
         placeholder = open(os.path.join(dir, '.placeholder'), 'w')
         placeholder.close()
 
-        create_commit_folders(self.request.user, self.git_repo, commit_message, '.placeholder', folder_name)
+        relative_dir = url_directories + url_directories_ext + folder_name
+        create_commit_folders(self.request.user, self.git_repo, commit_message, '.placeholder', relative_dir)
 
         return super(RepositoryCreateFolderView, self).form_valid(form)
 
     def get_success_url(self):
-         return reverse(
-            "gitusers:repo_detail_folder",
+        if 'directories_ext' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                    'directories_ext': self.kwargs.get('directories_ext') + self.folder
+                }
+            )
+        if 'directories' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                    'directories_ext': self.folder
+                }
+            )
+        return reverse(
+            "gitusers:repo_detail",
             kwargs={
                 'username': self.kwargs.get('username'),
                 'slug': self.kwargs.get('slug'),
-                'directories': self.folder
             }
         )
 
@@ -1026,10 +1063,10 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         new_filename = form.cleaned_data['new_filename']
         filename = self.kwargs.get('filename')
         if ".." in new_filename:
-            form.add_error(None, "Can't have '..' anywhere in rename")
+            form.add_error('new_filename', "Can't have '..' anywhere in rename")
             return self.form_invalid(form)
         if "/" in new_filename:
-            form.add_error(None, "Can't have '/' anywhere in rename")
+            form.add_error('new_filename', "Can't have '/' anywhere in rename")
             return self.form_invalid(form)
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
@@ -1047,7 +1084,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         Path(new_file)
         index_tree = self.repo.index
         if find_file_oid_in_tree_using_index(new_filename, index_tree) != 404:
-            form.add_error(None, "File named {} already exists".format(new_filename))
+            form.add_error('new_filename', "File named {} already exists".format(new_filename))
             return self.form_invalid(form)
         os.rename(old_file, new_file)
         commit_message = form.cleaned_data['commit_message']

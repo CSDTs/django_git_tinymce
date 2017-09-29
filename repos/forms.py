@@ -163,6 +163,12 @@ class FolderCreateForm(forms.Form):
     def clean_folder_name(self):
         folder_name = self.cleaned_data['folder_name']
 
+        # if self.repo_tree is None, mean the repo is empty,
+        # hence anyname will be legit. return folder_name to validate
+        if self.repo_tree is None:
+            return folder_name
+
+        # else check the tree.
         folder_exist = find_folder_oid_in_tree(folder_name, self.repo_tree)
         if  folder_exist != 404:
             raise forms.ValidationError('folder already exists')
