@@ -572,9 +572,9 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         url_directories = ""
         url_directories_ext = ""
         if 'directories' in self.kwargs:
-            directories = self.kwargs['directories']
+            url_directories = self.kwargs['directories']
         if 'directories_ext' in self.kwargs:
-            directories_ext = self.kwargs['directories_ext']
+            url_directories_ext = self.kwargs['directories_ext']
 
         absolute_dir = os.path.join(
             self.repo_obj.get_repo_path(),
@@ -727,6 +727,8 @@ class BlobEditView(FormView):
                     owner = True
         if not owner:
             raise PermissionDenied
+
+        return context
 
 
 class BlobRawView(View):
@@ -1360,8 +1362,8 @@ class SSIFolderView(TemplateView):
         tree = commit.tree
         try:
             tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
-            context['nav'] = str(path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
+            context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
         except KeyError:
             context['nav'] = None
-        context['url'] = str(path.join(repo.get_repo_path_media(), directory, filename))
+        context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
         return context

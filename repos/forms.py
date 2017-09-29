@@ -170,7 +170,7 @@ class FolderCreateForm(forms.Form):
 
         # else check the tree.
         folder_exist = find_folder_oid_in_tree(folder_name, self.repo_tree)
-        if  folder_exist != 404:
+        if folder_exist != 404:
             raise forms.ValidationError('folder already exists')
 
         return folder_name
