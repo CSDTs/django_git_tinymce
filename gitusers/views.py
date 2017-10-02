@@ -604,8 +604,9 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
             except OSError:  # Guard against race condition
                 raise
         else:
-            form.add_error(None, "path already exists")
-            return self.form_invalid(form)
+            if len(os.listdir(self.repo_obj.get_repo_path() + "/" +  dirname)) > 0:
+                form.add_error(None, "path already exists")
+                return self.form_invalid(form)
 
         try:
             file = open(os.path.join(self.repo_obj.get_repo_path(), dirname, filename2), 'w')
