@@ -255,7 +255,7 @@ export default class Layout extends React.Component {
                 const rawLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/blob/${window.props.directory}/${file.name}`}><font style={{fontSize: '.75em', color: '#333'}}>raw</font></a> : (file.type == 'blob') ? <a href={`blob/${file.name}`}><font style={{fontSize: '.75em', color: '#333'}}>raw</font></a> : null
                 const downloadLink = (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}`} download={`${file.name}`}><font style={{fontSize: '.75em', color: '#999'}}>download</font></a> : null
 
-                return <tr key={file.name + file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink} &nbsp;{renameLink}</th><td>{rawLink}</td><td>{downloadLink}</td><td>{deleteLink}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
+                return <tr key={file.name + file.type + file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink} &nbsp;{renameLink}</th><td>{rawLink}</td><td>{downloadLink}</td><td>{deleteLink}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
               })}
 
               </tbody>
