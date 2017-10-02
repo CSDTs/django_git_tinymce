@@ -593,7 +593,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         placeholder = open(os.path.join(dir, '.placeholder'), 'w')
         placeholder.close()
 
-        relative_dir = url_directories + url_directories_ext + folder_name
+        relative_dir = url_directories + "/" + url_directories_ext + "/" + folder_name
         create_commit_folders(self.request.user, self.git_repo, commit_message, '.placeholder', relative_dir)
 
         return super(RepositoryCreateFolderView, self).form_valid(form)
@@ -606,7 +606,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
                     'username': self.kwargs.get('username'),
                     'slug': self.kwargs.get('slug'),
                     'directories': self.kwargs.get('directories'),
-                    'directories_ext': self.kwargs.get('directories_ext') + self.folder
+                    'directories_ext': self.kwargs.get('directories_ext') + "/" + self.folder
                 }
             )
         if 'directories' in self.kwargs:
