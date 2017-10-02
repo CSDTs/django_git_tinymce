@@ -7,7 +7,6 @@ from django.utils.text import slugify
 from tinymce.widgets import TinyMCE
 
 from .models import Repository
-from gitusers.utils import find_folder_oid_in_tree
 
 User = get_user_model()
 

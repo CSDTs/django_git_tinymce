@@ -181,8 +181,7 @@ class ReduxRepositoryDetailView(TemplateView):
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         user = User.objects.get(username=owner_name)
-        print(owner_name)
-        print(user, repo_name)
+
         repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
@@ -565,26 +564,21 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        repo = self.repo_obj
         git_repo = pygit2.Repository(self.repo_obj.get_repo_path())
 
         filename = '.placeholder'
-        if not "/" in filename:
+        if "/" not in filename:
             url_directories = ""
             if 'directories' in self.kwargs:
-                url_directories +=  self.kwargs['directories']
-                print('dir', self.kwargs['directories'])
+                url_directories += self.kwargs['directories']
             if 'directories_ext' in self.kwargs:
                 url_directories += "/" + self.kwargs['directories_ext']
-                print('dir-ext', self.kwargs['directories_ext'])
             folder_name = form.cleaned_data['folder_name']
             self.folder = folder_name
             if url_directories == "":
                 filename = folder_name + "/" + filename
             else:
                 filename = url_directories + "/" + folder_name + "/" + filename
-
-        print('filename55', filename)
         filecontent = ""
         commit_message = form.cleaned_data['commit_message']
 
@@ -608,12 +602,10 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
             # matches = pattern.search(filename)
             # print('matches', matches)
             dirname, filename2 = os.path.split(filename)
-        print('dirname', dirname)
-        print('filename2', filename2)
         if not os.path.exists(os.path.join(self.repo_obj.get_repo_path(), dirname)):
             try:
                 os.makedirs(os.path.dirname(os.path.join(self.repo_obj.get_repo_path(), dirname, filename2)))
-            except OSError as exc:  # Guard against race condition
+            except OSError:  # Guard against race condition
                 raise
         else:
             form.add_error(None, "path already exists")
@@ -631,7 +623,6 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         create_commit_folders(self.request.user, git_repo, commit_message, filename2, dirname)
 
         return super(RepositoryCreateFolderView, self).form_valid(form)
-
 
     def get_success_url(self):
         if 'directories_ext' in self.kwargs:
@@ -803,8 +794,6 @@ class BlobRawView(View):
                     dir += folder + "/"
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
-            print('filename', filename)
-            print('index_tree', index_tree)
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
             if blob_id != 404:
                 extension = self.kwargs.get('extension')
@@ -1081,7 +1070,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
                     dir += folder + "/"
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
-                    print('index_tree_int', index_tree)
+
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
             blob = self.repo[blob_id]
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
