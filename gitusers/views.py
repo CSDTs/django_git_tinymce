@@ -472,7 +472,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
                 form.add_error("filename", "path already exists")
                 return self.form_invalid(form)
             else:
-                form.add_error("filename", "Do you want a folder or a file? Add extension like '.html' if file creation, or if a directory, add a file too. Example: foldername/filename.html")
+                form.add_error("filename", "Do you want a folder or a file? Add extension like '.html' if file creation, or if adding a directory, add a placeholder file too. Example: folder1name/folder2name/placeholder.html")
                 return self.form_invalid(form)
 
         try:
