@@ -467,8 +467,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
                 if exc.errno != errno.EEXIST:  # noqa: F821
                     raise
         else:
-            form.add_error("filename", "path already exists")
-            return self.form_invalid(form)
+            pass
 
         try:
             file = open(os.path.join(repo.get_repo_path(), dirname, filename2), 'w')
