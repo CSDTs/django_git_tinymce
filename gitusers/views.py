@@ -459,8 +459,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             # matches = pattern.search(filename)
             # print('matches', matches)
             dirname, filename2 = os.path.split(filename)
-        print('dirname', dirname)
-        print('filename2', filename2)
         if not os.path.exists(os.path.join(repo.get_repo_path(), dirname)):
             try:
                 os.makedirs(os.path.dirname(os.path.join(repo.get_repo_path(), dirname, filename2)))
@@ -474,8 +472,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             else:
                 form.add_error("filename", "Do you want a folder or a file? \
                 Add extension like '.html' if file creation, or if adding a \
-                directory, add a placeholder file too. Example: \
-                folder1name/folder2name/placeholder.html")
+                directory, add a placeholder file too. Example: folder1name/folder2name/placeholder.html")
                 return self.form_invalid(form)
 
         try:
