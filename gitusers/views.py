@@ -459,6 +459,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             # matches = pattern.search(filename)
             # print('matches', matches)
             dirname, filename2 = os.path.split(filename)
+
         if not os.path.exists(os.path.join(repo.get_repo_path(), dirname)):
             try:
                 os.makedirs(os.path.dirname(os.path.join(repo.get_repo_path(), dirname, filename2)))
@@ -466,14 +467,8 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
                 if exc.errno != errno.EEXIST:  # noqa: F821
                     raise
         else:
-            if "." in filename:
-                form.add_error("filename", "path already exists")
-                return self.form_invalid(form)
-            else:
-                form.add_error("filename", "Do you want a folder or a file? \
-                Add extension like '.html' if file creation, or if adding a \
-                directory, add a placeholder file too. Example: folder1name/folder2name/placeholder.html")
-                return self.form_invalid(form)
+            form.add_error("filename", "path already exists")
+            return self.form_invalid(form)
 
         try:
             file = open(os.path.join(repo.get_repo_path(), dirname, filename2), 'w')
