@@ -797,6 +797,9 @@ class BlobRawView(View):
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
             if blob_id != 404:
                 extension = self.kwargs.get('extension')
+                print('extension', extension)
+                if extension is None:
+                    return HttpResponse(repo[blob_id].data)
                 if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
                     return HttpResponse(repo[blob_id].data, content_type="image/png")
                 elif extension in ('.pdf'):
