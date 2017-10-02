@@ -150,11 +150,16 @@ class FolderCreateForm(forms.Form):
     folder_name = forms.CharField(label='New folder name', required=True)
     commit_message = forms.CharField(
         required=False,
-        empty_value="folder {} Created on {}".format(
-            folder_name,
-            datetime.now().strftime("%A, %d. %B %Y %I:%M%p"),
-        )
-    )
+        empty_value="folder created on {}".format(
+            datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
+        ))
+
+    def save(self, *args, **kwargs):
+        if self.commit_message == "":
+            self.commit_message = "folder {} Created on {}".format(
+                self.folder_name,
+                datetime.now().strftime("%A, %d. %B %Y %I:%M%p"))
+        super(FolderCreateForm, self).save(*args, **kwargs)
 
     def __init__(self, *args, **kwargs):
         self.repo_tree = kwargs.pop('tree')
@@ -167,11 +172,6 @@ class FolderCreateForm(forms.Form):
         # hence anyname will be legit. return folder_name to validate
         if self.repo_tree is None:
             return folder_name
-
-        # else check the tree.
-        folder_exist = find_folder_oid_in_tree(folder_name, self.repo_tree)
-        if folder_exist != 404:
-            raise forms.ValidationError('folder already exists')
 
         return folder_name
 
