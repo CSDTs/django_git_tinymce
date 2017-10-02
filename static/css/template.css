@@ -173,10 +173,10 @@ a.anchor {
 }
 #sidebar {
   height: 100%;
-  padding-right: 0;
+  padding-right: 20px;
   padding-top: 20px;
-  display: block;
-  margin-left: -210px;
+  margin-left: 20px;
+
 }
 #sidebar .nav {
   width: 95%;
