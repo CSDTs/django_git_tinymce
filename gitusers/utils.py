@@ -1,10 +1,12 @@
+from pygit2 import Signature
 from os import path
 
 
 def find_file_oid_in_tree(filename, tree):
     for entry in tree:
-        if entry.name.lower() == filename.lower():
-            return entry.id
+        if entry.type == 'blob':
+            if entry.name.lower() == filename.lower():
+                return entry.id
     return 404
 
 
@@ -15,8 +17,15 @@ def find_file_oid_in_tree_using_index(filename, index_tree):
     return 404
 
 
+def find_folder_oid_in_tree(foldername, tree):
+    for entry in tree:
+        if entry.type == 'tree':
+            if entry.name.lower() == foldername.lower():
+                return entry.id
+    return 404
+
+
 def create_commit(user, repo, message, filename):
-    from pygit2 import Signature
     # example:
     '''
     author = Signature('Alice Author', 'alice@authors.tld')
@@ -58,7 +67,6 @@ def create_commit(user, repo, message, filename):
 
 
 def create_commit_folders(user, repo, message, filename, directory):
-    from pygit2 import Signature
     # example:
     '''
     author = Signature('Alice Author', 'alice@authors.tld')

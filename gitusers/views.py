@@ -33,6 +33,7 @@ from repos.forms import (
     TinyMCEFileEditForm,
     FileCreateForm,
     FileRenameForm,
+    FolderCreateForm,
     RepoForkRenameForm,
     AddEditorsForm
 )
@@ -41,7 +42,6 @@ from repos.models import Repository, ForkedRepository
 from pygit2 import GIT_SORT_TOPOLOGICAL
 
 import pygit2
-from os import path
 import os
 from pathlib import Path
 import shutil
@@ -416,25 +416,10 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
     def get_initial(self, **kwargs):
         initial = super(RepositoryCreateFileView, self).get_initial()
 
-        user = self.request.user
         self.repo_obj = Repository.objects.get(
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
-
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if self.repo_obj.owner == user:
-            owner = True
-
-        else:
-            for editor in self.repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if not owner:
-            raise PermissionDenied
 
         directory = ""
         if 'directories' in self.kwargs:
@@ -448,9 +433,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
         return initial
 
     def form_valid(self, form):
-        if self.repo_obj is None:
-            raise Repository.DoesNotExist
-
         repo = self.repo_obj
         git_repo = pygit2.Repository(repo.get_repo_path())
 
@@ -479,14 +461,18 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             # print('matches', matches)
             dirname, filename2 = os.path.split(filename)
 
-        if not os.path.exists(path.join(repo.get_repo_path(), dirname)):
+        if not os.path.exists(os.path.join(repo.get_repo_path(), dirname)):
             try:
-                os.makedirs(os.path.dirname(path.join(repo.get_repo_path(), dirname, filename2)))
+                os.makedirs(os.path.dirname(os.path.join(repo.get_repo_path(), dirname, filename2)))
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:  # noqa: F821
                     raise
+        else:
+            form.add_error("filename", "path already exists")
+            return self.form_invalid(form)
+
         try:
-            file = open(path.join(repo.get_repo_path(), dirname, filename2), 'w')
+            file = open(os.path.join(repo.get_repo_path(), dirname, filename2), 'w')
         except OSError:
             form.add_error('filename',
                            "Can't add just a directory, must add a file too.\
@@ -494,13 +480,33 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             return self.form_invalid(form)
         file.write(filecontent)
         file.close()
-        # b = git_repo.create_blob_fromworkdir(path.join(dirname, filename2))
+        # b = git_repo.create_blob_fromworkdir(os.path.join(dirname, filename2))
         # bld = git_repo.TreeBuilder()
         # bld.insert(filename2, b, os.stat(os.path.join(repo.get_repo_path(), dirname, filename2)).st_mode)
         # bld.write()
         create_commit_folders(self.request.user, git_repo, commit_message, filename2, dirname)
 
         return super(RepositoryCreateFileView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(RepositoryCreateFileView, self).get_context_data(**kwargs)
+
+        user = self.request.user
+        owner = False
+        if user.is_superuser:
+            owner = True
+        if self.repo_obj.owner == user:
+            owner = True
+
+        else:
+            for editor in self.repo_obj.editors.all():
+                if editor.id == user.id:
+                    owner = True
+
+        if not owner:
+            raise PermissionDenied
+
+        return context
 
     def get_success_url(self):
         if 'directories_ext' in self.kwargs:
@@ -527,12 +533,102 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             kwargs={
                 'username': self.kwargs.get('username'),
                 'slug': self.kwargs.get('slug')
-
             }
         )
 
 
-class BlobEditView(OwnerRequiredMixin, FormView):
+class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
+    template_name = 'repo/create_folder.html'
+    form_class = FolderCreateForm
+    repo_obj = None
+    git_repo = None
+    folder = None
+
+    def get_form_kwargs(self):
+        kwargs = super(RepositoryCreateFolderView, self).get_form_kwargs()
+
+        self.repo_obj = Repository.objects.get(
+            owner__username=self.kwargs['username'],
+            slug=self.kwargs['slug']
+        )
+
+        self.git_repo = pygit2.Repository(self.repo_obj.get_repo_path())
+
+        if self.git_repo.is_empty:
+            kwargs.update({'tree': None})
+            return kwargs
+
+        commit = self.git_repo.revparse_single('HEAD')
+        tree = commit.tree
+        kwargs.update({'tree': tree})
+
+        return kwargs
+
+    def form_valid(self, form):
+        folder_name = form.cleaned_data['folder_name']
+        commit_message = form.cleaned_data['commit_message']
+        self.folder = folder_name
+
+        url_directories = ""
+        url_directories_ext = ""
+        if 'directories' in self.kwargs:
+            url_directories = self.kwargs['directories']
+        if 'directories_ext' in self.kwargs:
+            url_directories_ext = self.kwargs['directories_ext']
+
+        absolute_dir = os.path.join(
+            self.repo_obj.get_repo_path(),
+            url_directories,
+            url_directories_ext,
+            folder_name
+        )
+        if not os.path.exists(absolute_dir):
+            dir = os.path.join(absolute_dir)
+            os.mkdir(dir)
+        else:
+            form.add_error("folder_name", "folder alrady exists")
+            return self.form_invalid(form)
+
+        # Create a placeholder file
+        placeholder = open(os.path.join(dir, '.placeholder'), 'w')
+        placeholder.close()
+
+        relative_dir = url_directories + "/" + url_directories_ext + "/" + folder_name
+        create_commit_folders(self.request.user, self.git_repo, commit_message, '.placeholder', relative_dir)
+
+        return super(RepositoryCreateFolderView, self).form_valid(form)
+
+    def get_success_url(self):
+        if 'directories_ext' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                    'directories_ext': self.kwargs.get('directories_ext') + "/" + self.folder
+                }
+            )
+        if 'directories' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                    'directories_ext': self.folder
+                }
+            )
+        return reverse(
+            "gitusers:repo_detail",
+            kwargs={
+                'username': self.kwargs.get('username'),
+                'slug': self.kwargs.get('slug'),
+            }
+        )
+
+
+class BlobEditView(FormView):
     template_name = 'repo/file_edit.html'
     form_class = TinyMCEFileEditForm
     blob = None
@@ -540,27 +636,6 @@ class BlobEditView(OwnerRequiredMixin, FormView):
     repo_obj = None
 
     def get_initial(self, **kwargs):
-        self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
-        try:
-            self.repo_obj = Repository.objects.get(
-                owner__username=self.kwargs['username'],
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Repository.DoesNotExist
-
-        user = self.request.user
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if self.repo_obj.owner == user:
-            owner = True
-        else:
-            for editor in self.repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-        if not owner:
-            raise PermissionDenied
         initial = super(BlobEditView, self).get_initial()
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
@@ -612,7 +687,7 @@ class BlobEditView(OwnerRequiredMixin, FormView):
 
         try:
             repo_path = self.repo_obj.get_repo_path()
-            file = open(path.join(repo_path, directory, filename), 'w')
+            file = open(os.path.join(repo_path, directory, filename), 'w')
 
             file.truncate()
             file.write(form.cleaned_data['content'])
@@ -628,6 +703,32 @@ class BlobEditView(OwnerRequiredMixin, FormView):
             raise form.ValidationError("Save error, please check the file.")
 
         return super(BlobEditView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(BlobEditView, self).get_context_data(**kwargs)
+        self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
+        try:
+            self.repo_obj = Repository.objects.get(
+                owner__username=self.kwargs['username'],
+                slug=self.kwargs['slug']
+            )
+        except:
+            raise Repository.DoesNotExist
+
+        user = self.request.user
+        owner = False
+        if user.is_superuser:
+            owner = True
+        if self.repo_obj.owner == user:
+            owner = True
+        else:
+            for editor in self.repo_obj.editors.all():
+                if editor.id == user.id:
+                    owner = True
+        if not owner:
+            raise PermissionDenied
+
+        return context
 
 
 class BlobRawView(View):
@@ -964,10 +1065,10 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         new_filename = form.cleaned_data['new_filename']
         filename = self.kwargs.get('filename')
         if ".." in new_filename:
-            form.add_error(None, "Can't have '..' anywhere in rename")
+            form.add_error('new_filename', "Can't have '..' anywhere in rename")
             return self.form_invalid(form)
         if "/" in new_filename:
-            form.add_error(None, "Can't have '/' anywhere in rename")
+            form.add_error('new_filename', "Can't have '/' anywhere in rename")
             return self.form_invalid(form)
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
@@ -978,14 +1079,14 @@ class RenameFileView(OwnerRequiredMixin, FormView):
             directory += "/" + self.kwargs.get('directories_ext')
         user = self.request.user
         repo_path = self.repo_obj.get_repo_path()
-        # file = open(path.join(repo_path, directory, filename), 'w')
+        # file = open(os.path.join(repo_path, directory, filename), 'w')
         # os.rename('a.txt', 'b.kml')
         old_file = os.path.join(repo_path, directory, filename)
         new_file = os.path.join(repo_path, directory, new_filename)
         Path(new_file)
         index_tree = self.repo.index
         if find_file_oid_in_tree_using_index(new_filename, index_tree) != 404:
-            form.add_error(None, "File named {} already exists".format(new_filename))
+            form.add_error('new_filename', "File named {} already exists".format(new_filename))
             return self.form_invalid(form)
         os.rename(old_file, new_file)
         commit_message = form.cleaned_data['commit_message']
@@ -1178,24 +1279,10 @@ class AddEditors(OwnerRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super(AddEditors, self).get_form_kwargs()
         kwargs.update({'request': self.request})
-        # kwargs.update({'old_name': self.object.name})
         return kwargs
 
-    def get(self, request, *args, **kwargs):
-        User = get_user_model()
-        username_in_url = self.kwargs.get("username")
-        # prevents forking your own repo:
-        origin_user = User.objects.get(username=username_in_url)
-        origin_repo = self.kwargs.get("slug")
-        origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
-
-        context = {}
-        context['form'] = AddEditorsForm()
-
-        return render(request, self.template_name, context)
-
     def form_valid(self, form):
-        super(AddEditors, self).form_valid(form)
+        valid_data = super(AddEditors, self).form_valid(form)
         new_editor_username = form.cleaned_data.get("new_editor_username")
         new_editor_email = form.cleaned_data.get("new_editor_username")
         username_in_url = self.kwargs.get("username")
@@ -1214,14 +1301,7 @@ class AddEditors(OwnerRequiredMixin, FormView):
         origin_repo_for_id.editors.add(user_pull)
         origin_repo_for_id.save()
 
-        return HttpResponseRedirect(reverse(
-            "gitusers:setting",
-            kwargs={
-                'username': self.kwargs.get("username"),
-                'slug': self.kwargs.get('slug')
-
-            }
-        ))
+        return valid_data
 
     def get_success_url(self):
         return reverse(
@@ -1229,7 +1309,6 @@ class AddEditors(OwnerRequiredMixin, FormView):
             kwargs={
                 'username': self.kwargs.get("username"),
                 'slug': self.kwargs.get('slug')
-
             }
         )
 
@@ -1283,8 +1362,8 @@ class SSIFolderView(TemplateView):
         tree = commit.tree
         try:
             tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
-            context['nav'] = str(path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
+            context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
         except KeyError:
             context['nav'] = None
-        context['url'] = str(path.join(repo.get_repo_path_media(), directory, filename))
+        context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
         return context

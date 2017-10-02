@@ -6,6 +6,7 @@ from .views import (
     BlobRawView,
     RepositoryCreateView,
     RepositoryCreateFileView,
+    RepositoryCreateFolderView,
     # RepositoryDetailView,
     RepositoryDeleteView,
     RepositoryForkView,
@@ -33,6 +34,7 @@ urlpatterns = [
     url(r'^csdt\.css/$', RedirectView.as_view(url='/static/css/csdt.css')),
 
     url(r'^create/$', RepositoryCreateView.as_view(), name='create'),
+    # url(r'^(?P<slug>[-\w]+)/$', RepositoryDetailView.as_view(), name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/$', ReduxRepositoryDetailView.as_view(), name='repo_detail'),
     # Hacky css fix so don't have to change website
     url(r'^(?P<slug>[-\w]+)/csdt\.css/$', RedirectView.as_view(url='/static/css/csdt.css')),
@@ -51,12 +53,15 @@ urlpatterns = [
     url(r'^(?P<slug>[-\w]+)/delete/$', RepositoryDeleteView.as_view(), name='delete'),
 
     url(r'^(?P<slug>[-\w]+)/create/$', RepositoryCreateFileView.as_view(), name='create_file'),
+    url(r'^(?P<slug>[-\w]+)/createfolder/$', RepositoryCreateFolderView.as_view(), name='create_folder'),
 
 
 
 
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/create/$', RepositoryCreateFileView.as_view(), name='create_file_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/createfolder/$', RepositoryCreateFolderView.as_view(), name='create_folder_dir'),  # noqa: E501
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/create/$', RepositoryCreateFileView.as_view(), name='create_file_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/createfolder/$', RepositoryCreateFolderView.as_view(), name='create_folder_folder'),  # noqa: E501
 
 
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/$', ReduxRepositoryFolderDetailView.as_view(), name='repo_detail_folder'),  # noqa: E501
