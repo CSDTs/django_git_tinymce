@@ -466,9 +466,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:  # noqa: F821
                     raise
-        else:
-            pass
-
         try:
             file = open(os.path.join(repo.get_repo_path(), dirname, filename2), 'w')
         except OSError:
