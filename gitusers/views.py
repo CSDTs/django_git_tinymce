@@ -181,8 +181,7 @@ class ReduxRepositoryDetailView(TemplateView):
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         user = User.objects.get(username=owner_name)
-        print(owner_name)
-        print(user, repo_name)
+
         repo = Repository.objects.get(owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
@@ -467,10 +466,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:  # noqa: F821
                     raise
-        else:
-            form.add_error("filename", "path already exists")
-            return self.form_invalid(form)
-
         try:
             file = open(os.path.join(repo.get_repo_path(), dirname, filename2), 'w')
         except OSError:
@@ -565,36 +560,64 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        folder_name = form.cleaned_data['folder_name']
+        git_repo = pygit2.Repository(self.repo_obj.get_repo_path())
+
+        filename = '.placeholder'
+        if "/" not in filename:
+            url_directories = ""
+            if 'directories' in self.kwargs:
+                url_directories += self.kwargs['directories']
+            if 'directories_ext' in self.kwargs:
+                url_directories += "/" + self.kwargs['directories_ext']
+            folder_name = form.cleaned_data['folder_name']
+            self.folder = folder_name
+            if url_directories == "":
+                filename = folder_name + "/" + filename
+            else:
+                filename = url_directories + "/" + folder_name + "/" + filename
+        filecontent = ""
         commit_message = form.cleaned_data['commit_message']
-        self.folder = folder_name
 
-        url_directories = ""
-        url_directories_ext = ""
-        if 'directories' in self.kwargs:
-            url_directories = self.kwargs['directories']
-        if 'directories_ext' in self.kwargs:
-            url_directories_ext = self.kwargs['directories_ext']
+        if not git_repo.is_empty:
+            commit = git_repo.revparse_single('HEAD')
+            tree = commit.tree
 
-        absolute_dir = os.path.join(
-            self.repo_obj.get_repo_path(),
-            url_directories,
-            url_directories_ext,
-            folder_name
-        )
-        if not os.path.exists(absolute_dir):
-            dir = os.path.join(absolute_dir)
-            os.mkdir(dir)
-        else:
-            form.add_error("folder_name", "folder alrady exists")
+            if find_file_oid_in_tree(filename, tree) != 404:
+                form.add_error(None, "File named {} already exists".format(filename))
+                return self.form_invalid(form)
+
+        if ".." in filename:
+            form.add_error(None, "Can't have '..' anywhere in directories structure")
             return self.form_invalid(form)
 
-        # Create a placeholder file
-        placeholder = open(os.path.join(dir, '.placeholder'), 'w')
-        placeholder.close()
+        dirname = ""
+        filename2 = filename
+        if "/" in filename:
+            # import re
+            # pattern = re.compile(r"^(.+)/([^/]+)$")
+            # matches = pattern.search(filename)
+            # print('matches', matches)
+            dirname, filename2 = os.path.split(filename)
+        if not os.path.exists(os.path.join(self.repo_obj.get_repo_path(), dirname)):
+            try:
+                os.makedirs(os.path.dirname(os.path.join(self.repo_obj.get_repo_path(), dirname, filename2)))
+            except OSError:  # Guard against race condition
+                raise
+        else:
+            if len(os.listdir(self.repo_obj.get_repo_path() + "/" + dirname)) > 0:
+                form.add_error(None, "path already exists")
+                return self.form_invalid(form)
 
-        relative_dir = url_directories + url_directories_ext + folder_name
-        create_commit_folders(self.request.user, self.git_repo, commit_message, '.placeholder', relative_dir)
+        try:
+            file = open(os.path.join(self.repo_obj.get_repo_path(), dirname, filename2), 'w')
+        except OSError:
+            form.add_error(None,
+                           "Can't add just a directory, must add a file too.\
+                           \nExample: foldername/filename.html")
+            return self.form_invalid(form)
+        file.write(filecontent)
+        file.close()
+        create_commit_folders(self.request.user, git_repo, commit_message, filename2, dirname)
 
         return super(RepositoryCreateFolderView, self).form_valid(form)
 
@@ -606,7 +629,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
                     'username': self.kwargs.get('username'),
                     'slug': self.kwargs.get('slug'),
                     'directories': self.kwargs.get('directories'),
-                    'directories_ext': self.kwargs.get('directories_ext') + self.folder
+                    'directories_ext': self.kwargs.get('directories_ext') + "/" + self.folder
                 }
             )
         if 'directories' in self.kwargs:
@@ -768,11 +791,12 @@ class BlobRawView(View):
                     dir += folder + "/"
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
-            print('filename', filename)
-            print('index_tree', index_tree)
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
             if blob_id != 404:
                 extension = self.kwargs.get('extension')
+                print('extension', extension)
+                if extension is None:
+                    return HttpResponse(repo[blob_id].data)
                 if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
                     return HttpResponse(repo[blob_id].data, content_type="image/png")
                 elif extension in ('.pdf'):
@@ -1046,7 +1070,7 @@ class RenameFileView(OwnerRequiredMixin, FormView):
                     dir += folder + "/"
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
-                    print('index_tree_int', index_tree)
+
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
             blob = self.repo[blob_id]
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
