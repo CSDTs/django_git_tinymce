@@ -59,9 +59,9 @@ urlpatterns = [
 
 
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/create/$', RepositoryCreateFileView.as_view(), name='create_file_dir'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/createfolder/$', RepositoryCreateFileView.as_view(), name='create_folder_dir'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/createfolder/$', RepositoryCreateFolderView.as_view(), name='create_folder_dir'),  # noqa: E501
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/create/$', RepositoryCreateFileView.as_view(), name='create_file_folder'),  # noqa: E501
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/createfolder/$', RepositoryCreateFileView.as_view(), name='create_folder_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/createfolder/$', RepositoryCreateFolderView.as_view(), name='create_folder_folder'),  # noqa: E501
 
 
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/$', ReduxRepositoryFolderDetailView.as_view(), name='repo_detail_folder'),  # noqa: E501
