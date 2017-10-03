@@ -1419,5 +1419,6 @@ class SSIFolderView(TemplateView):
             context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
         except KeyError:
             context['nav'] = None
+        print("****************", context['nav'])
         context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
         return context

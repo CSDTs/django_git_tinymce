@@ -64,7 +64,7 @@ ROOT_URLCONF = 'django_git.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), '/vagrant/media/git_repos'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'media', 'git_repos')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
