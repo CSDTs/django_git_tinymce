@@ -668,6 +668,15 @@ class BlobEditView(FormView):
             directory = self.kwargs.get('directories')
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
+        
+        try:
+            self.repo_obj = Repository.objects.get(
+                owner__username=self.kwargs['username'],
+                slug=self.kwargs['slug']
+            )
+        except:
+            raise Http404("The repository does not exist")
+
         try:
             self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
             if self.repo.is_empty:
@@ -729,14 +738,6 @@ class BlobEditView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super(BlobEditView, self).get_context_data(**kwargs)
-        self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
-        try:
-            self.repo_obj = Repository.objects.get(
-                owner__username=self.kwargs['username'],
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Repository.DoesNotExist
 
         user = self.request.user
         owner = False
@@ -752,6 +753,35 @@ class BlobEditView(FormView):
             raise PermissionDenied
 
         return context
+
+    def get_success_url(self):
+        if self.kwargs.get('directories_ext'):
+            self.success_url = reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                    'directories_ext': self.kwargs.get('directories_ext'),
+                }
+            )
+        elif self.kwargs.get('directories'):
+            self.success_url = reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                }
+            )
+        else:
+            self.success_url = reverse(
+            "gitusers:repo_detail",
+            kwargs={
+                'username': self.kwargs.get('username'),
+                'slug': self.kwargs.get('slug'),
+            }
+        )
 
 
 class BlobRawView(View):
@@ -1389,5 +1419,6 @@ class SSIFolderView(TemplateView):
             context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
         except KeyError:
             context['nav'] = None
+        print("****************", context['nav'])
         context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
         return context
