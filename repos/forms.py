@@ -170,7 +170,7 @@ class FolderCreateForm(forms.Form):
 
         # else check the tree.
         folder_exist = find_folder_oid_in_tree(folder_name, self.repo_tree)
-        if  folder_exist != 404:
+        if folder_exist != 404:
             raise forms.ValidationError('folder already exists')
 
         return folder_name
@@ -206,27 +206,22 @@ class RepoForkRenameForm(forms.Form):
 
 
 class AddEditorsForm(forms.Form):
-    new_editor_username = forms.CharField(label='Username', required=False)
-
-    def clean_new_editor_username(self):
-        new_editor_username = self.cleaned_data['new_editor_username']
-        print(new_editor_username, 'new_editor_username')
-        user_pull = User.objects.get(username=new_editor_username)
-        if not user_pull:
-            raise forms.ValidationError(
-                "User named '{}' not found".format(new_editor_username)
-            )
-        return new_editor_username
+    new_editor_username = forms.CharField(label='Username', required=True)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(AddEditorsForm, self).__init__(*args, **kwargs)
 
-    def clean_new_editor_email(self):
-        new_editor_email = self.cleaned_data['new_editor_email']
-        user_pull = User.objects.get(username=new_editor_email)
-        if not user_pull:
+    def clean_new_editor_username(self):
+        new_editor_username = self.cleaned_data['new_editor_username']
+        print(new_editor_username, 'new_editor_username')
+
+        if not User.objects.filter(username=new_editor_username).exists():
             raise forms.ValidationError(
-                "User email '{}' not found".format(new_editor_email)
+                "User named '{}' not found".format(new_editor_username)
             )
-        return new_editor_email
+
+        if new_editor_username == self.request.user.username:
+            raise forms.ValidationError("You are already the owner!")
+
+        return new_editor_username
