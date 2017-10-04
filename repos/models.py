@@ -52,6 +52,7 @@ class Repository(models.Model):
         return join(settings.REPO_DIR, self.owner.username, str(self.pk))
 
     def get_repo_path_media(self):
+        print("******************", join(self.owner.username, str(self.pk)))
         return join(self.owner.username, str(self.pk))
 
     def save(self, *args, **kwargs):
@@ -106,7 +107,7 @@ def repository_post_save(sender, instance, **kwagrs):
         <nav class="navbar navbar-inverse navbar-local visible-xs">\
     <div class="container-fluid">\
     <div class="navbar-header">\
-        <a class="navbar-brand" href="./index.html">{0}</a>
+        <a class="navbar-brand" href="/{1}/{2}/render/index.html">{0}</a>
         <button aria-expanded="false" class="navbar-toggle collapsed"
         data-target="#nav-menu" data-toggle="collapse" type="button">
         <span class="sr-only">Toggle navigation</span> <span class="icon-bar">
@@ -116,13 +117,13 @@ def repository_post_save(sender, instance, **kwagrs):
     <div class="collapse navbar-collapse navbar-right" id="nav-menu">\
         <ul class="nav navbar-nav">\
             <li class="visible-xs">\
-                <a href="./index.html">Background</a>\
+                <a href="/{1}/{2}/render/index.html">Background</a>\
             </li>\
             <li class="visible-xs">\
-                <a href="./origins.html">Origins</a>\
+                <a href="/{1}/{2}/render/origins.html">Origins</a>\
             </li>\
             <li class="visible-xs">\
-                <a href="./teaching.html">Teaching Materials</a>\
+                <a href="/{1}/{2}/render/teaching.html">Teaching Materials</a>\
             </li>\
         </ul>\
 \
@@ -135,14 +136,14 @@ def repository_post_save(sender, instance, **kwagrs):
         <div class="stuck">\
             <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">\
                 <ul class="nav">\
-                    <li class="active"><a href="./index.html">Background</a></li>\
-                    <li class="indented"><a href="./origins.html">Origins</a></li>\
-                    <li><a href="./tutorial.html">Tutorial</a></li>\
-                    <li><a href="./software.html">Software</a></li>\
-                    <li><a href="./teaching.html">Teaching Materials</a></li>\
+                    <li class="active"><a href="/{1}/{2}/render/index.html">Background</a></li>\
+                    <li class="indented"><a href="/{1}/{2}/render/origins.html">Origins</a></li>\
+                    <li><a href="/{1}/{2}/render/tutorial.html">Tutorial</a></li>\
+                    <li><a href="/{1}/{2}/render/software.html">Software</a></li>\
+                    <li><a href="/{1}/{2}/render/teaching.html">Teaching Materials</a></li>\
                 </ul>\
             </div>\
-        </div>""".format(instance.name)
+        </div>""".format(instance.name, instance.owner, instance.slug)
         fn = "nav_" + instance.slug + ".html"
         f = open(os.path.join(repo.workdir, fn), 'w')
         f.write(data)
