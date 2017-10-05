@@ -668,7 +668,6 @@ class BlobEditView(FormView):
             directory = self.kwargs.get('directories')
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
-        
         try:
             self.repo_obj = Repository.objects.get(
                 owner__username=self.kwargs['username'],
@@ -776,12 +775,12 @@ class BlobEditView(FormView):
             )
         else:
             self.success_url = reverse(
-            "gitusers:repo_detail",
-            kwargs={
-                'username': self.kwargs.get('username'),
-                'slug': self.kwargs.get('slug'),
-            }
-        )
+                "gitusers:repo_detail",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                }
+            )
 
 
 class BlobRawView(View):
