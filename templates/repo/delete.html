@@ -1,10 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete{% endblock %}
+
+{% block content %}
+
 {% if error_message %}
 	{{ error_message }}
 	
 {% else %}
+<h1>Confirm Delete</h1>
 	<form action="" method="post">
 	    {% csrf_token %}
 	     <p>Are you sure you want to delete "{{ object }}"?</p>
-	    <input type="submit" value="Delete" />
+	    <input type="submit" value="Delete" class="btn btn-warning">
+	    <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-default">Cancel</a>
 	</form>
 {% endif %}
+
+{% endblock %}
