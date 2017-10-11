@@ -704,8 +704,6 @@ class BlobEditView(FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
 
-        # Base object is immutable and Blob doesn't have a constructor
-        # Have to directly change the actually file in file system
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
@@ -1046,13 +1044,11 @@ class BlobDeleteFolderView(TemplateView):
         return context
 
 
-class RenameFileView(OwnerRequiredMixin, FormView):
+class RenameFileView(FormView):
     template_name = 'repo/rename_file.html'
     form_class = FileRenameForm
 
     def get_initial(self, **kwargs):
-        self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
-
         initial = super(RenameFileView, self).get_initial()
         user = self.request.user
         try:
@@ -1061,19 +1057,9 @@ class RenameFileView(OwnerRequiredMixin, FormView):
                 slug=self.kwargs['slug']
             )
         except:
-            pass
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if self.repo_obj.owner == user:
-            owner = True
+            raise Http404("Repository does not exist")
 
-        else:
-            for editor in self.repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if not owner:
+        if not owner_editor_check(self.repo_obj, self.request.user):
             raise PermissionDenied
 
         filename = self.kwargs.get('filename')
@@ -1085,26 +1071,14 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
         try:
-            # self.repo_obj = Repository.objects.get(
-            #     owner__username=self.kwargs.get('username'),
-            #     slug=self.kwargs['slug']
-            # )
-
             self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
 
             if self.repo.is_empty:
-                raise Http404
+                raise Http404("No such file")
 
             index_tree = self.repo.index
             commit = self.repo.revparse_single('HEAD')
             tree = commit.tree
-            # blob = self.repo[find_file_oid_in_tree(filename, tree)]
-            #
-            # print('directory', directory)
-            # if directory != "":
-            #     item = tree.__getitem__(str(directory))
-            #     print('item', item)
-            #     index_tree.read_tree(item.id)
 
             if directory != "":
                 folders = directory.split("/")
@@ -1127,8 +1101,6 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
 
-        # Base object is immutable and Blob doesn't have a constructor
-        # Have to directly change the actually file in file system
         new_filename = form.cleaned_data['new_filename']
         filename = self.kwargs.get('filename')
         if ".." in new_filename:
@@ -1196,9 +1168,9 @@ class RenameFileView(OwnerRequiredMixin, FormView):
             }
         )
         )
-
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         context = super(RenameFileView, self).get_context_data(**kwargs)
+
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
@@ -1209,7 +1181,8 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         if self.kwargs.get('directories_ext'):
             directory += "/" + self.kwargs.get('directories_ext')
         context['directory'] = directory
-        return render(request, self.template_name, context)
+
+        return context
 
 
 class ForkedReposView(ListView):
