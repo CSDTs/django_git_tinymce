@@ -1130,44 +1130,14 @@ class RenameFileView(FormView):
         os.rename(old_file, new_file)
         commit_message = form.cleaned_data['commit_message']
         commit_message = 'Renamed ' + str(filename) + ' to ' + str(new_filename) + ' - ' + commit_message
-        # sha = create_commit(user, self.repo, commit_message, filename)
         delete_commit_folders(user, self.repo, commit_message, filename, directory)
         create_commit_folders(user, self.repo, commit_message, new_filename, directory)
 
         # except OSError:
         #     raise form.ValidationError("Save error, please check the file.")
 
-        # return super(RenameFileView, self).form_valid(form)
-        if 'directories_ext' in self.kwargs:
-            return HttpResponseRedirect(reverse(
-                "gitusers:repo_detail_folder",
-                kwargs={
-                    'username': self.kwargs.get('username'),
-                    'slug': self.kwargs.get('slug'),
-                    'directories': self.kwargs.get('directories'),
-                    'directories_ext': self.kwargs.get('directories_ext')
-                }
-            )
-            )
-        if 'directories' in self.kwargs:
-            return HttpResponseRedirect(reverse(
-                "gitusers:repo_detail_folder",
-                kwargs={
-                    'username': self.kwargs.get('username'),
-                    'slug': self.kwargs.get('slug'),
-                    'directories': self.kwargs.get('directories')
-                }
-            )
-            )
-        return HttpResponseRedirect(reverse(
-            "gitusers:repo_detail",
-            kwargs={
-                'username': self.kwargs.get('username'),
-                'slug': self.kwargs.get('slug')
-
-            }
-        )
-        )
+        return super(RenameFileView, self).form_valid(form)
+        
     def get_context_data(self, *args, **kwargs):
         context = super(RenameFileView, self).get_context_data(**kwargs)
 
@@ -1184,31 +1154,57 @@ class RenameFileView(FormView):
 
         return context
 
+    def get_success_url(self):
+        if 'directories_ext' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                    'directories_ext': self.kwargs.get('directories_ext')
+                }
+            )
+            
+        if 'directories' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories')
+                }
+            )
+            
+        return reverse(
+            "gitusers:repo_detail",
+            kwargs={
+                'username': self.kwargs.get('username'),
+                'slug': self.kwargs.get('slug')
+
+            }
+        )
+
 
 class ForkedReposView(ListView):
-    model = Repository
+    model = ForkedRepository
     template_name = 'repo/forked_repos.html'
 
     def get_queryset(self):
-        # queryset = super(ForkedReposView, self).get_queryset()
-
         self.owner_name = self.kwargs['username']
         self.repo_name = self.kwargs['slug']
         user = User.objects.get(username=self.owner_name)
-        repo = Repository.objects.get(owner=user.id, slug=self.repo_name)
-        forked_repos = ForkedRepository.objects.filter(original=repo)
+        try:
+            self.repo = Repository.objects.get(owner=user.id, slug=self.repo_name)
+        except:
+            raise Http404("Repository does not exist")
+        forked_repos = ForkedRepository.objects.filter(original=self.repo)
         return forked_repos
 
     def get_context_data(self, **kwargs):
         context = super(ForkedReposView, self).get_context_data(**kwargs)
         forked_repos = self.get_queryset()
-        repos = []
-        for repo in forked_repos:
-            repo = Repository.objects.get(owner=repo.fork.owner, slug=repo.fork.name)
-            repos.append(repo)
-        context['orig_repo'] = self.repo_name
-        context['orig_author'] = self.owner_name
-        context['repos'] = repos
+        context['orig_repo'] = self.repo
         return context
 
 
