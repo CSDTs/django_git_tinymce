@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.utils.text import slugify
 from django.views import View
 from django.views.generic.base import TemplateView
@@ -810,8 +810,8 @@ class BlobRawView(View):
 
         try:
             index_tree = repo.index
-            commit = repo.revparse_single('HEAD')
-            tree = commit.tree
+            # commit = repo.revparse_single('HEAD')
+            # tree = commit.tree
             ''' This block is not used
             if directory != "":
                 folders = directory.split("/")
@@ -916,7 +916,7 @@ class BlobDeleteView(TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(BlobDeleteView, self).get_context_data(**kwargs)
-        
+
         try:
             repo_obj = Repository.objects.get(
                 owner__username=self.kwargs.get('username'),
@@ -1024,7 +1024,7 @@ class BlobDeleteFolderView(TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(BlobDeleteFolderView, self).get_context_data(**kwargs)
-        
+
         try:
             repo_obj = Repository.objects.get(
                 owner__username=self.kwargs.get('username'),
@@ -1050,7 +1050,6 @@ class RenameFileView(FormView):
 
     def get_initial(self, **kwargs):
         initial = super(RenameFileView, self).get_initial()
-        user = self.request.user
         try:
             self.repo_obj = Repository.objects.get(
                 owner__username=self.kwargs.get('username'),
@@ -1137,7 +1136,7 @@ class RenameFileView(FormView):
         #     raise form.ValidationError("Save error, please check the file.")
 
         return super(RenameFileView, self).form_valid(form)
-        
+
     def get_context_data(self, *args, **kwargs):
         context = super(RenameFileView, self).get_context_data(**kwargs)
 
@@ -1165,7 +1164,7 @@ class RenameFileView(FormView):
                     'directories_ext': self.kwargs.get('directories_ext')
                 }
             )
-            
+
         if 'directories' in self.kwargs:
             return reverse(
                 "gitusers:repo_detail_folder",
@@ -1175,7 +1174,7 @@ class RenameFileView(FormView):
                     'directories': self.kwargs.get('directories')
                 }
             )
-            
+
         return reverse(
             "gitusers:repo_detail",
             kwargs={
@@ -1203,7 +1202,6 @@ class ForkedReposView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ForkedReposView, self).get_context_data(**kwargs)
-        forked_repos = self.get_queryset()
         context['orig_repo'] = self.repo
         return context
 
