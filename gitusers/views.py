@@ -875,7 +875,7 @@ class BlobRawView(View):
             raise Http404("Failed to open or read file")
 
 
-class BlobDeleteView(OwnerRequiredMixin, TemplateView):
+class BlobDeleteView(TemplateView):
     template_name = 'repo/delete.html'
 
     def post(self, request, *args, **kwargs):
@@ -930,16 +930,20 @@ class BlobDeleteView(OwnerRequiredMixin, TemplateView):
         if not owner_editor_check(repo_obj, self.request.user):
             raise PermissionDenied
 
-        context['object'] = self.kwargs.get("filename")
+        filename = self.kwargs.get('filename')
+        if self.kwargs.get('extension'):
+            filename += self.kwargs.get('extension')
+
+        context['object'] = filename
         return context
 
 
-class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
+class BlobDeleteFolderView(TemplateView):
 
     template_name = 'repo/delete.html'
     success_url = reverse_lazy('index')
 
-    def get(self, request, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         user = self.request.user
         try:
@@ -948,38 +952,22 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
                 slug=self.kwargs['slug']
             )
         except:
-            pass
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if repo_obj.owner == user:
-            owner = True
+            raise Http404("Repository does not exist")
 
-        else:
-            for editor in repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if not owner:
+        if not owner_editor_check(repo_obj, user):
             raise PermissionDenied
 
         filename = self.kwargs.get('filename')
+        if self.kwargs.get('extension'):
+            filename += self.kwargs.get('extension')
+
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs['directories_ext']
 
-        if self.kwargs.get('extension'):
-            filename += self.kwargs.get('extension')
-
-        # repo_obj = None
-
         try:
-            # repo_obj = Repository.objects.get(
-            #     owner__username=self.kwargs.get('username'),
-            #     slug=self.kwargs['slug']
-            # )
             repo = pygit2.Repository(repo_obj.get_repo_path())
 
             if repo.is_empty:
@@ -1035,6 +1023,27 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
             }
         )
         )
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(BlobDeleteFolderView, self).get_context_data(**kwargs)
+        
+        try:
+            repo_obj = Repository.objects.get(
+                owner__username=self.kwargs.get('username'),
+                slug=self.kwargs['slug']
+            )
+        except:
+            raise Http404("Repository does not exist")
+
+        if not owner_editor_check(repo_obj, self.request.user):
+            raise PermissionDenied
+
+        filename = self.kwargs.get('filename')
+        if self.kwargs.get('extension'):
+            filename += self.kwargs.get('extension')
+
+        context['object'] = filename
+        return context
 
 
 class RenameFileView(OwnerRequiredMixin, FormView):
