@@ -7,7 +7,7 @@
 {% block content %}
 
 
-<h1>Rename File {{ directory }}{% if directory %}/{% endif %}{{ object }}</h1>
+<h1>Rename {% if directory %}{{ directory }}/{% endif %}{{ object }}</h1>
 
 {% if error_message %}
 	{{ error_message }}

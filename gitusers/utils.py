@@ -20,6 +20,7 @@ def owner_editor_check(repo, request_user):
         return False
     return True
 
+
 def find_file_oid_in_tree(filename, tree):
     for entry in tree:
         if entry.type == 'blob':
