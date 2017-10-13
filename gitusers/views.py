@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.utils.text import slugify
 from django.views import View
 from django.views.generic.base import TemplateView
@@ -191,7 +191,7 @@ class ReduxRepositoryDetailView(TemplateView):
             if orig_fork:
                 is_fork = True
             orig = orig_fork.original
-            fork_name = orig.name
+            fork_name = orig.slug
             fork_owner = orig.owner.username
         except:
             orig_fork = None
@@ -704,8 +704,6 @@ class BlobEditView(FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
 
-        # Base object is immutable and Blob doesn't have a constructor
-        # Have to directly change the actually file in file system
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
@@ -812,8 +810,8 @@ class BlobRawView(View):
 
         try:
             index_tree = repo.index
-            commit = repo.revparse_single('HEAD')
-            tree = commit.tree
+            # commit = repo.revparse_single('HEAD')
+            # tree = commit.tree
             ''' This block is not used
             if directory != "":
                 folders = directory.split("/")
@@ -875,7 +873,7 @@ class BlobRawView(View):
             raise Http404("Failed to open or read file")
 
 
-class BlobDeleteView(OwnerRequiredMixin, TemplateView):
+class BlobDeleteView(TemplateView):
     template_name = 'repo/delete.html'
 
     def post(self, request, *args, **kwargs):
@@ -918,7 +916,7 @@ class BlobDeleteView(OwnerRequiredMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(BlobDeleteView, self).get_context_data(**kwargs)
-        
+
         try:
             repo_obj = Repository.objects.get(
                 owner__username=self.kwargs.get('username'),
@@ -930,16 +928,20 @@ class BlobDeleteView(OwnerRequiredMixin, TemplateView):
         if not owner_editor_check(repo_obj, self.request.user):
             raise PermissionDenied
 
-        context['object'] = self.kwargs.get("filename")
+        filename = self.kwargs.get('filename')
+        if self.kwargs.get('extension'):
+            filename += self.kwargs.get('extension')
+
+        context['object'] = filename
         return context
 
 
-class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
+class BlobDeleteFolderView(TemplateView):
 
     template_name = 'repo/delete.html'
     success_url = reverse_lazy('index')
 
-    def get(self, request, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         user = self.request.user
         try:
@@ -948,38 +950,22 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
                 slug=self.kwargs['slug']
             )
         except:
-            pass
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if repo_obj.owner == user:
-            owner = True
+            raise Http404("Repository does not exist")
 
-        else:
-            for editor in repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if not owner:
+        if not owner_editor_check(repo_obj, user):
             raise PermissionDenied
 
         filename = self.kwargs.get('filename')
+        if self.kwargs.get('extension'):
+            filename += self.kwargs.get('extension')
+
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs['directories_ext']
 
-        if self.kwargs.get('extension'):
-            filename += self.kwargs.get('extension')
-
-        # repo_obj = None
-
         try:
-            # repo_obj = Repository.objects.get(
-            #     owner__username=self.kwargs.get('username'),
-            #     slug=self.kwargs['slug']
-            # )
             repo = pygit2.Repository(repo_obj.get_repo_path())
 
             if repo.is_empty:
@@ -1036,35 +1022,43 @@ class BlobDeleteFolderView(OwnerRequiredMixin, DeleteView):
         )
         )
 
+    def get_context_data(self, *args, **kwargs):
+        context = super(BlobDeleteFolderView, self).get_context_data(**kwargs)
 
-class RenameFileView(OwnerRequiredMixin, FormView):
+        try:
+            repo_obj = Repository.objects.get(
+                owner__username=self.kwargs.get('username'),
+                slug=self.kwargs['slug']
+            )
+        except:
+            raise Http404("Repository does not exist")
+
+        if not owner_editor_check(repo_obj, self.request.user):
+            raise PermissionDenied
+
+        filename = self.kwargs.get('filename')
+        if self.kwargs.get('extension'):
+            filename += self.kwargs.get('extension')
+
+        context['object'] = filename
+        return context
+
+
+class RenameFileView(FormView):
     template_name = 'repo/rename_file.html'
     form_class = FileRenameForm
 
     def get_initial(self, **kwargs):
-        self.success_url = '/{}/{}'.format(self.kwargs.get('username'), self.kwargs['slug'])
-
         initial = super(RenameFileView, self).get_initial()
-        user = self.request.user
         try:
             self.repo_obj = Repository.objects.get(
                 owner__username=self.kwargs.get('username'),
                 slug=self.kwargs['slug']
             )
         except:
-            pass
-        owner = False
-        if user.is_superuser:
-            owner = True
-        if self.repo_obj.owner == user:
-            owner = True
+            raise Http404("Repository does not exist")
 
-        else:
-            for editor in self.repo_obj.editors.all():
-                if editor.id == user.id:
-                    owner = True
-
-        if not owner:
+        if not owner_editor_check(self.repo_obj, self.request.user):
             raise PermissionDenied
 
         filename = self.kwargs.get('filename')
@@ -1076,26 +1070,14 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
         try:
-            # self.repo_obj = Repository.objects.get(
-            #     owner__username=self.kwargs.get('username'),
-            #     slug=self.kwargs['slug']
-            # )
-
             self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
 
             if self.repo.is_empty:
-                raise Http404
+                raise Http404("No such file")
 
             index_tree = self.repo.index
             commit = self.repo.revparse_single('HEAD')
             tree = commit.tree
-            # blob = self.repo[find_file_oid_in_tree(filename, tree)]
-            #
-            # print('directory', directory)
-            # if directory != "":
-            #     item = tree.__getitem__(str(directory))
-            #     print('item', item)
-            #     index_tree.read_tree(item.id)
 
             if directory != "":
                 folders = directory.split("/")
@@ -1118,8 +1100,6 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         # This method is called when valid form data has been POSTed.
         # It should return an HttpResponse.
 
-        # Base object is immutable and Blob doesn't have a constructor
-        # Have to directly change the actually file in file system
         new_filename = form.cleaned_data['new_filename']
         filename = self.kwargs.get('filename')
         if ".." in new_filename:
@@ -1149,47 +1129,17 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         os.rename(old_file, new_file)
         commit_message = form.cleaned_data['commit_message']
         commit_message = 'Renamed ' + str(filename) + ' to ' + str(new_filename) + ' - ' + commit_message
-        # sha = create_commit(user, self.repo, commit_message, filename)
         delete_commit_folders(user, self.repo, commit_message, filename, directory)
         create_commit_folders(user, self.repo, commit_message, new_filename, directory)
 
         # except OSError:
         #     raise form.ValidationError("Save error, please check the file.")
 
-        # return super(RenameFileView, self).form_valid(form)
-        if 'directories_ext' in self.kwargs:
-            return HttpResponseRedirect(reverse(
-                "gitusers:repo_detail_folder",
-                kwargs={
-                    'username': self.kwargs.get('username'),
-                    'slug': self.kwargs.get('slug'),
-                    'directories': self.kwargs.get('directories'),
-                    'directories_ext': self.kwargs.get('directories_ext')
-                }
-            )
-            )
-        if 'directories' in self.kwargs:
-            return HttpResponseRedirect(reverse(
-                "gitusers:repo_detail_folder",
-                kwargs={
-                    'username': self.kwargs.get('username'),
-                    'slug': self.kwargs.get('slug'),
-                    'directories': self.kwargs.get('directories')
-                }
-            )
-            )
-        return HttpResponseRedirect(reverse(
-            "gitusers:repo_detail",
-            kwargs={
-                'username': self.kwargs.get('username'),
-                'slug': self.kwargs.get('slug')
+        return super(RenameFileView, self).form_valid(form)
 
-            }
-        )
-        )
-
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         context = super(RenameFileView, self).get_context_data(**kwargs)
+
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
@@ -1200,33 +1150,59 @@ class RenameFileView(OwnerRequiredMixin, FormView):
         if self.kwargs.get('directories_ext'):
             directory += "/" + self.kwargs.get('directories_ext')
         context['directory'] = directory
-        return render(request, self.template_name, context)
+
+        return context
+
+    def get_success_url(self):
+        if 'directories_ext' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories'),
+                    'directories_ext': self.kwargs.get('directories_ext')
+                }
+            )
+
+        if 'directories' in self.kwargs:
+            return reverse(
+                "gitusers:repo_detail_folder",
+                kwargs={
+                    'username': self.kwargs.get('username'),
+                    'slug': self.kwargs.get('slug'),
+                    'directories': self.kwargs.get('directories')
+                }
+            )
+
+        return reverse(
+            "gitusers:repo_detail",
+            kwargs={
+                'username': self.kwargs.get('username'),
+                'slug': self.kwargs.get('slug')
+
+            }
+        )
 
 
 class ForkedReposView(ListView):
-    model = Repository
+    model = ForkedRepository
     template_name = 'repo/forked_repos.html'
 
     def get_queryset(self):
-        # queryset = super(ForkedReposView, self).get_queryset()
-
         self.owner_name = self.kwargs['username']
         self.repo_name = self.kwargs['slug']
         user = User.objects.get(username=self.owner_name)
-        repo = Repository.objects.get(owner=user.id, slug=self.repo_name)
-        forked_repos = ForkedRepository.objects.filter(original=repo)
+        try:
+            self.repo = Repository.objects.get(owner=user.id, slug=self.repo_name)
+        except:
+            raise Http404("Repository does not exist")
+        forked_repos = ForkedRepository.objects.filter(original=self.repo)
         return forked_repos
 
     def get_context_data(self, **kwargs):
         context = super(ForkedReposView, self).get_context_data(**kwargs)
-        forked_repos = self.get_queryset()
-        repos = []
-        for repo in forked_repos:
-            repo = Repository.objects.get(owner=repo.fork.owner, slug=repo.fork.name)
-            repos.append(repo)
-        context['orig_repo'] = self.repo_name
-        context['orig_author'] = self.owner_name
-        context['repos'] = repos
+        context['orig_repo'] = self.repo
         return context
 
 
