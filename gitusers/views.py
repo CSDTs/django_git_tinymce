@@ -1209,7 +1209,8 @@ class ForkedReposView(ListView):
 class CommitLogView(ListView):
     model = Repository
     template_name = 'repo/commits.html'
-    paginate_by = 200
+    paginate_by = 100
+    context_object_name = "commits"
 
     def get_queryset(self):
         self.owner_name = self.kwargs['username']
@@ -1220,7 +1221,6 @@ class CommitLogView(ListView):
             git_repo = pygit2.Repository(repo.get_repo_path())
         except IOError:
             raise Http404("Repository does not exist")
-        commits = []
 
         class Commit(object):
             message = ""
@@ -1233,6 +1233,8 @@ class CommitLogView(ListView):
                 self.hex = hex
                 self.committer = committer
                 self.commit_time = commit_time
+
+        commits = []
         for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TOPOLOGICAL):
             time3 = datetime.datetime.fromtimestamp(int(commit.commit_time)).strftime('%m-%d-%Y %H:%M:%S')
             commit_obj = Commit(commit.hex, commit.message, commit.committer.name, time3)
@@ -1242,19 +1244,11 @@ class CommitLogView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CommitLogView, self).get_context_data(**kwargs)
+
         commits = self.get_queryset()
         context['orig_repo'] = self.repo_name
         context['orig_author'] = self.owner_name
-        page = self.request.GET.get('page', 1)
-        paginator = Paginator(commits, 200)
-        try:
-            commits = paginator.page(page)
-        except PageNotAnInteger:
-            commits = paginator.page(1)
-        except EmptyPage:
-            commits = paginator.page(paginator.num_pages)
-
-        context['commits'] = commits
+        
         return context
 
 
