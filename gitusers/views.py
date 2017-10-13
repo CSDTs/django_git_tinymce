@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+# from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 # from django.shortcuts import render
@@ -1245,12 +1245,10 @@ class CommitLogView(ListView):
     def get_context_data(self, **kwargs):
         context = super(CommitLogView, self).get_context_data(**kwargs)
 
-        commits = self.get_queryset()
         context['orig_repo'] = self.repo_name
         context['orig_author'] = self.owner_name
-        
-        return context
 
+        return context
 
 
 # TODO: parse diff format same to output of "git show"
