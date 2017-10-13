@@ -1252,50 +1252,42 @@ class CommitLogView(ListView):
         return context
 
 
-class CommitView(ListView):
-    model = Repository
-    template_name = 'repo/commit.html'
-    # paginate_by = 200
 
-    def get_queryset(self):
-        queryset = super(CommitView, self).get_queryset()
-        return queryset
+# TODO: parse diff format same to output of "git show"
+class CommitView(TemplateView):
+    template_name = 'repo/commit.html'
 
     def get_context_data(self, **kwargs):
         context = super(CommitView, self).get_context_data(**kwargs)
-        self.owner_name = self.kwargs['username']
-        self.repo_name = self.kwargs['slug']
-        self.commit_hex = self.kwargs['commit']
-        context['orig_repo'] = self.repo_name
-        context['orig_author'] = self.owner_name
-        user = User.objects.get(username=self.owner_name)
-        repo = Repository.objects.get(owner=user.id, slug=self.repo_name)
+
+        owner_name = self.kwargs['username']
+        repo_slug = self.kwargs['slug']
+        commit_hex = self.kwargs['commit']
+        user = User.objects.get(username=owner_name)
+
+        try:
+            repo = Repository.objects.get(owner=user.id, slug=repo_slug)
+            context['repo'] = repo
+        except:
+            raise Http404("Repository does not exist")
+
         try:
             git_repo = pygit2.Repository(repo.get_repo_path())
         except IOError:
             raise Http404("Repository does not exist")
+
         try:
-            commit = git_repo.revparse_single(self.commit_hex)
-            context['message'] = commit.message
-            context['hash'] = commit.hex
+            commit = git_repo.revparse_single(commit_hex)
             diff = git_repo.diff(commit.parents[0], commit).patch
-            # patches = [p for p in diff]
-            # old_files = []
-            # hunks_files = []
-            # for patch in patches:
-            #     old_files.append(patch.delta)
-            #     hunks_files.append(patch.hunks)
-            context['diff'] = diff
             files = []
             for e in commit.tree:
                 files.append(e.name)
+
+            context['commit'] = commit
+            context['diff'] = diff
             context['files'] = files
         except:
-            context['message'] = None
-            context['hash'] = self.commit_hex
-            context['diff'] = None
-            context['files'] = None
-        # context['hunks'] = hunks_files
+            context['commit'] = None
 
         return context
 
