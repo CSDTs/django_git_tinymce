@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 # from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-# from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
 from django.views import View
 from django.views.generic.base import TemplateView
@@ -183,7 +183,7 @@ class ReduxRepositoryDetailView(TemplateView):
             directory = self.kwargs['directories']
         user = User.objects.get(username=owner_name)
 
-        repo = Repository.objects.get(owner=user.id, slug=repo_name)
+        repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
         try:
@@ -233,7 +233,7 @@ class ReduxRepositoryFolderDetailView(TemplateView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs['directories_ext']
         user = User.objects.get(username=owner_name)
-        repo = Repository.objects.get(owner=user.id, slug=repo_name)
+        repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
         try:
@@ -286,7 +286,7 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
         origin_user = User.objects.get(username=username_in_url)
         new_reponame = form.cleaned_data.get("new_reponame")
         origin_repo = self.kwargs.get("slug")
-        origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+        origin_repo = get_object_or_404(Repository, slug=origin_repo, owner=origin_user)
         obj = Repository.objects.create(
             name=new_reponame,
             description=origin_repo.description,
@@ -324,7 +324,7 @@ class RepositoryForkView(LoginRequiredMixin, FormView):
 
         origin_user = User.objects.get(username=username_in_url)
         origin_repo = self.kwargs.get("slug")
-        origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
+        origin_repo = get_object_or_404(Repository, slug=origin_repo, owner=origin_user)
 
         if Repository.objects.filter(
                 slug=origin_repo.slug, owner=self.request.user
@@ -353,7 +353,7 @@ class RepositoryUpdateView(OwnerRequiredMixin, UpdateView):
     def editors(self):
         username = self.kwargs.get('username')
         slug = self.kwargs.get('slug')
-        repo = Repository.objects.get(owner__username=username, slug=slug)
+        repo = get_object_or_404(Repository, owner__username=username, slug=slug)
         editors = repo.editors.all()
         list_to_return = []
         for editor in editors:
@@ -416,7 +416,8 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
     def get_initial(self, **kwargs):
         initial = super(RepositoryCreateFileView, self).get_initial()
 
-        self.repo_obj = Repository.objects.get(
+        self.repo_obj = get_object_or_404(
+            Repository, 
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -543,7 +544,8 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super(RepositoryCreateFolderView, self).get_form_kwargs()
 
-        self.repo_obj = Repository.objects.get(
+        self.repo_obj = get_object_or_404(
+            Repository, 
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -669,13 +671,12 @@ class BlobEditView(FormView):
             directory = self.kwargs.get('directories')
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
-        try:
-            self.repo_obj = Repository.objects.get(
-                owner__username=self.kwargs['username'],
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Http404("The repository does not exist")
+
+        self.repo_obj = get_object_or_404(
+            Repository, 
+            owner__username=self.kwargs['username'],
+            slug=self.kwargs['slug']
+        )
 
         try:
             self.repo = pygit2.Repository(self.repo_obj.get_repo_path())
@@ -692,6 +693,7 @@ class BlobEditView(FormView):
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
+            print("**************", blob_id)
             blob = self.repo[blob_id]
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
                 initial['content'] = blob.data
@@ -795,18 +797,15 @@ class BlobRawView(View):
             directory += "/" + self.kwargs.get('directories_ext')
         repo_obj = None
 
-        try:
-            repo_obj = Repository.objects.get(
-                owner__username=self.kwargs.get('username'),
-                slug=self.kwargs['slug']
-            )
-            repo = pygit2.Repository(repo_obj.get_repo_path())
+        repo_obj = get_object_or_404(
+            Repository, 
+            owner__username=self.kwargs.get('username'),
+            slug=self.kwargs['slug']
+        )
+        repo = pygit2.Repository(repo_obj.get_repo_path())
 
-            if repo.is_empty:
-                raise Http404("File does not exist")
-
-        except:
-            raise Http404("Failed to open repository")
+        if repo.is_empty:
+            raise Http404("File does not exist")
 
         try:
             index_tree = repo.index
@@ -882,13 +881,11 @@ class BlobDeleteView(TemplateView):
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
 
-        try:
-            repo_obj = Repository.objects.get(
-                owner__username=self.kwargs.get('username'),
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Http404("Repository does not exist")
+        repo_obj = get_object_or_404(
+            Repository, 
+            owner__username=self.kwargs.get('username'),
+            slug=self.kwargs['slug']
+        )
 
         if not owner_editor_check(repo_obj, user):
             raise PermissionDenied
@@ -917,13 +914,11 @@ class BlobDeleteView(TemplateView):
     def get_context_data(self, *args, **kwargs):
         context = super(BlobDeleteView, self).get_context_data(**kwargs)
 
-        try:
-            repo_obj = Repository.objects.get(
-                owner__username=self.kwargs.get('username'),
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Http404("Repository does not exist")
+        repo_obj = get_object_or_404(
+            Repository, 
+            owner__username=self.kwargs.get('username'),
+            slug=self.kwargs['slug']
+        )
 
         if not owner_editor_check(repo_obj, self.request.user):
             raise PermissionDenied
@@ -944,13 +939,13 @@ class BlobDeleteFolderView(TemplateView):
     def post(self, request, *args, **kwargs):
 
         user = self.request.user
-        try:
-            repo_obj = Repository.objects.get(
-                owner__username=self.kwargs.get('username'),
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Http404("Repository does not exist")
+
+        repo_obj = get_object_or_404(
+            Repository, 
+            owner__username=self.kwargs.get('username'),
+            slug=self.kwargs['slug']
+        )
+
 
         if not owner_editor_check(repo_obj, user):
             raise PermissionDenied
@@ -1025,13 +1020,11 @@ class BlobDeleteFolderView(TemplateView):
     def get_context_data(self, *args, **kwargs):
         context = super(BlobDeleteFolderView, self).get_context_data(**kwargs)
 
-        try:
-            repo_obj = Repository.objects.get(
-                owner__username=self.kwargs.get('username'),
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Http404("Repository does not exist")
+        repo_obj = get_object_or_404(
+            Repository, 
+            owner__username=self.kwargs.get('username'),
+            slug=self.kwargs['slug']
+        )
 
         if not owner_editor_check(repo_obj, self.request.user):
             raise PermissionDenied
@@ -1050,13 +1043,11 @@ class RenameFileView(FormView):
 
     def get_initial(self, **kwargs):
         initial = super(RenameFileView, self).get_initial()
-        try:
-            self.repo_obj = Repository.objects.get(
-                owner__username=self.kwargs.get('username'),
-                slug=self.kwargs['slug']
-            )
-        except:
-            raise Http404("Repository does not exist")
+
+        self.repo_obj = get_object_or_404(Repository, 
+            owner__username=self.kwargs.get('username'),
+            slug=self.kwargs['slug']
+        )
 
         if not owner_editor_check(self.repo_obj, self.request.user):
             raise PermissionDenied
@@ -1290,9 +1281,20 @@ class CommitView(TemplateView):
         return context
 
 
-class AddEditors(OwnerRequiredMixin, FormView):
+class AddEditors(FormView):
     template_name = 'repo/add_editors.html'
     form_class = AddEditorsForm
+
+    def get_initial(self, **kwargs):
+        username_in_url = self.kwargs.get("username")
+        origin_user = User.objects.get(username=username_in_url)
+        origin_repo = self.kwargs.get("slug")
+        self.repo_obj = get_object_or_404(Repository, slug=origin_repo, owner=origin_user)
+
+        if not owner_editor_check(self.repo_obj, self.request.user):
+            raise PermissionDenied
+
+        return super(AddEditors, self).get_initial(**kwargs)
 
     def get_form_kwargs(self):
         kwargs = super(AddEditors, self).get_form_kwargs()
@@ -1303,11 +1305,7 @@ class AddEditors(OwnerRequiredMixin, FormView):
         valid_data = super(AddEditors, self).form_valid(form)
         new_editor_username = form.cleaned_data.get("new_editor_username")
         new_editor_email = form.cleaned_data.get("new_editor_username")
-        username_in_url = self.kwargs.get("username")
-        origin_user = User.objects.get(username=username_in_url)
-        origin_repo = self.kwargs.get("slug")
 
-        origin_repo_for_id = Repository.objects.get(slug=origin_repo, owner=origin_user,)
         user_pull = None
         try:
             user_pull = User.objects.get(username=new_editor_username)
@@ -1316,10 +1314,22 @@ class AddEditors(OwnerRequiredMixin, FormView):
         if not user_pull:
             form.add_error(None, "User not found")
             return self.form_invalid(form)
-        origin_repo_for_id.editors.add(user_pull)
-        origin_repo_for_id.save()
+
+        self.repo_obj.editors.add(user_pull)
+        self.repo_obj.save()
 
         return valid_data
+
+    def get_context_data(self, **kwargs):
+        username_in_url = self.kwargs.get("username")
+        origin_user = User.objects.get(username=username_in_url)
+        origin_repo = self.kwargs.get("slug")
+
+        self.repo_obj = get_object_or_404(Repository, slug=origin_repo, owner=origin_user)
+        if not owner_editor_check(self.repo_obj, self.request.user):
+            raise PermissionDenied
+
+        return super(AddEditors, self).get_context_data(**kwargs)
 
     def get_success_url(self):
         return reverse(
@@ -1331,36 +1341,58 @@ class AddEditors(OwnerRequiredMixin, FormView):
         )
 
 
-class EditorDeleteView(OwnerRequiredMixin, DeleteView):
-
+class EditorDeleteView(TemplateView):
     template_name = 'repo/delete.html'
 
-    def get(self, request, **kwargs):
-
+    def post(self, request, *args, **kwargs):
+        slug = self.kwargs.get("slug")
         username_in_url = self.kwargs.get("username")
-        # prevents forking your own repo:
-        origin_user = User.objects.get(username=username_in_url)
-        origin_repo = self.kwargs.get("slug")
         editor_to_delete = self.kwargs.get("editor")
-        origin_repo = Repository.objects.get(slug=origin_repo, owner=origin_user)
-        origin_repo.editors.remove(User.objects.get(username=editor_to_delete))
-        origin_repo.save()
+
+        # get the repo object
+        origin_user = get_object_or_404(User, username=username_in_url)
+        repo_obj = get_object_or_404(Repository, slug=slug, owner=origin_user)
+        
+        # Permission
+        if not owner_editor_check(repo_obj, origin_user):
+            raise PermissionDenied
+
+        # remove editor
+        repo_obj.editors.remove(User.objects.get(username=editor_to_delete))
+        repo_obj.save()
 
         return HttpResponseRedirect(reverse(
             "gitusers:setting",
             kwargs={
                 'username': self.kwargs.get("username"),
                 'slug': self.kwargs.get('slug')
-
             }
         ))
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(EditorDeleteView, self).get_context_data(**kwargs)
+
+        repo_obj = get_object_or_404(
+            Repository,
+            owner__username=self.kwargs.get('username'),
+            slug=self.kwargs['slug']
+        )
+
+        if not owner_editor_check(repo_obj, self.request.user):
+            raise PermissionDenied
+
+        context['object'] = self.kwargs.get('editor')
+        return context
 
 
 class SSIFolderView(TemplateView):
     template_name = 'repo/view_ssi.html'
 
     def get_object(self):
-        obj = Repository.objects.get(owner__username=self.kwargs.get('username'), slug=self.kwargs.get('slug'))
+        username = self.kwargs.get('username')
+        slug = self.kwargs.get('slug')
+        user = User.get_object_or_404(User, username=username)
+        obj = get_object_or_404(Repository, ownere=user, slug=slug)
         return obj
 
     def get_context_data(self, **kwargs):
