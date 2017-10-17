@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}{{ form.media }}{% endblock %}
+
+{% block title %}Commit Log{% endblock %}
+
+{% block content %}
+
+<p>
+<a href="{% url 'gitusers:repo_detail' username=repo.owner slug=repo.slug  %}"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>&nbsp;Back to Repo</a>
+</p>
+<p>
+<a href="{% url 'gitusers:commits' username=repo.owner slug=repo.slug  %}"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span>&nbsp;Back to Commit Log</a>
+</p>
+
+<h3>Commit <a href="{% url 'gitusers:index' username=repo.owner  %}">{{ repo.owner }}</a> / <a href="{% url 'gitusers:repo_detail' username=repo.owner slug=repo.slug  %}">{{ repo }}</a> / {{ commit.hex }}</h3> 
+
+<p>
+<strong>Message:</strong>{% if commit %} {{ commit.message }} {% else %} None {% endif %}
+</p>
+
+<p>
+<strong>Diff:</strong>{% if diff %} {{ diff }} {% else %} None {% endif %}
+
+<p>
+<strong>Files:</strong>
+
+{% if files %}
+</p>
+<ul class="filetree">
+  {% for file in files %}
+    <li>{{ file }}</li>
+{% endfor %}
+</ul>
+{% else %}
+None
+</p>
+{% endif %}
+
+{% endblock %}
+
