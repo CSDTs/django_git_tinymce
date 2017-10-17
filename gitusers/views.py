@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+# from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 # from django.shortcuts import render
@@ -1209,7 +1209,8 @@ class ForkedReposView(ListView):
 class CommitLogView(ListView):
     model = Repository
     template_name = 'repo/commits.html'
-    paginate_by = 200
+    paginate_by = 100
+    context_object_name = "commits"
 
     def get_queryset(self):
         self.owner_name = self.kwargs['username']
@@ -1220,7 +1221,6 @@ class CommitLogView(ListView):
             git_repo = pygit2.Repository(repo.get_repo_path())
         except IOError:
             raise Http404("Repository does not exist")
-        commits = []
 
         class Commit(object):
             message = ""
@@ -1233,6 +1233,8 @@ class CommitLogView(ListView):
                 self.hex = hex
                 self.committer = committer
                 self.commit_time = commit_time
+
+        commits = []
         for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TOPOLOGICAL):
             time3 = datetime.datetime.fromtimestamp(int(commit.commit_time)).strftime('%m-%d-%Y %H:%M:%S')
             commit_obj = Commit(commit.hex, commit.message, commit.committer.name, time3)
@@ -1242,66 +1244,48 @@ class CommitLogView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CommitLogView, self).get_context_data(**kwargs)
-        commits = self.get_queryset()
+
         context['orig_repo'] = self.repo_name
         context['orig_author'] = self.owner_name
-        page = self.request.GET.get('page', 1)
-        paginator = Paginator(commits, 200)
-        try:
-            commits = paginator.page(page)
-        except PageNotAnInteger:
-            commits = paginator.page(1)
-        except EmptyPage:
-            commits = paginator.page(paginator.num_pages)
 
-        context['commits'] = commits
         return context
 
 
-class CommitView(ListView):
-    model = Repository
+# TODO: parse diff format same to output of "git show"
+class CommitView(TemplateView):
     template_name = 'repo/commit.html'
-    # paginate_by = 200
-
-    def get_queryset(self):
-        queryset = super(CommitView, self).get_queryset()
-        return queryset
 
     def get_context_data(self, **kwargs):
         context = super(CommitView, self).get_context_data(**kwargs)
-        self.owner_name = self.kwargs['username']
-        self.repo_name = self.kwargs['slug']
-        self.commit_hex = self.kwargs['commit']
-        context['orig_repo'] = self.repo_name
-        context['orig_author'] = self.owner_name
-        user = User.objects.get(username=self.owner_name)
-        repo = Repository.objects.get(owner=user.id, slug=self.repo_name)
+
+        owner_name = self.kwargs['username']
+        repo_slug = self.kwargs['slug']
+        commit_hex = self.kwargs['commit']
+        user = User.objects.get(username=owner_name)
+
+        try:
+            repo = Repository.objects.get(owner=user.id, slug=repo_slug)
+            context['repo'] = repo
+        except:
+            raise Http404("Repository does not exist")
+
         try:
             git_repo = pygit2.Repository(repo.get_repo_path())
         except IOError:
             raise Http404("Repository does not exist")
+
         try:
-            commit = git_repo.revparse_single(self.commit_hex)
-            context['message'] = commit.message
-            context['hash'] = commit.hex
+            commit = git_repo.revparse_single(commit_hex)
             diff = git_repo.diff(commit.parents[0], commit).patch
-            # patches = [p for p in diff]
-            # old_files = []
-            # hunks_files = []
-            # for patch in patches:
-            #     old_files.append(patch.delta)
-            #     hunks_files.append(patch.hunks)
-            context['diff'] = diff
             files = []
             for e in commit.tree:
                 files.append(e.name)
+
+            context['commit'] = commit
+            context['diff'] = diff
             context['files'] = files
         except:
-            context['message'] = None
-            context['hash'] = self.commit_hex
-            context['diff'] = None
-            context['files'] = None
-        # context['hunks'] = hunks_files
+            context['commit'] = None
 
         return context
 
