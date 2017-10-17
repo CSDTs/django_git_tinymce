@@ -692,9 +692,11 @@ class BlobEditView(FormView):
                     dir += folder + "/"
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
+            print("*************filename/index_tree ", filename, index_tree)
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
-            print("**************", blob_id)
+            print("**************blob_id: ", blob_id)
             blob = self.repo[blob_id]
+
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
                 initial['content'] = blob.data
 
