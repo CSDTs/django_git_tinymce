@@ -666,11 +666,14 @@ class BlobEditView(FormView):
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
+        print("**********************ext: ", self.kwargs.get('extension'))
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs.get('directories')
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
+
+        print("dir: ", directory)
 
         self.repo_obj = get_object_or_404(
             Repository, 
@@ -686,10 +689,12 @@ class BlobEditView(FormView):
             commit = self.repo.revparse_single('HEAD')
             tree = commit.tree
             if directory != "":
+                
                 folders = directory.split("/")
                 dir = ""
                 for folder in folders:
                     dir += folder + "/"
+                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
             print("*************filename/index_tree ", filename, index_tree)
@@ -735,7 +740,7 @@ class BlobEditView(FormView):
 
         except OSError:
             raise form.ValidationError("Save error, please check the file.")
-
+        print("******formvalid")
         return super(BlobEditView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -777,6 +782,12 @@ class BlobEditView(FormView):
                 }
             )
         else:
+            print("####################")
+            print("####################", self.kwargs.get('username'))
+            print("####################", self.kwargs.get('slug'))
+            print("####################")
+            print("####################")
+            print("####################")
             self.success_url = reverse(
                 "gitusers:repo_detail",
                 kwargs={
