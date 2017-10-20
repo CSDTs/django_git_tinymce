@@ -407,7 +407,10 @@ class RepositoryDeleteView(OwnerOnlyRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse_lazy('index')
 
-
+# TODO: Use
+#          Tree.__getitem__(name)
+#          Tree.__contains__(name)
+#       to retrieve and check file.
 class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
     template_name = 'repo/create_file.html'
     form_class = FileCreateForm
@@ -1392,10 +1395,10 @@ class SSIFolderView(TemplateView):
         git_repo = pygit2.Repository(repo.get_repo_path())
         commit = git_repo.revparse_single('HEAD')
         tree = commit.tree
-        try:
-            tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
-            context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
-        except KeyError:
-            context['nav'] = None
+        # try:
+        #     tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
+        #     context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
+        # except KeyError:
+        #     context['nav'] = None
         context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
         return context
