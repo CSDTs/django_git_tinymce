@@ -456,10 +456,6 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
         dirname = ""
         filename2 = filename
         if "/" in filename:
-            # import re
-            # pattern = re.compile(r"^(.+)/([^/]+)$")
-            # matches = pattern.search(filename)
-            # print('matches', matches)
             dirname, filename2 = os.path.split(filename)
 
         if not os.path.exists(os.path.join(repo.get_repo_path(), dirname)):
@@ -596,10 +592,6 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         dirname = ""
         filename2 = filename
         if "/" in filename:
-            # import re
-            # pattern = re.compile(r"^(.+)/([^/]+)$")
-            # matches = pattern.search(filename)
-            # print('matches', matches)
             dirname, filename2 = os.path.split(filename)
         if not os.path.exists(os.path.join(self.repo_obj.get_repo_path(), dirname)):
             try:
@@ -666,14 +658,12 @@ class BlobEditView(FormView):
         filename = self.kwargs.get('filename')
         if self.kwargs.get('extension'):
             filename += self.kwargs.get('extension')
-        print("**********************ext: ", self.kwargs.get('extension'))
+
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs.get('directories')
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
-
-        print("dir: ", directory)
 
         self.repo_obj = get_object_or_404(
             Repository, 
@@ -694,12 +684,10 @@ class BlobEditView(FormView):
                 dir = ""
                 for folder in folders:
                     dir += folder + "/"
-                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                     item = tree.__getitem__(str(dir))
                     index_tree.read_tree(item.id)
-            print("*************filename/index_tree ", filename, index_tree)
+
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
-            print("**************blob_id: ", blob_id)
             blob = self.repo[blob_id]
 
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
@@ -740,7 +728,7 @@ class BlobEditView(FormView):
 
         except OSError:
             raise form.ValidationError("Save error, please check the file.")
-        print("******formvalid")
+        
         return super(BlobEditView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -816,22 +804,9 @@ class BlobRawView(View):
 
         try:
             index_tree = repo.index
-            # commit = repo.revparse_single('HEAD')
-            # tree = commit.tree
-            ''' This block is not used
-            if directory != "":
-                folders = directory.split("/")
-                dir = ""
-                for folder in folders:
-                    dir += folder + "/"
-                    item = tree.__getitem__(str(dir))
-                    index_tree.read_tree(item.id)
-                    print("********", dir, item, index_tree.read_tree(item.id))
-            '''
             blob_id = find_file_oid_in_tree_using_index(filename, index_tree)
             if blob_id != 404:
                 extension = self.kwargs.get('extension')
-                print('extension', extension)
                 if extension is None:
                     return HttpResponse(repo[blob_id].data)
                 if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
@@ -1399,7 +1374,7 @@ class SSIFolderView(TemplateView):
         username = self.kwargs.get('username')
         slug = self.kwargs.get('slug')
         user = get_object_or_404(User, username=username)
-        obj = get_object_or_404(Repository, ownere=user, slug=slug)
+        obj = get_object_or_404(Repository, owner=user, slug=slug)
         return obj
 
     def get_context_data(self, **kwargs):
@@ -1422,6 +1397,5 @@ class SSIFolderView(TemplateView):
             context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
         except KeyError:
             context['nav'] = None
-        print("****************", context['nav'])
         context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
         return context
