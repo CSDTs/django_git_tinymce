@@ -7,29 +7,35 @@
 {% block content %}
 
 <p>
-<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>&nbsp;Back to Repo</a>
+<a href="{% url 'gitusers:repo_detail' username=repo.owner slug=repo.slug  %}"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>&nbsp;Back to Repo</a>
 </p>
 <p>
-<a href="{% url 'gitusers:commits' username=orig_author slug=orig_repo  %}"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span>&nbsp;Back to Commit Log</a>
-</p>
-
-<h3>Commit <a href="{% url 'gitusers:index' username=orig_author  %}">{{ orig_author }}</a> / <a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}">{{ orig_repo }}</a> / {{ hash }}</h3>
-
-<p>
-<strong>Message:</strong> {{ message }}
-</p>
-<p>
-<strong>Diff:</strong> {{ diff }}
-<p>
-<strong>Files:</strong> {{ files }}
+<a href="{% url 'gitusers:commits' username=repo.owner slug=repo.slug  %}"><span class="glyphicon glyphicon-backward" aria-hidden="true"></span>&nbsp;Back to Commit Log</a>
 </p>
 
-<!-- {% for dif in diff %}
-  {{ dif.new_file.path }}
+<h3>Commit <a href="{% url 'gitusers:index' username=repo.owner  %}">{{ repo.owner }}</a> / <a href="{% url 'gitusers:repo_detail' username=repo.owner slug=repo.slug  %}">{{ repo }}</a> / {{ commit.hex }}</h3> 
+
+<p>
+<strong>Message:</strong>{% if commit %} {{ commit.message }} {% else %} None {% endif %}
+</p>
+
+<p>
+<strong>Diff:</strong>{% if diff %} {{ diff }} {% else %} None {% endif %}
+
+<p>
+<strong>Files:</strong>
+
+{% if files %}
+</p>
+<ul class="filetree">
+  {% for file in files %}
+    <li>{{ file }}</li>
 {% endfor %}
-
-{% for hunk in hunks %}
-  {{ hunk }}
-{% endfor %} -->
+</ul>
+{% else %}
+None
+</p>
+{% endif %}
 
 {% endblock %}
+

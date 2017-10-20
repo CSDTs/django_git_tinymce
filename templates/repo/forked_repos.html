@@ -7,16 +7,16 @@
 {% block content %}
 
 
-<h1>Forked Repos of "<a href="{% url 'gitusers:repo_detail' username=orig_author slug=orig_repo  %}">{{ orig_author }}/{{ orig_repo }}</a>"</h1>
+<h1>Forked Repos of "<a href="{{ orig_repo.get_absolute_url }}">{{ orig_repo.owner }}/{{ orig_repo.name }}</a>"</h1>
 
 <ul>
-{% if not repos %}
-<h3>✗&nbsp;No forks yet</h3>
-{% endif %}
-{% for repo in repos %}
+	{% for forkedrepo in forkedrepository_list %}
+	<li>
+		<a href="{{ forkedrepo.fork.get_absolute_url }}">{{ forkedrepo.fork.owner}}/{{ forkedrepo.fork.name }}</a>{% if forkedrepo.fork.description %}- {{ forkedrepo.fork.description }}{% endif %}
+	</li>
+	{% empty %}
+	<h3>✗&nbsp;No forks yet</h3>
 
-<li><a href="{% url 'gitusers:repo_detail' username=repo.owner slug=repo.name  %}">{{ repo.owner}}/{{ repo.name }}</a> - {{ repo.description}}</li>
-
-{% endfor %}
+	{% endfor %}
 </ul>
 {% endblock %}

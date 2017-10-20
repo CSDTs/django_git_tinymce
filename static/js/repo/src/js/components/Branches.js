@@ -28,7 +28,7 @@ export default class Branches extends React.Component {
 
           </div>
         </div>
-        <div className="col-md-offset-6 col-md-5 col-sm-offset-3 col-sm-6 col-xs-9">
+        <div className="col-md-offset-6 col-md-5 col-sm-offset-3 col-sm-6 col-xs-9" style={{padding: '0px'}}>
           {(this.props.is_owner || this.props.is_editor) &&
           <div style={{margin: '0px 0px 10px 0px'}} className="text-right">
             <div className="btn-group" role="group" aria-label="...">

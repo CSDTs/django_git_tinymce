@@ -1,5 +1,24 @@
+from repos.models import Repository
+
 from pygit2 import Signature
 from os import path
+
+
+def owner_editor_check(repo, request_user):
+    if not isinstance(repo, Repository):
+        return False
+
+    permission = False
+    if request_user == repo.owner:
+        permission = True
+    if request_user in repo.editors.all():
+        permission = True
+    if request_user.is_superuser:
+        permission = True
+
+    if not permission:
+        return False
+    return True
 
 
 def find_file_oid_in_tree(filename, tree):
