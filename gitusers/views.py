@@ -763,7 +763,7 @@ class BlobEditView(FormView):
 
     def get_success_url(self):
         if self.kwargs.get('directories_ext'):
-            self.success_url = reverse(
+            return reverse(
                 "gitusers:repo_detail_folder",
                 kwargs={
                     'username': self.kwargs.get('username'),
@@ -773,7 +773,7 @@ class BlobEditView(FormView):
                 }
             )
         elif self.kwargs.get('directories'):
-            self.success_url = reverse(
+            return reverse(
                 "gitusers:repo_detail_folder",
                 kwargs={
                     'username': self.kwargs.get('username'),
@@ -782,13 +782,7 @@ class BlobEditView(FormView):
                 }
             )
         else:
-            print("####################")
-            print("####################", self.kwargs.get('username'))
-            print("####################", self.kwargs.get('slug'))
-            print("####################")
-            print("####################")
-            print("####################")
-            self.success_url = reverse(
+            return reverse(
                 "gitusers:repo_detail",
                 kwargs={
                     'username': self.kwargs.get('username'),
