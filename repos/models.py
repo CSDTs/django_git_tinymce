@@ -52,7 +52,6 @@ class Repository(models.Model):
         return join(settings.REPO_DIR, self.owner.username, str(self.pk))
 
     def get_repo_path_media(self):
-        print("******************", join(self.owner.username, str(self.pk)))
         return join(self.owner.username, str(self.pk))
 
     def save(self, *args, **kwargs):

@@ -1,4 +1,3 @@
-{% load bootstrap3 %}
 {% load staticfiles %}
 
 <!DOCTYPE html>
@@ -6,16 +5,15 @@
 <head>
 	<title>Django-Git | {% block title %}{% endblock %}</title>
 	<link rel="shortcut icon" href="/static/img/favicon.ico">
-	<!-- {% bootstrap_css %} -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<!-- Optional theme -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 	<link rel='stylesheet' href="/static/css/base.css" />
 
 	<link href="https://fonts.googleapis.com/css?family=Arvo" rel="stylesheet">
-	<link rel="stylesheet" href="/static/css/csdt.css">
+	<!-- <link rel="stylesheet" href="/static/css/csdt.css">
 	<link rel="stylesheet" href="/static/css/template.css">
-  <link rel="stylesheet" href="/static/css/tutorial.css">
+  <link rel="stylesheet" href="/static/css/tutorial.css"> -->
 
 	{% block extra_head %}{% endblock %}
 </head>
@@ -91,10 +89,6 @@
 </div>
 </div>
 
-
-
-
-	<!-- {% bootstrap_javascript jquery=True %} -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
