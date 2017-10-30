@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'tags.apps.TagsConfig',
     'bootstrap3',
     'tinymce',
+    'ckeditor',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
