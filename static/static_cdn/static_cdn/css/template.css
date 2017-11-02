@@ -1,0 +1,357 @@
+/* sets font */
+* {
+    font-family: 'Khula', sans-serif;
+    color: black;
+    margin: 0px;
+    padding: 0px;
+
+}
+
+/* container */
+.page-scroll {
+    padding: 0px;
+    margin: 0px;
+    height: 100%;
+}
+
+/* images for div */
+.scroll-block {
+ background-repeat: no-repeat;
+    background-size:100%;
+    height: 700px;
+    width: 100%;
+
+    background-attachment: scroll;
+    padding: 0px;
+    margin: 0px;
+
+}
+
+/* overlay text */
+.header-text {
+    width: 45%;
+    font-size: 5.3em;
+    padding-left: 5%;
+    line-height: 1;
+    color: white;
+    padding-top: 50px;
+    padding-bottom: 40px;
+
+}
+
+/* overlay text */
+.text-text {
+    width: 45%;
+    font-size: 6em;
+    padding-left: 5%;
+    line-height: 1;
+    color: white;
+    padding-top: 50px;
+    padding-bottom: 40px;
+
+}
+
+
+/* below text  */
+.below-text {
+    font-size: 2em;
+    padding: 30px 40px;
+}
+
+/* flexbox */
+.flex-box {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.flex-item-origin {
+    flex-basis: 25%;
+}
+
+.flex-item-origin img {
+    width: 100%;
+}
+
+/* hides on mobile */
+
+
+#intro {
+
+}
+
+/* shrinks img */
+.mobile-table img{
+    display: block;
+    width: 50%;
+    margin: auto;
+}
+
+
+/* sets vertical h for potrait images */
+.portrait {
+    height: 1300px;
+}
+
+/* header */
+.header {
+    font-size: 5em;
+}
+
+/* caption to images */
+.caption {
+    font-size: 2.5em;
+    margin: 0px 20px 20px;
+}
+
+/* Headers for Paragraphs */
+.section-header {
+    font-size: 5em;
+    margin: 10px 15px;
+    padding: 0px 15px;
+}
+
+/* symbols flexbox - mobile */
+.flex-box-symbols {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content:space-between;
+    margin-left: 15px;
+}
+
+a.anchor {
+    display: block;
+    position: relative;
+    top: -60px;
+    visibility: hidden;
+}
+
+
+
+.cultural-bg-1 {
+    background-color: #aaa;
+}
+
+.cultural-bg-2 {
+    background-color: #fff;
+}
+
+.cultural-bg-3 {
+    background-color: #bbb;
+}
+
+.cultural-bg-4 {
+    background-color: #fff;
+}
+
+.stuck{
+    width: 80%;
+    height: 100%;
+    position: fixed;
+
+}
+
+.right {
+    width: 80%;
+    height: auto;
+    position: absolute;
+    right: 0;
+
+}
+
+.indented {
+    padding-left: 20px;
+}
+
+
+
+body {
+  padding-top: 51px;
+}
+.text-center {
+  padding-top: 20px;
+}
+.col-xs-12 {
+  background-color: #fff;
+}
+#sidebar {
+  height: 100%;
+  padding-right: 0;
+  padding-top: 20px;
+  display: block;
+}
+#sidebar .nav {
+  width: 95%;
+}
+#sidebar li {
+  border:0 #f2f2f2 solid;
+  border-bottom-width:1px;
+}
+
+
+
+/* collapsed sidebar styles */
+@media screen and (max-width: 767px) {
+  .row-offcanvas {
+    position: relative;
+    -webkit-transition: all .25s ease-out;
+         -o-transition: all .25s ease-out;
+            transition: all .25s ease-out;
+  }
+
+  .row-offcanvas-right {
+    right: 0;
+  }
+
+  .row-offcanvas-left {
+    left: 0;
+  }
+
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+    right: -50%; /* 6 columns */
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -50%; /* 6 columns */
+  }
+
+  .row-offcanvas-right.active {
+    right: 50%; /* 6 columns */
+  }
+
+  .row-offcanvas-left.active {
+    left: 50%; /* 6 columns */
+  }
+
+  .sidebar-offcanvas {
+    position: absolute;
+    top: 0;
+    width: 50%; /* 6 columns */
+  }
+
+  .right {
+    width: 100%;
+  }
+
+
+}
+
+@media only screen
+and (min-device-width : 668px)
+{
+    
+
+    /* resizes over-image text */
+    .text-text {
+        font-size: 6em;
+
+    }
+
+    /* portrait images */
+    .scroll-block {
+        height: 750px;
+
+    }
+
+    /* shrinks down big images */
+    .figure {
+        width: 60%;
+        height: 500px;
+    }
+
+    /* resizes below-text */
+    .below-text {
+        margin: 20px 20px 20px 0px;
+        padding: 0px;
+        font-size: 1.25em;
+    }
+
+    /* resizes for desktop */
+    .desktop-shrink {
+        height: 650px;
+    }
+
+    .flex-box {
+
+        flex-direction: row;
+    }
+
+    /* flexbox */
+    .flex-item-origin {
+        flex-basis: 25%;
+        flex-shrink: 1;
+    }
+
+    /* representation */
+    .mobile-table {
+        flex-basis: 25%;
+    }
+
+    /* sets width of same for each adinkra */
+    .mobile-table img {
+        width: 200px;
+
+    }
+
+    /* sets vertical h. to same for each */
+    .mobile-table-image {
+        height: 200px;
+
+    }
+
+    /* height for portrait photos */
+    .portrait {
+        height: 1400px;
+    }
+
+    /* caption below photos */
+    .caption {
+        font-size: 1.25em;
+    }
+
+    /* sets vertical h. for landscape photos */
+    .md-6 {
+        height: 575px;
+    }
+
+    /* sets vertical h. for portrait photos */
+    .md-4 {
+        height: 650px;
+    }
+
+    /* sets vertical h. for landscape photos */
+    .md-3 {
+        height: 300px;
+    }
+
+    /* show launch sim links */
+
+
+    /* hides artistic table */
+    .art-mobile-table {
+        display: none;
+    }
+
+    /* resizes section headers */
+    .section-header {
+        font-size: 2.25em;
+        padding: 0px 0px;
+        padding-top: 40px;
+    }
+
+    .mobile-hide {
+        display: block;
+
+    }
+
+    /* having some -15 margin issues */
+    .row {
+        margin: 0px;
+    }
+
+
+
+
+}

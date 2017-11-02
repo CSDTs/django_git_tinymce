@@ -695,7 +695,6 @@ class BlobEditView(FormView):
 
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
                 initial['content'] = blob.data
-                print(blob.data)
 
         except IOError:
             raise Http404("Repository does not exist")
@@ -1402,6 +1401,7 @@ class SSIFolderView(TemplateView):
         # except KeyError:
         #     context['nav'] = None
         context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
+        # print("url: ----  ", context['url'])
         return context
 
 
