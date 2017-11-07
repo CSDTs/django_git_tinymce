@@ -1,5 +1,5 @@
 Back-end:
-  - Modify tag and sub-tag of repo (ModelForm)
+  - ~~Modify tag and sub-tag of repo (ModelForm)~~
   - Indication of owner in render mode/page
   - Editable template
   - Parse commit message
@@ -12,7 +12,7 @@ Back-end:
   - Random folder go to broken
   - base folder xxxx while in folder 
   - Limit tags / auto-complete
-  - Move submit button down in repo settings page
+  - ~~Move submit button down in repo settings page~~
   - remove gitusers model
   - Subfoder view, base folder link in CAP letters
   - Make CKEditor allow JS

@@ -58,7 +58,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 
     class Meta:
         model = Repository
-        fields = ['name', 'description', 'image', 'tags']
+        fields = ['name', 'description', 'image', 'tags', 'grade_level', 'subject', 'culture', 'image']
 
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "Repository name"}),
