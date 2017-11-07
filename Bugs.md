@@ -5,7 +5,7 @@ Back-end:
   - Parse commit message
   - Show only file changed in commit view
   - Fix create file form - wrong editor
-  - Template nac image absolut url
+  - Template nav image absolut url
   - Prefill rename repo form
   - Download image corrupt (suspect extention in CAP letters)
   - file rename should slug/protect (don't allow ' or " etc..)
@@ -19,7 +19,7 @@ Back-end:
 
 
 Front-end:
-  - Default image
+  - ~~Default image~~
   - Tag filter (grade level, subject). (API is done.)
   - Loading indication while forking
   - Admin link vs. index render link

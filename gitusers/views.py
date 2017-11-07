@@ -1382,6 +1382,7 @@ class SSIFolderView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SSIFolderView, self).get_context_data(**kwargs)
+        # self.template_name = 'repo/view_ssi1.html'
         filename = self.kwargs.get('filename')
         # if self.kwargs.get('extension'):
         #     filename += self.kwargs.get('extension')
