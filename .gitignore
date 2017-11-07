@@ -9,6 +9,7 @@ eclipse/
 python/
 media/
 collected_static/
+_site/
 local_settings.py
 
 # Vagrant stuff
