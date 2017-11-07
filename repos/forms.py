@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from tinymce.widgets import TinyMCE
 
 from .models import Repository
@@ -96,7 +97,8 @@ class RepositoryUpdateModelForm(forms.ModelForm):
 
 
 class TinyMCEFileEditForm(forms.Form):
-    content = forms.CharField(widget=TinyMCE(mce_attrs={'width': '100%'}))
+    # content = forms.CharField(widget=TinyMCE(mce_attrs={'width': '100%'}))
+    content = forms.CharField(widget=CKEditorUploadingWidget())
     commit_message = forms.CharField(
         required=False,
         empty_value="edited on {}".format(

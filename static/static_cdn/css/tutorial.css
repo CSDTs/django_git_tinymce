@@ -1,0 +1,353 @@
+
+
+
+.stuck1 {
+    position: relative;
+
+
+}
+
+.stuck2 {
+    position: relative;
+
+}
+
+.stuck3 {
+    position: relative;
+
+}
+
+.program {
+    display: block;
+
+}
+
+
+.menuitem {
+    height: 150px;
+
+}
+
+.tutorial-name {
+    padding-left: 15px;
+}
+
+.subclass {
+        text-align: center;
+        vertical-align: middle;
+        line-height: 150px;
+        font-size: 3rem;
+}
+
+.menuitem a {
+    text-decoration:        none;
+    display: block;
+    color:                    #000;
+}
+
+.row-icons {
+    font-size: 2rem;
+    padding: 15px;
+}
+
+.right {
+    padding-top: 0px;
+}
+
+.below-text {
+    font-size: 2rem;
+    padding: 15px 0px;
+}
+
+.section-header {
+    font-size: 4rem;
+    margin: 15px 0px;
+}
+
+.index-menu {
+
+    width: 100%;
+}
+
+.row {
+    margin: 0px;
+}
+
+.tutorial-name {
+    font-size: 2rem;
+}
+
+.subclass {
+    font-size: 2rem;
+}
+
+.container-outer { overflow: scroll; width: 100%; height: 390px; }
+.container-inner { width: 10000px; }
+
+.tutorial-node {
+    display: inline-block;
+    padding: 0px 25px;
+}
+
+.tutorial-node iframe{
+    height: 300px;
+    width: 400px;
+}
+
+.tutorial-text {
+    font-family: khula;
+    font-size: 2.0rem;
+
+}
+
+.tutorial-node-text {
+    color: black;
+}
+
+.tutorial-node-left {
+    width: 400px;
+    height: 358px;
+    background-color:white;
+    float: left;
+    border: 2px solid grey;
+}
+
+.tutorial-node-right {
+    width: 400px;
+    background-color: #ddd;
+    color: black;
+    border: 2px solid grey;
+    border-left: 0px;
+    height: 358px;
+    float: right;
+
+
+}
+
+.tutorial-node-right img {
+    height:330px;
+    display:block;
+    margin:auto;
+
+}
+
+.tutorial-node-left img {
+    width: 270px;
+    display:block;
+    margin:auto;
+
+}
+
+.launch-sim {
+    color: lime;
+    background-color: black;
+    border: 0px solid lime;
+    font-size: 1.4rem;
+    box-shadow: 3px 3px 10px grey;
+    font-family: 'VT323', monospace;
+    border-radius: 0px 0px 5px 5px;
+    margin: 0px auto 20px;
+}
+
+.launch-sim:hover {
+    color: white;
+}
+
+.launch-sim:checked {
+    color: lime;
+}
+
+.launch-sim:active {
+    color: lime;
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    padding-top: 30px; height: 0; overflow: hidden;
+
+}
+
+.video-container iframe,
+.video-container object,
+.video-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+
+
+
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px)
+{
+
+    .stuck1 {
+        position: relative;
+    }
+
+    .stuck2 {
+        position: relative;
+    }
+
+
+
+    .program {
+        display: block;
+    }
+
+    .index-menu {
+
+        width: 100%;
+
+    }
+
+    .subclass {
+        font-size: 3rem;
+    }
+
+
+
+}
+
+@media only screen
+and (min-device-width : 1024px)
+and (max-device-width : 1366px) {
+    .stuck1 {
+        position: relative;
+    }
+
+    .stuck2 {
+        position: relative;
+    }
+
+    .program {
+        display: block;
+    }
+
+    .index-menu {
+
+        width: 90%;
+    }
+
+    .subclass {
+        font-size: 3rem;
+    }
+
+    .launch-sim {
+        font-size: 2.0rem;
+
+    }
+
+
+}
+
+
+@media screen and (min-width: 1366px) {
+
+    .stuck1 {
+        position: fixed;
+        top: 50px;
+        left:0px;
+        bottom: 10px;
+        width: 200px;
+        overflow-y: auto;
+        padding: 15px;
+
+    }
+
+    .stuck2 {
+        position: fixed;
+        top: 50px;
+        left:200px;
+        bottom: 10px;
+        width: 300px;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .stuck3 {
+        position: fixed;
+        top: 50px;
+        left:200px;
+        bottom: 10px;
+        width: 85%;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .program {
+        display: block;
+        padding-left: 500px;
+    }
+
+    .menuitem {
+        list-style-type:        none;
+        display:                 block;
+        font-size: 5rem;
+        padding: 15px 15px;
+        height: 200px;
+
+
+
+    }
+
+    .subclass {
+        text-align: center;
+        vertical-align: middle;
+        line-height: 200px;
+        font-size: 3rem;
+
+    }
+
+    .tutorial-name {
+        padding: 30px;
+        font-size: 2rem;
+    }
+
+    .row-icons {
+        font-size: 2.5rem;
+        padding: 20px;
+    }
+
+    .index-menu {
+
+        width: 50%;
+        margin-left: 50px;
+
+    }
+
+    .section-header {
+        font-size: 3.5rem;
+    }
+
+    .launch-sim {
+        font-size: 2.5rem;
+
+    }
+
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        padding-top: 30px;
+        height: 0;
+        overflow: hidden;
+        width: 100%;
+        margin: auto;
+    }
+
+    .video-container iframe,
+    .video-container object,
+    .video-container embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}

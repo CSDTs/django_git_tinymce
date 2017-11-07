@@ -1371,7 +1371,7 @@ class EditorDeleteView(TemplateView):
 
 
 class SSIFolderView(TemplateView):
-    template_name = 'repo/view_ssi.html'
+    template_name = 'repo/view_ssi1.html'
 
     def get_object(self):
         username = self.kwargs.get('username')
@@ -1401,4 +1401,41 @@ class SSIFolderView(TemplateView):
         # except KeyError:
         #     context['nav'] = None
         context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
+        # print("url: ----  ", context['url'])
+        return context
+
+
+class SSIPreviewView(TemplateView):
+    template_name = 'repo/preview.html'
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        slug = self.kwargs.get('slug')
+        user = get_object_or_404(User, username=username)
+        obj = get_object_or_404(Repository, owner=user, slug=slug)
+        return obj
+
+    def get_context_data(self, **kwargs):
+        context = super(SSIPreviewView, self).get_context_data(**kwargs)
+        filename = self.kwargs.get('filename')
+        # if self.kwargs.get('extension'):
+        #     filename += self.kwargs.get('extension')
+        filename += ".html"
+        directory = ""
+        if 'directories' in self.kwargs:
+            directory = self.kwargs.get('directories')
+        if 'directories_ext' in self.kwargs:
+            directory += "/" + self.kwargs.get('directories_ext')
+        repo = self.get_object()
+        # git_repo = pygit2.Repository(repo.get_repo_path())
+        # commit = git_repo.revparse_single('HEAD')
+        # tree = commit.tree
+        # try:
+        #     tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
+        #     context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
+        # except KeyError:
+        #     context['nav'] = None
+        # context['url'] = str(os.path.join(repo.get_repo_path_media(), directory, filename))
+        context['url'] = str(os.path.join(repo.get_repo_path(), directory, filename))
+        print("**********************", context['url'])
         return context
