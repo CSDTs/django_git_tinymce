@@ -18,6 +18,8 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.views.generic.base import RedirectView
 from rest_framework import routers
 
@@ -25,6 +27,8 @@ from dashboard.views import MenuView
 from tags import viewsets as tags_viewsets
 from repos import viewsets as repos_viewsets
 from gitusers import viewsets as gitusers_viewsets
+
+from ckeditor_uploader.views import upload, browse
 
 
 router = routers.DefaultRouter()
@@ -46,6 +50,9 @@ urlpatterns = [
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^logout/$', auth_views.LogoutView.as_view(), name='logout'),
     url(r'^tinymce/', include('tinymce.urls')),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+    url(r'^upload/', login_required(upload), name='ckeditor_upload'),
+    url(r'^browse/', never_cache(login_required(browse)), name='ckeditor_browse'),
     url(r'^api/v1/', include(router.urls, namespace='apiv1')),
     url(r'^api-auth/',
         include('rest_framework.urls', namespace='rest_framework')),

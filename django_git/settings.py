@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'tags.apps.TagsConfig',
     'bootstrap3',
     'tinymce',
+    'ckeditor',
+    'ckeditor_uploader',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -136,7 +138,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
-    '/var/www/static/',
+    # '/var/www/static/',
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static", "static_cdn")
@@ -169,24 +171,17 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
 }
-#
-# TINYMCE_DEFAULT_CONFIG = {
-#     # 'relative_urls' : False,
-#     # 'document_base_url': "http://127.0.0.1:8001/",
-#     # 'theme' : 'advanced',
-#     # 'theme_advanced_buttons1' : 'bold,italic,underline,separator,bullist,numlist,separator,link,unlink',
-#     # 'theme_advanced_buttons2' : '',
-#     # 'theme_advanced_buttons3' : '',
-#     # 'theme_advanced_toolbar_location' : 'top',
-#     # 'theme_advanced_toolbar_align': 'left',
-#     # 'paste_text_sticky': True,
-#     # 'paste_text_sticky_default' : True,
-#     # 'valid_styles' : 'font-weight,font-style,text-decoration',
-#
-#     # 'remove_script_host' : False,
-#     # 'convert_urls' : False,
-#
-#     # # URL settings
-#     # 'convert_urls' : False,
-#     # 'relative_urls' : False,
-# }
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_IMAGE_BACKEND = 'pillow'
+CKEDITOR_RESTRICT_BY_USER = True
+
+# Example ckeditor configuration
+# https://github.com/django-ckeditor/django-ckeditor#example-ckeditor-configuration
+CKEDITOR_CONFIGS = {
+    'default': {
+        'extraPlugins': ','.join([
+            'uploadimage', # the upload image feature
+        ]),
+    }
+}

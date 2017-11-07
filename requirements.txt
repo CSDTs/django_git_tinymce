@@ -2,6 +2,7 @@ bleach
 cffi==1.9.1
 Django==1.11.2
 django-bootstrap3==8.2.3
+django-ckeditor==5.3.1
 django-cleanup==1.0.1
 django-filter==1.0.4
 django-tinymce4-lite==1.4.1
