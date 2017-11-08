@@ -181,7 +181,7 @@ CKEDITOR_RESTRICT_BY_USER = True
 CKEDITOR_CONFIGS = {
     'default': {
         'extraPlugins': ','.join([
-            'uploadimage', # the upload image feature
+            'uploadimage',  # the upload image feature
         ]),
     }
 }

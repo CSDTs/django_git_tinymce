@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
-from tinymce.widgets import TinyMCE
 
 from .models import Repository
 

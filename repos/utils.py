@@ -68,7 +68,7 @@ def repo_setup(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
+        # b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
@@ -83,7 +83,7 @@ def repo_setup(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
+        # b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
@@ -98,7 +98,7 @@ def repo_setup(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
+        # b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
@@ -113,7 +113,6 @@ def repo_setup(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
@@ -179,8 +178,6 @@ def repo_setup(git_repo, repo_instance):
             with a nav_{}.html, README.html, and pages'.format(repo_instance.slug), tree2, [])
 
 
-
-
 def repo_setup1(git_repo, repo_instance):
     if not isinstance(git_repo, pygit2.Repository):
         raise TypeError("git_object is not a pygit2 Repository object")
@@ -243,7 +240,7 @@ def repo_setup1(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
+        # b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
@@ -258,7 +255,7 @@ def repo_setup1(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
+        # b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
@@ -273,7 +270,7 @@ def repo_setup1(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
+        # b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
@@ -288,7 +285,6 @@ def repo_setup1(git_repo, repo_instance):
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()
-        b = git_repo.create_blob_fromworkdir(fn)
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()

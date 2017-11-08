@@ -21,7 +21,7 @@ install:
 
 before_script:
 
-  - flake8 --exclude=migrations,libgit2-0.26.0 --max-line-length=122 .
+  - flake8 --exclude=migrations,libgit2-0.26.0,_site --max-line-length=122 .
 
 script:
   - python manage.py migrate
