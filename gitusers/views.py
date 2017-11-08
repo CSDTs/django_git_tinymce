@@ -31,7 +31,7 @@ from django_git.mixins import OwnerRequiredMixin, OwnerOnlyRequiredMixin
 from repos.forms import (
     RepositoryModelForm,
     RepositoryUpdateModelForm,
-    TinyMCEFileEditForm,
+    CKEditorFileEditForm,
     FileCreateForm,
     FileRenameForm,
     FolderCreateForm,
@@ -411,6 +411,8 @@ class RepositoryDeleteView(OwnerOnlyRequiredMixin, DeleteView):
 #          Tree.__getitem__(name)
 #          Tree.__contains__(name)
 #       to retrieve and check file.
+
+
 class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
     template_name = 'repo/create_file.html'
     form_class = FileCreateForm
@@ -420,7 +422,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
         initial = super(RepositoryCreateFileView, self).get_initial()
 
         self.repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -544,7 +546,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         kwargs = super(RepositoryCreateFolderView, self).get_form_kwargs()
 
         self.repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -651,7 +653,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
 
 class BlobEditView(FormView):
     template_name = 'repo/file_edit.html'
-    form_class = TinyMCEFileEditForm
+    form_class = CKEditorFileEditForm
     blob = None
     repo = None
     repo_obj = None
@@ -669,7 +671,7 @@ class BlobEditView(FormView):
             directory += "/" + self.kwargs.get('directories_ext')
 
         self.repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -682,7 +684,7 @@ class BlobEditView(FormView):
             commit = self.repo.revparse_single('HEAD')
             tree = commit.tree
             if directory != "":
-                
+
                 folders = directory.split("/")
                 dir = ""
                 for folder in folders:
@@ -731,7 +733,7 @@ class BlobEditView(FormView):
 
         except OSError:
             raise form.ValidationError("Save error, please check the file.")
-        
+
         return super(BlobEditView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -796,7 +798,7 @@ class BlobRawView(View):
         repo_obj = None
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -867,7 +869,7 @@ class BlobDeleteView(TemplateView):
             filename += self.kwargs.get('extension')
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -900,7 +902,7 @@ class BlobDeleteView(TemplateView):
         context = super(BlobDeleteView, self).get_context_data(**kwargs)
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -926,11 +928,10 @@ class BlobDeleteFolderView(TemplateView):
         user = self.request.user
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
-
 
         if not owner_editor_check(repo_obj, user):
             raise PermissionDenied
@@ -1006,7 +1007,7 @@ class BlobDeleteFolderView(TemplateView):
         context = super(BlobDeleteFolderView, self).get_context_data(**kwargs)
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -1029,7 +1030,8 @@ class RenameFileView(FormView):
     def get_initial(self, **kwargs):
         initial = super(RenameFileView, self).get_initial()
 
-        self.repo_obj = get_object_or_404(Repository, 
+        self.repo_obj = get_object_or_404(
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -1067,6 +1069,7 @@ class RenameFileView(FormView):
             blob = self.repo[blob_id]
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
                 initial['content'] = blob.data
+                initial['new_filename'] = filename
 
         except IOError:
             raise Http404("Repository does not exist")
@@ -1337,7 +1340,7 @@ class EditorDeleteView(TemplateView):
         # get the repo object
         origin_user = get_object_or_404(User, username=username_in_url)
         repo_obj = get_object_or_404(Repository, slug=slug, owner=origin_user)
-        
+
         # Permission
         if not owner_editor_check(repo_obj, origin_user):
             raise PermissionDenied
@@ -1382,6 +1385,7 @@ class SSIFolderView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SSIFolderView, self).get_context_data(**kwargs)
+        # self.template_name = 'repo/view_ssi1.html'
         filename = self.kwargs.get('filename')
         # if self.kwargs.get('extension'):
         #     filename += self.kwargs.get('extension')
@@ -1392,9 +1396,9 @@ class SSIFolderView(TemplateView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
         repo = self.get_object()
-        git_repo = pygit2.Repository(repo.get_repo_path())
-        commit = git_repo.revparse_single('HEAD')
-        tree = commit.tree
+        # git_repo = pygit2.Repository(repo.get_repo_path())
+        # commit = git_repo.revparse_single('HEAD')
+        # tree = commit.tree
         # try:
         #     tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
         #     context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))
