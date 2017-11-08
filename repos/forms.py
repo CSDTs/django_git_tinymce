@@ -96,7 +96,7 @@ class RepositoryUpdateModelForm(forms.ModelForm):
         return name
 
 
-class TinyMCEFileEditForm(forms.Form):
+class CKEditorFileEditForm(forms.Form):
     # content = forms.CharField(widget=TinyMCE(mce_attrs={'width': '100%'}))
     content = forms.CharField(widget=CKEditorUploadingWidget())
     commit_message = forms.CharField(
@@ -109,10 +109,11 @@ class TinyMCEFileEditForm(forms.Form):
 
 class FileCreateForm(forms.Form):
     filename = forms.CharField(label='File name', required=True)
-    content = forms.CharField(widget=TinyMCE(mce_attrs={'width': '100%'}))
+    content = forms.CharField(widget=CKEditorUploadingWidget())
     commit_message = forms.CharField(
         required=False,
-        empty_value="Created on {}".format(
+        empty_value="{} Created on {}".format(
+            filename,
             datetime.now().strftime("%A, %d. %B %Y %I:%M%p")
         )
     )

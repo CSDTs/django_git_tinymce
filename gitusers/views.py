@@ -31,7 +31,7 @@ from django_git.mixins import OwnerRequiredMixin, OwnerOnlyRequiredMixin
 from repos.forms import (
     RepositoryModelForm,
     RepositoryUpdateModelForm,
-    TinyMCEFileEditForm,
+    CKEditorFileEditForm,
     FileCreateForm,
     FileRenameForm,
     FolderCreateForm,
@@ -651,7 +651,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
 
 class BlobEditView(FormView):
     template_name = 'repo/file_edit.html'
-    form_class = TinyMCEFileEditForm
+    form_class = CKEditorFileEditForm
     blob = None
     repo = None
     repo_obj = None
@@ -1067,6 +1067,7 @@ class RenameFileView(FormView):
             blob = self.repo[blob_id]
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
                 initial['content'] = blob.data
+                initial['new_filename'] = filename
 
         except IOError:
             raise Http404("Repository does not exist")

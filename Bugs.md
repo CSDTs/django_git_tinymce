@@ -4,9 +4,9 @@ Back-end:
   - Editable template
   - Parse commit message
   - Show only file changed in commit view
-  - Fix create file form - wrong editor
+  - ~~Fix create file form - wrong editor~~
   - Template nav image absolut url
-  - Prefill rename repo form
+  - ~~Prefill rename file form~~
   - Download image corrupt (suspect extention in CAP letters)
   - file rename should slug/protect (don't allow ' or " etc..)
   - Random folder go to broken
