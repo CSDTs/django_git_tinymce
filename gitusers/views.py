@@ -814,7 +814,7 @@ class BlobRawView(View):
                 extension = self.kwargs.get('extension')
                 if extension is None:
                     return HttpResponse(repo[blob_id].data)
-                if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
+                if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg', 'PNG', 'JPEG', 'JPG', 'GIF', 'SVG'):
                     return HttpResponse(repo[blob_id].data, content_type="image/png")
                 elif extension in ('.pdf'):
                     return HttpResponse(repo[blob_id].data, content_type="application/pdf")

@@ -7,7 +7,6 @@ Back-end:
   - ~~Fix create file form - wrong editor~~
   - Template nav image absolut url
   - ~~Prefill rename file form~~
-  - Download image corrupt (suspect extention in CAP letters)
   - file rename should slug/protect (don't allow ' or " etc..)
   - Random folder go to broken
   - base folder xxxx while in folder 
@@ -27,6 +26,8 @@ Front-end:
   - Folder drop info/handle
   - Auto complete user
   - Readme not embedded
+  - Download image corrupt (suspect extention in CAP letters) - file: layout.js(256:165)
+    - This can be handled by backend, easier.
 
 
 Both:
