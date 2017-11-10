@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load bootstrap3 %}
+{% load crispy_forms_tags %}
 
 {% block title %}Repository Setting{% endblock %}
 
@@ -7,25 +7,29 @@
 
 <h1>Repository Setting</h1>
 {% if error_message %}
-	{{ error_message }}
+  {{ error_message }}
 
 
 {% else %}
-<p><a href="{% url 'gitusers:repo_detail' username=object.owner slug=object.slug  %}"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span> Go back to repo</a></p>
-	<form action="" method="post" enctype='multipart/form-data'>
-	    {% csrf_token %}
-	    {% bootstrap_form form %}
-	    
-		<p><hr></p>
-		<p><strong>Add/Remove Editors</strong> (full read/write/delete permissions, <i>be very careful</i>)
-		</p>
-			{% for editor in view.editors %}
-				{{ editor }} <a href="{% url 'gitusers:remove_editor' username=object.owner slug=object.slug editor=editor %}">[X]</a>{% if not forloop.last %},{% endif %}
-			{% endfor %}
-		</p>
-		<p><a href="{% url 'gitusers:add_editor' username=object.owner slug=object.slug %}">Add Editor</a></p>
-		<input type="submit" value="Submit" />
-	</form>
+<div class="row">
+  <div class="col-md-5">
+      <p><a href="{% url 'gitusers:repo_detail' username=object.owner slug=object.slug  %}"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span> Go back to repo</a></p>
+        <form action="" method="post" enctype='multipart/form-data'>
+            {% csrf_token %}
+            {{ form|crispy }}
+            
+          <p><hr></p>
+          <p><strong>Add/Remove Editors</strong> (full read/write/delete permissions, <i>be very careful</i>)
+          </p>
+            {% for editor in view.editors %}
+              {{ editor }} <a href="{% url 'gitusers:remove_editor' username=object.owner slug=object.slug editor=editor %}">[X]</a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </p>
+          <p><a href="{% url 'gitusers:add_editor' username=object.owner slug=object.slug %}">Add Editor</a></p>
+          <input type="submit" value="Submit" />
+        </form>
+    </div>
+</div>
 {% endif %}
 
 {% endblock %}
