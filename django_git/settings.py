@@ -192,6 +192,7 @@ CKEDITOR_CONFIGS = {
             'uploadimage',  # the upload image feature
         ]),
         'width': '100%',
+        'extraAllowedContent': 'script',
     }
 }
 

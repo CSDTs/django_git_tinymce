@@ -15,7 +15,8 @@
 {{ super }}
 
   <script>window.props = {{props|json}}; </script>
-  <script src="/static/js/{{component}}"></script>
+  {% comment %}<script src="/static/js/{{component}}"></script>{% endcomment %}
+  <script src="{% static 'js/repo/src/client.min.js' %}"></script>
 
 
 {% endblock %}

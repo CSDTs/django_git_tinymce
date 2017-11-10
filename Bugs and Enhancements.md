@@ -9,12 +9,11 @@ Back-end:
   - ~~Prefill rename file form~~
   - file rename should slug/protect (don't allow ' or " etc..)
   - Random folder go to broken
-  - base folder xxxx while in folder 
-  - Limit tags / auto-complete
+  - Base folder xxxx while in folder 
   - ~~Move submit button down in repo settings page~~
   - remove gitusers model
   - Subfoder view, base folder link in CAP letters
-  - Make CKEditor allow JS
+  - ~~Configure CKEditor to allow script tag~~
 
 
 Front-end:
@@ -35,3 +34,7 @@ Both:
   - Hide .placeholder
   - Warn overwrite drag and drop upload
   - Static link change
+
+
+Enhancement:
+  - Limit tags / auto-complete
