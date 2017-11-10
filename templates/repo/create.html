@@ -1,21 +1,25 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
 
 {% block title %}Create Repository{% endblock %}
 
 {% block content %}
 
 <h1>Create Repository</h1>
-
-{% if error_message %}
-	{{ error_message }}
-	<p><a href="{% url 'create' %}">Go back</a></p>
-	
-{% else %}
-	<form action="" method="post" enctype="multipart/form-data">
-	    {% csrf_token %}
-	    {{ form.as_p }}
-	    <input type="submit" value="Create" />
-	</form>
-{% endif %}
-
+<div class="row">
+  <div class="col-md-5">
+    {% if error_message %}
+      {{ error_message }}
+      <p><a href="{% url 'create' %}">Go back</a></p>
+      
+    {% else %}
+      <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+          <input type="submit" value="Create" />
+      </form>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

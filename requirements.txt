@@ -4,6 +4,7 @@ Django==1.11.2
 django-bootstrap3==8.2.3
 django-ckeditor==5.3.1
 django-cleanup==1.0.1
+django-crispy-forms==1.7.0
 django-filter==1.0.4
 django-tinymce4-lite==1.4.1
 djangorestframework==3.6.3
