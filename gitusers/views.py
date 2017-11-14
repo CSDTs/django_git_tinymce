@@ -168,24 +168,33 @@ class RepositoryDetailView(DetailView):
         return context
 
 
-class ReduxRepositoryDetailView(TemplateView):
+class ReduxRepositoryDetailView(DetailView):
+    model = Repository
     template_name = 'repo/redux_repo.html'
-    component = 'repo/src/client.min.js'
+    component = 'js/repo/src/client.min.js'
+
+    def get_queryset(self):
+        queryset = super(ReduxRepositoryDetailView, self).get_queryset()
+
+        return queryset.filter(owner__username=self.kwargs.get('username'))
 
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
 
         # gets passed to react via window.props
-        owner_name = self.kwargs['username']
-        repo_name = self.kwargs['slug']
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
-        user = User.objects.get(username=owner_name)
 
-        repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
-        forked_repos = ForkedRepository.objects.filter(original=repo)
-        fork_count = len(forked_repos)
+        repo = self.get_object()
+        owner = repo.owner
+
+        # A count() call performs a SELECT COUNT(*) behind the scenes
+        # Always use count() rather than loading all of the record into Python
+        # objects and calling len() on the result
+        # (unless need to load the objects into memory anyway, in which case len() will be faster).
+        fork_count = ForkedRepository.objects.filter(original=repo).count()
+
         try:
             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
             if orig_fork:
@@ -200,10 +209,11 @@ class ReduxRepositoryDetailView(TemplateView):
             fork_name = None
             fork_owner = None
 
+        # gets passed to react via window.props
         props = {
-            'repo_name': repo_name,
-            'repo_owner': owner_name,
-            'repo_owner_id': user.id,
+            'repo_name': repo.name,
+            'repo_owner': owner.username,
+            'repo_owner_id': owner.id,
             'repo_id': repo.id,
             'directory': directory,
             'fork_count': fork_count,
@@ -217,23 +227,82 @@ class ReduxRepositoryDetailView(TemplateView):
 
         return context
 
+# class ReduxRepositoryDetailView(TemplateView):
+#     template_name = 'repo/redux_repo.html'
+#     component = 'js/repo/src/client.min.js'
 
-class ReduxRepositoryFolderDetailView(TemplateView):
+#     def get_context_data(self, **kwargs):
+#         context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
+
+#         # gets passed to react via window.props
+#         owner_name = self.kwargs['username']
+#         repo_name = self.kwargs['slug']
+#         directory = ""
+#         if 'directories' in self.kwargs:
+#             directory = self.kwargs['directories']
+#         user = User.objects.get(username=owner_name)
+
+#         repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
+#         forked_repos = ForkedRepository.objects.filter(original=repo)
+#         fork_count = len(forked_repos)
+#         try:
+#             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+#             if orig_fork:
+#                 is_fork = True
+#             orig = orig_fork.original
+#             fork_name = orig.slug
+#             fork_owner = orig.owner.username
+#         except:
+#             orig_fork = None
+#             is_fork = False
+#             orig = None
+#             fork_name = None
+#             fork_owner = None
+
+#         props = {
+#             'repo_name': repo_name,
+#             'repo_owner': owner_name,
+#             'repo_owner_id': user.id,
+#             'repo_id': repo.id,
+#             'directory': directory,
+#             'fork_count': fork_count,
+#             'is_fork': is_fork,
+#             'fork_name': fork_name,
+#             'fork_owner': fork_owner,
+#         }
+
+#         context['component'] = self.component
+#         context['props'] = props
+
+#         return context
+
+
+class ReduxRepositoryFolderDetailView(DetailView):
+    model = Repository
     template_name = 'repo/redux_repo.html'
-    component = 'repo/src/client.min.js'
+    component = 'js/repo/src/client.min.js'
+
+    def get_queryset(self):
+        queryset = super(ReduxRepositoryFolderDetailView, self).get_queryset()
+        return queryset.filter(owner__username=self.kwargs.get('username'))
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        queryset = queryset.filter(slug=self.kwargs.get('slug'))
+        # get the single obj in queryset
+        obj = queryset.get()
+        return obj
 
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
-
-        owner_name = self.kwargs['username']
-        repo_name = self.kwargs['slug']
+        repo = self.get_object()
+        owner = repo.owner
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs['directories_ext']
-        user = User.objects.get(username=owner_name)
-        repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
+
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
         try:
@@ -251,9 +320,9 @@ class ReduxRepositoryFolderDetailView(TemplateView):
             fork_owner = None
 
         props = {
-            'repo_name': repo_name,
-            'repo_owner': owner_name,
-            'repo_owner_id': user.id,
+            'repo_name': repo.name,
+            'repo_owner': owner.username,
+            'repo_owner_id': owner.id,
             'repo_id': repo.id,
             'directory': directory,
             'fork_count': fork_count,
@@ -266,6 +335,56 @@ class ReduxRepositoryFolderDetailView(TemplateView):
         context['props'] = props
 
         return context
+
+
+# class ReduxRepositoryFolderDetailView(TemplateView):
+#     template_name = 'repo/redux_repo.html'
+#     component = 'js/repo/src/client.min.js'
+
+#     def get_context_data(self, **kwargs):
+#         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
+
+#         owner_name = self.kwargs['username']
+#         repo_name = self.kwargs['slug']
+#         directory = ""
+#         if 'directories' in self.kwargs:
+#             directory = self.kwargs['directories']
+#         if 'directories_ext' in self.kwargs:
+#             directory += "/" + self.kwargs['directories_ext']
+#         user = User.objects.get(username=owner_name)
+#         repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
+#         forked_repos = ForkedRepository.objects.filter(original=repo)
+#         fork_count = len(forked_repos)
+#         try:
+#             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+#             if orig_fork:
+#                 is_fork = True
+#             orig = orig_fork.original
+#             fork_name = orig.name
+#             fork_owner = orig.owner.username
+#         except:
+#             orig_fork = None
+#             is_fork = False
+#             orig = None
+#             fork_name = None
+#             fork_owner = None
+
+#         props = {
+#             'repo_name': repo_name,
+#             'repo_owner': owner_name,
+#             'repo_owner_id': user.id,
+#             'repo_id': repo.id,
+#             'directory': directory,
+#             'fork_count': fork_count,
+#             'is_fork': is_fork,
+#             'fork_name': fork_name,
+#             'fork_owner': fork_owner,
+#         }
+
+#         context['component'] = self.component
+#         context['props'] = props
+
+#         return context
 
 
 # Fork Already Named Fork
@@ -814,7 +933,7 @@ class BlobRawView(View):
                 extension = self.kwargs.get('extension')
                 if extension is None:
                     return HttpResponse(repo[blob_id].data)
-                if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
+                if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg', 'PNG', 'JPEG', 'JPG', 'GIF', 'SVG'):
                     return HttpResponse(repo[blob_id].data, content_type="image/png")
                 elif extension in ('.pdf'):
                     return HttpResponse(repo[blob_id].data, content_type="application/pdf")

@@ -5,6 +5,7 @@ from django.urls import reverse
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -50,13 +51,18 @@ class FilesView(APIView):
         try:
             specific_repo = repo_model.objects.get(id=repo)
         except:
-            return Response({'detail': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Repo not found'}, status=status.HTTP_404_NOT_FOUND)
         this_repo = Repository(specific_repo.get_repo_path())
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         dir_path = path.join(specific_repo.get_repo_path(), directory)
-        os.chdir(dir_path)
+        try:
+            os.chdir(dir_path)
+        except:
+            # returning Response() and raise NotFound is the same
+            # return Response(status=status.HTTP_404_NOT_FOUND)
+            raise NotFound(detail="No such dir or file", code=404)
 
         index_tree = this_repo.index
         tuplet = []
