@@ -279,7 +279,7 @@ class ReduxRepositoryDetailView(DetailView):
 
 class ReduxRepositoryFolderDetailView(TemplateView):
     template_name = 'repo/redux_repo.html'
-    component = 'repo/src/client.min.js'
+    component = 'js/repo/src/client.min.js'
 
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
