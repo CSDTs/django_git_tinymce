@@ -4,14 +4,16 @@ Back-end:
   - Editable template
   - Parse commit message
   - Show only file changed in commit view
+    - use diff_to_tree()
+    - http://www.pygit2.org/diff.html
+
   - ~~Fix create file form - wrong editor~~
   - Template nav image absolut url
   - ~~Prefill rename file form~~
   - file rename should slug/protect (don't allow ' or " etc..)
-  - Random folder go to broken
   - Base folder xxxx while in folder 
   - ~~Move submit button down in repo settings page~~
-  - remove gitusers model
+  - ~~remove gitusers model~~
   - Subfoder view, base folder link in CAP letters
   - ~~Configure CKEditor to allow script tag~~
 
@@ -23,7 +25,9 @@ Front-end:
                http://127.0.0.1:8000/admin/quilting/img/ is different from
                http://127.0.0.1:8000/admin/Quilting/img/
 
-  - ~~Default image~~
+  - Random folder go to broken
+    - Uses filefetch api but does not handle 404 response which means couldn't locate the directory
+
   - Tag filter (grade level, subject). (API is done.)
   - Loading indication while forking
   - Admin link vs. index render link
