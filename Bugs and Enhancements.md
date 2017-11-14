@@ -17,6 +17,12 @@ Back-end:
 
 
 Front-end:
+  - Link to subfolder should use repo.slug not repo.name.
+    - example: Repo name = Quilting
+               Repo slug = quilting
+               http://127.0.0.1:8000/admin/quilting/img/ is different from
+               http://127.0.0.1:8000/admin/Quilting/img/
+
   - ~~Default image~~
   - Tag filter (grade level, subject). (API is done.)
   - Loading indication while forking
