@@ -75,7 +75,8 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         owner_name = self.kwargs['username']
-        user_specific = User.objects.get(username=owner_name)
+        # user_specific = User.objects.get(username=owner_name)
+        user_specific = get_object_or_404(User, username=owner_name)
         queryset = Repository.objects.filter(owner=user_specific.id)
         search_query = self.request.GET.get('search')
         if search_query:

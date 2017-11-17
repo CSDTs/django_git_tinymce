@@ -23,3 +23,8 @@ class DashboardAllRepoIndexView(ListView):
 class MenuView(ListView):
     model = Repository
     template_name = "dashboard/menu.html"
+
+
+from django.views.generic.base import TemplateView
+class TempView(TemplateView):
+    template_name = 'dashboard/tempview.html'

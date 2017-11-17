@@ -61,10 +61,7 @@ urlpatterns = [
         gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
     url(r'^api/v1/files/(?P<resource_id>\d+)/(?P<directories>.*)/$',
         gitusers_viewsets.FilesView.as_view(), name='my_rest_view'),
-
-
-
-
+    url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
 ]
 # use custom template name by providing the template_name argument
 # https://docs.djangoproject.com/en/1.11/topics/auth/default/#all-authentication-views
@@ -75,5 +72,5 @@ url(r'^accounts/login/$', auth_views.LoginView.as_view(template_name='myapp/logi
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-urlpatterns += url(r'^(?P<username>[\w.+-]+)/', include('gitusers.urls')),
+    from dashboard.views import TempView
+    urlpatterns.insert(0, url(r'^temp/$', TempView.as_view(), name='temp'),)
