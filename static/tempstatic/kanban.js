@@ -1,35 +1,19 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   var docElem = document.documentElement;
-  var kanban = document.querySelector('.kanban-demo');
-  var board = kanban.querySelector('.board');
+  var sidebar = document.querySelector('.sidebar');
+  // var board = sidebar.querySelector('.board');
   // var itemContainers = Array.prototype.slice.call(kanban.querySelectorAll('.board-column-content'));
-  var itemContainers = kanban.querySelector('.board-column-content');
+  var itemContainers = sidebar.querySelector('.board-column-content');
   var columnGrids = [];
   var dragCounter = 0;
   var boardGrid;
 
-  // itemContainers.forEach(function (container) {
-    boardGrid = new Muuri(board, {
-    layoutDuration: 400,
-    layoutEasing: 'ease',
-    dragEnabled: true,
-    dragSortInterval: 0,
-    dragStartPredicate: {
-      handle: '.board-column-header'
-    },
-    dragReleaseDuration: 400,
-    dragReleaseEasing: 'ease'
-  });
-    // var muuri = new Muuri(container, {
     var muuri = new Muuri(itemContainers, {  
       items: '.board-item',
       layoutDuration: 400,
       layoutEasing: 'ease',
       dragEnabled: true,
-      dragSort: function () {
-        return columnGrids;
-      },
       dragSortInterval: 0,
       dragContainer: document.body,
       dragReleaseDuration: 400,
@@ -41,24 +25,11 @@ document.addEventListener('DOMContentLoaded', function () {
       item.getElement().style.width = item.getWidth() + 'px';
       item.getElement().style.height = item.getHeight() + 'px';
     })
-    .on('dragEnd', function (item) {
-      if (--dragCounter < 1) {
-        docElem.classList.remove('dragging');
-      }
-    })
-    .on('dragReleaseEnd', function (item) {
-      item.getElement().style.width = '';
-      item.getElement().style.height = '';
-      columnGrids.forEach(function (muuri) {
-        muuri.refreshItems();
-      });
-    })
-    .on('layoutStart', function () {
-      boardGrid.refreshItems().layout();
-    });
 
-    columnGrids.push(muuri);
-
+    items = muuri.getItems();
+    for (var i = 0; i < items.length; ++i){
+      console.log(items[i].getElement().textContent);
+    }
   });
 
   

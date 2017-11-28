@@ -38,15 +38,15 @@
     text-indent: -1000px;
   }
 }
-.board-column.todo .board-column-header {
+.board-column.sidebar .board-column-header {
   background: #4A9FF9;
 }
-.board-column.working .board-column-header {
+/*.board-column.working .board-column-header {
   background: #f9944a;
 }
 .board-column.done .board-column-header {
   background: #2ac06d;
-}
+}*/
 .board-column-content {
   position: relative;
   border: 10px solid transparent;
