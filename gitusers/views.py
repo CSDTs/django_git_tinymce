@@ -31,7 +31,7 @@ from django_git.mixins import OwnerRequiredMixin, OwnerOnlyRequiredMixin
 from repos.forms import (
     RepositoryModelForm,
     RepositoryUpdateModelForm,
-    TinyMCEFileEditForm,
+    CKEditorFileEditForm,
     FileCreateForm,
     FileRenameForm,
     FolderCreateForm,
@@ -75,7 +75,8 @@ class IndividualIndexView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         owner_name = self.kwargs['username']
-        user_specific = User.objects.get(username=owner_name)
+        # user_specific = User.objects.get(username=owner_name)
+        user_specific = get_object_or_404(User, username=owner_name)
         queryset = Repository.objects.filter(owner=user_specific.id)
         search_query = self.request.GET.get('search')
         if search_query:
@@ -168,24 +169,33 @@ class RepositoryDetailView(DetailView):
         return context
 
 
-class ReduxRepositoryDetailView(TemplateView):
+class ReduxRepositoryDetailView(DetailView):
+    model = Repository
     template_name = 'repo/redux_repo.html'
-    component = 'repo/src/client.min.js'
+    component = 'js/repo/src/client.min.js'
+
+    def get_queryset(self):
+        queryset = super(ReduxRepositoryDetailView, self).get_queryset()
+
+        return queryset.filter(owner__username=self.kwargs.get('username'))
 
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
 
         # gets passed to react via window.props
-        owner_name = self.kwargs['username']
-        repo_name = self.kwargs['slug']
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
-        user = User.objects.get(username=owner_name)
 
-        repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
-        forked_repos = ForkedRepository.objects.filter(original=repo)
-        fork_count = len(forked_repos)
+        repo = self.get_object()
+        owner = repo.owner
+
+        # A count() call performs a SELECT COUNT(*) behind the scenes
+        # Always use count() rather than loading all of the record into Python
+        # objects and calling len() on the result
+        # (unless need to load the objects into memory anyway, in which case len() will be faster).
+        fork_count = ForkedRepository.objects.filter(original=repo).count()
+
         try:
             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
             if orig_fork:
@@ -200,10 +210,11 @@ class ReduxRepositoryDetailView(TemplateView):
             fork_name = None
             fork_owner = None
 
+        # gets passed to react via window.props
         props = {
-            'repo_name': repo_name,
-            'repo_owner': owner_name,
-            'repo_owner_id': user.id,
+            'repo_name': repo.name,
+            'repo_owner': owner.username,
+            'repo_owner_id': owner.id,
             'repo_id': repo.id,
             'directory': directory,
             'fork_count': fork_count,
@@ -217,23 +228,82 @@ class ReduxRepositoryDetailView(TemplateView):
 
         return context
 
+# class ReduxRepositoryDetailView(TemplateView):
+#     template_name = 'repo/redux_repo.html'
+#     component = 'js/repo/src/client.min.js'
 
-class ReduxRepositoryFolderDetailView(TemplateView):
+#     def get_context_data(self, **kwargs):
+#         context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
+
+#         # gets passed to react via window.props
+#         owner_name = self.kwargs['username']
+#         repo_name = self.kwargs['slug']
+#         directory = ""
+#         if 'directories' in self.kwargs:
+#             directory = self.kwargs['directories']
+#         user = User.objects.get(username=owner_name)
+
+#         repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
+#         forked_repos = ForkedRepository.objects.filter(original=repo)
+#         fork_count = len(forked_repos)
+#         try:
+#             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+#             if orig_fork:
+#                 is_fork = True
+#             orig = orig_fork.original
+#             fork_name = orig.slug
+#             fork_owner = orig.owner.username
+#         except:
+#             orig_fork = None
+#             is_fork = False
+#             orig = None
+#             fork_name = None
+#             fork_owner = None
+
+#         props = {
+#             'repo_name': repo_name,
+#             'repo_owner': owner_name,
+#             'repo_owner_id': user.id,
+#             'repo_id': repo.id,
+#             'directory': directory,
+#             'fork_count': fork_count,
+#             'is_fork': is_fork,
+#             'fork_name': fork_name,
+#             'fork_owner': fork_owner,
+#         }
+
+#         context['component'] = self.component
+#         context['props'] = props
+
+#         return context
+
+
+class ReduxRepositoryFolderDetailView(DetailView):
+    model = Repository
     template_name = 'repo/redux_repo.html'
-    component = 'repo/src/client.min.js'
+    component = 'js/repo/src/client.min.js'
+
+    def get_queryset(self):
+        queryset = super(ReduxRepositoryFolderDetailView, self).get_queryset()
+        return queryset.filter(owner__username=self.kwargs.get('username'))
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        queryset = queryset.filter(slug=self.kwargs.get('slug'))
+        # get the single obj in queryset
+        obj = queryset.get()
+        return obj
 
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
-
-        owner_name = self.kwargs['username']
-        repo_name = self.kwargs['slug']
+        repo = self.get_object()
+        owner = repo.owner
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs['directories_ext']
-        user = User.objects.get(username=owner_name)
-        repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
+
         forked_repos = ForkedRepository.objects.filter(original=repo)
         fork_count = len(forked_repos)
         try:
@@ -251,9 +321,9 @@ class ReduxRepositoryFolderDetailView(TemplateView):
             fork_owner = None
 
         props = {
-            'repo_name': repo_name,
-            'repo_owner': owner_name,
-            'repo_owner_id': user.id,
+            'repo_name': repo.name,
+            'repo_owner': owner.username,
+            'repo_owner_id': owner.id,
             'repo_id': repo.id,
             'directory': directory,
             'fork_count': fork_count,
@@ -266,6 +336,56 @@ class ReduxRepositoryFolderDetailView(TemplateView):
         context['props'] = props
 
         return context
+
+
+# class ReduxRepositoryFolderDetailView(TemplateView):
+#     template_name = 'repo/redux_repo.html'
+#     component = 'js/repo/src/client.min.js'
+
+#     def get_context_data(self, **kwargs):
+#         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
+
+#         owner_name = self.kwargs['username']
+#         repo_name = self.kwargs['slug']
+#         directory = ""
+#         if 'directories' in self.kwargs:
+#             directory = self.kwargs['directories']
+#         if 'directories_ext' in self.kwargs:
+#             directory += "/" + self.kwargs['directories_ext']
+#         user = User.objects.get(username=owner_name)
+#         repo = get_object_or_404(Repository, owner=user.id, slug=repo_name)
+#         forked_repos = ForkedRepository.objects.filter(original=repo)
+#         fork_count = len(forked_repos)
+#         try:
+#             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
+#             if orig_fork:
+#                 is_fork = True
+#             orig = orig_fork.original
+#             fork_name = orig.name
+#             fork_owner = orig.owner.username
+#         except:
+#             orig_fork = None
+#             is_fork = False
+#             orig = None
+#             fork_name = None
+#             fork_owner = None
+
+#         props = {
+#             'repo_name': repo_name,
+#             'repo_owner': owner_name,
+#             'repo_owner_id': user.id,
+#             'repo_id': repo.id,
+#             'directory': directory,
+#             'fork_count': fork_count,
+#             'is_fork': is_fork,
+#             'fork_name': fork_name,
+#             'fork_owner': fork_owner,
+#         }
+
+#         context['component'] = self.component
+#         context['props'] = props
+
+#         return context
 
 
 # Fork Already Named Fork
@@ -411,6 +531,8 @@ class RepositoryDeleteView(OwnerOnlyRequiredMixin, DeleteView):
 #          Tree.__getitem__(name)
 #          Tree.__contains__(name)
 #       to retrieve and check file.
+
+
 class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
     template_name = 'repo/create_file.html'
     form_class = FileCreateForm
@@ -420,7 +542,7 @@ class RepositoryCreateFileView(OwnerRequiredMixin, FormView):
         initial = super(RepositoryCreateFileView, self).get_initial()
 
         self.repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -544,7 +666,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
         kwargs = super(RepositoryCreateFolderView, self).get_form_kwargs()
 
         self.repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -651,7 +773,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
 
 class BlobEditView(FormView):
     template_name = 'repo/file_edit.html'
-    form_class = TinyMCEFileEditForm
+    form_class = CKEditorFileEditForm
     blob = None
     repo = None
     repo_obj = None
@@ -669,7 +791,7 @@ class BlobEditView(FormView):
             directory += "/" + self.kwargs.get('directories_ext')
 
         self.repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs['username'],
             slug=self.kwargs['slug']
         )
@@ -682,7 +804,7 @@ class BlobEditView(FormView):
             commit = self.repo.revparse_single('HEAD')
             tree = commit.tree
             if directory != "":
-                
+
                 folders = directory.split("/")
                 dir = ""
                 for folder in folders:
@@ -731,7 +853,7 @@ class BlobEditView(FormView):
 
         except OSError:
             raise form.ValidationError("Save error, please check the file.")
-        
+
         return super(BlobEditView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -796,7 +918,7 @@ class BlobRawView(View):
         repo_obj = None
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -812,7 +934,7 @@ class BlobRawView(View):
                 extension = self.kwargs.get('extension')
                 if extension is None:
                     return HttpResponse(repo[blob_id].data)
-                if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg'):
+                if extension in ('.png', '.jpeg', '.jpg', '.gif', '.svg', 'PNG', 'JPEG', 'JPG', 'GIF', 'SVG'):
                     return HttpResponse(repo[blob_id].data, content_type="image/png")
                 elif extension in ('.pdf'):
                     return HttpResponse(repo[blob_id].data, content_type="application/pdf")
@@ -867,7 +989,7 @@ class BlobDeleteView(TemplateView):
             filename += self.kwargs.get('extension')
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -900,7 +1022,7 @@ class BlobDeleteView(TemplateView):
         context = super(BlobDeleteView, self).get_context_data(**kwargs)
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -926,11 +1048,10 @@ class BlobDeleteFolderView(TemplateView):
         user = self.request.user
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
-
 
         if not owner_editor_check(repo_obj, user):
             raise PermissionDenied
@@ -1006,7 +1127,7 @@ class BlobDeleteFolderView(TemplateView):
         context = super(BlobDeleteFolderView, self).get_context_data(**kwargs)
 
         repo_obj = get_object_or_404(
-            Repository, 
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -1029,7 +1150,8 @@ class RenameFileView(FormView):
     def get_initial(self, **kwargs):
         initial = super(RenameFileView, self).get_initial()
 
-        self.repo_obj = get_object_or_404(Repository, 
+        self.repo_obj = get_object_or_404(
+            Repository,
             owner__username=self.kwargs.get('username'),
             slug=self.kwargs['slug']
         )
@@ -1067,6 +1189,7 @@ class RenameFileView(FormView):
             blob = self.repo[blob_id]
             if not blob.is_binary and isinstance(blob, pygit2.Blob):
                 initial['content'] = blob.data
+                initial['new_filename'] = filename
 
         except IOError:
             raise Http404("Repository does not exist")
@@ -1337,7 +1460,7 @@ class EditorDeleteView(TemplateView):
         # get the repo object
         origin_user = get_object_or_404(User, username=username_in_url)
         repo_obj = get_object_or_404(Repository, slug=slug, owner=origin_user)
-        
+
         # Permission
         if not owner_editor_check(repo_obj, origin_user):
             raise PermissionDenied
@@ -1382,6 +1505,7 @@ class SSIFolderView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SSIFolderView, self).get_context_data(**kwargs)
+        # self.template_name = 'repo/view_ssi1.html'
         filename = self.kwargs.get('filename')
         # if self.kwargs.get('extension'):
         #     filename += self.kwargs.get('extension')
@@ -1392,9 +1516,9 @@ class SSIFolderView(TemplateView):
         if 'directories_ext' in self.kwargs:
             directory += "/" + self.kwargs.get('directories_ext')
         repo = self.get_object()
-        git_repo = pygit2.Repository(repo.get_repo_path())
-        commit = git_repo.revparse_single('HEAD')
-        tree = commit.tree
+        # git_repo = pygit2.Repository(repo.get_repo_path())
+        # commit = git_repo.revparse_single('HEAD')
+        # tree = commit.tree
         # try:
         #     tree.__getitem__("nav_" + self.kwargs.get('slug') + ".html")
         #     context['nav'] = str(os.path.join(repo.get_repo_path_media(), "nav_" + self.kwargs.get('slug') + ".html"))

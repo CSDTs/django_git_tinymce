@@ -1,0 +1,6 @@
+{% comment %}
+This file fix the CKEditor width 100% problem.
+Without this file, setting editor width 100% in settings.py won't work.
+{% endcomment %}
+
+<textarea{{ final_attrs|safe }} data-processed="0" data-config='{{config|safe}}' data-external-plugin-resources='{{external_plugin_resources|safe}}' data-id="{{id}}" data-type="ckeditortype">{{ value }}</textarea>

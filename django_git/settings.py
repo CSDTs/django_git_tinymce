@@ -31,23 +31,27 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # my django apps
     'accounts.apps.AccountsConfig',
     'repos.apps.ReposConfig',
     'gitusers.apps.GitusersConfig',
     'tags.apps.TagsConfig',
-    'bootstrap3',
-    'tinymce',
-    'ckeditor',
-    'ckeditor_uploader',
+    # django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    # third party apps
+    'bootstrap3',
+    'ckeditor',
+    'ckeditor_uploader',
+    'crispy_forms',
     'django_cleanup',
     'django_filters',
+    'rest_framework',
+    'tinymce',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -146,6 +150,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = "/media/"
 
 
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+
 # Pygit2 settings
 REPO_DIR = os.path.join(BASE_DIR, "media", "git_repos")
 '''
@@ -153,11 +162,8 @@ if not path.exists(GITS_DIR):
     os.makedirs(GITS_DIR)
 '''
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
 
-
+# REST settings
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -172,6 +178,8 @@ REST_FRAMEWORK = {
     ),
 }
 
+
+# CKEditor settings
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = 'pillow'
 CKEDITOR_RESTRICT_BY_USER = True
@@ -181,7 +189,13 @@ CKEDITOR_RESTRICT_BY_USER = True
 CKEDITOR_CONFIGS = {
     'default': {
         'extraPlugins': ','.join([
-            'uploadimage', # the upload image feature
+            'uploadimage',  # the upload image feature
         ]),
+        'width': '100%',
+        'extraAllowedContent': 'script',
     }
 }
+
+
+# crispy form setting
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
