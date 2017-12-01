@@ -4,8 +4,8 @@
 {% block extra_head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/muuri/0.5.1/muuri.min.js"></script>
-<link rel="stylesheet" href="{% static 'tempstatic/kanban.css' %}">
-<script src="{% static 'tempstatic/kanban.js' %}"></script>
+<link rel="stylesheet" href="{% static 'tempstatic/sidebar.css' %}">
+<script src="{% static 'tempstatic/sidebar.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -50,10 +50,12 @@
       </div>
 
     </section>
-
+    {% comment %}
+<button class="submit-btn">submit</button>
+{% endcomment %}
 
 {% endblock %}
 
 {% block js %}
-// https://stackoverflow.com/questions/32435510/how-to-create-drag-drop-navigation-menu-manager-like-wordpress
+
 {% endblock %}

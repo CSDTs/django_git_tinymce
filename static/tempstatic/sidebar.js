@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
       layoutEasing: 'ease',
       dragEnabled: true,
       dragSortInterval: 0,
-      dragContainer: document.body,
+      // dragContainer: document.body,
+      // dragContainer: sidebar,
       dragReleaseDuration: 400,
       dragReleaseEasing: 'ease'
     })
@@ -32,6 +33,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  
+// https://stackoverflow.com/questions/32435510/how-to-create-drag-drop-navigation-menu-manager-like-wordpress
 
 // });
