@@ -68,7 +68,6 @@ urlpatterns = [
 
 
 
-
     # blob ssi
     url(r'^(?P<slug>[-\w]+)/render/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi'),  # noqa: E501
     url(r'^(?P<slug>[-\w]+)/render/(?P<directories>[\w-]+)/(?P<filename>.*?).html$', SSIFolderView.as_view(), name='blob_ssi_dir'),  # noqa: E501

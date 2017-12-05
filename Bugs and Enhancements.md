@@ -6,6 +6,7 @@ Back-end:
   - Show only file changed in commit view
     - use diff_to_tree()
     - http://www.pygit2.org/diff.html
+    - current showing the file hex instead of the last commit hex that involves the file changed.
 
   - ~~Fix create file form - wrong editor~~
   - Template nav image absolut url
@@ -37,6 +38,7 @@ Front-end:
   - Readme not embedded
   - Download image corrupt (suspect extention in CAP letters) - file: layout.js(256:165)
     - This can be handled by backend, easier.
+  - Commit Log page broken
 
 
 Both:

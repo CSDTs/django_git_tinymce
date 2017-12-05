@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 
 from repos.models import Repository
@@ -23,3 +24,7 @@ class DashboardAllRepoIndexView(ListView):
 class MenuView(ListView):
     model = Repository
     template_name = "dashboard/menu.html"
+
+
+class TempView(TemplateView):
+    template_name = 'dashboard/tempview.html'
