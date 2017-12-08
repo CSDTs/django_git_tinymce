@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from . import preset_html
+
 import pygit2
 
 import os
@@ -23,48 +25,50 @@ def repo_setup(git_repo, repo_instance):
         # head = git_repo.lookup_reference('HEAD').resolve()
 
         # Nav bar:
-        data = """
-        <nav class="navbar navbar-inverse navbar-local visible-xs">\
-    <div class="container-fluid">\
-    <div class="navbar-header">\
-        <a class="navbar-brand" href="/{1}/{2}/render/index.html">{0}</a>
-        <button aria-expanded="false" class="navbar-toggle collapsed"
-        data-target="#nav-menu" data-toggle="collapse" type="button">
-        <span class="sr-only">Toggle navigation</span> <span class="icon-bar">
-        </span> <span class="icon-bar"></span> <span class="icon-bar">
-        </span></button>\
-    </div>\
-    <div class="collapse navbar-collapse navbar-right" id="nav-menu">\
-        <ul class="nav navbar-nav">\
-            <li class="visible-xs">\
-                <a href="/{1}/{2}/render/index.html">Background</a>\
-            </li>\
-            <li class="visible-xs">\
-                <a href="/{1}/{2}/render/origins.html">Origins</a>\
-            </li>\
-            <li class="visible-xs">\
-                <a href="/{1}/{2}/render/teaching.html">Teaching Materials</a>\
-            </li>\
-        </ul>\
-\
-    </div>\
-    </div>\
-</nav>\
-\
-\
-<!-- sidebar -->\
-        <div class="stuck">\
-            <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">\
-                <ul class="nav">\
-                    <li class="active"><a href="/{1}/{2}/render/index.html">Background</a></li>\
-                    <li class="indented"><a href="/{1}/{2}/render/origins.html">Origins</a></li>\
-                    <li><a href="/{1}/{2}/render/tutorial.html">Tutorial</a></li>\
-                    <li><a href="/{1}/{2}/render/software.html">Software</a></li>\
-                    <li><a href="/{1}/{2}/render/teaching.html">Teaching Materials</a></li>\
-                </ul>\
-            </div>\
-        </div>""".format(repo_instance.name, repo_instance.owner, repo_instance.slug)
-        fn = "nav_" + repo_instance.slug + ".html"
+#         data = """
+#         <nav class="navbar navbar-inverse navbar-local visible-xs">\
+#     <div class="container-fluid">\
+#     <div class="navbar-header">\
+#         <a class="navbar-brand" href="/{1}/{2}/render/index.html">{0}</a>
+#         <button aria-expanded="false" class="navbar-toggle collapsed"
+#         data-target="#nav-menu" data-toggle="collapse" type="button">
+#         <span class="sr-only">Toggle navigation</span> <span class="icon-bar">
+#         </span> <span class="icon-bar"></span> <span class="icon-bar">
+#         </span></button>\
+#     </div>\
+#     <div class="collapse navbar-collapse navbar-right" id="nav-menu">\
+#         <ul class="nav navbar-nav">\
+#             <li class="visible-xs">\
+#                 <a href="/{1}/{2}/render/index.html">Background</a>\
+#             </li>\
+#             <li class="visible-xs">\
+#                 <a href="/{1}/{2}/render/origins.html">Origins</a>\
+#             </li>\
+#             <li class="visible-xs">\
+#                 <a href="/{1}/{2}/render/teaching.html">Teaching Materials</a>\
+#             </li>\
+#         </ul>\
+# \
+#     </div>\
+#     </div>\
+# </nav>\
+# \
+# \
+# <!-- sidebar -->\
+#         <div class="stuck">\
+#             <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">\
+#                 <ul class="nav">\
+#                     <li class="active"><a href="/{1}/{2}/render/index.html">Background</a></li>\
+#                     <li class="indented"><a href="/{1}/{2}/render/origins.html">Origins</a></li>\
+#                     <li><a href="/{1}/{2}/render/tutorial.html">Tutorial</a></li>\
+#                     <li><a href="/{1}/{2}/render/software.html">Software</a></li>\
+#                     <li><a href="/{1}/{2}/render/teaching.html">Teaching Materials</a></li>\
+#                 </ul>\
+#             </div>\
+#         </div>""".format(repo_instance.name, repo_instance.owner, repo_instance.slug)
+        data = preset_html.left_navbar
+        # fn = "nav_" + repo_instance.slug + ".html"
+        fn = "left_navbar"
         f = open(os.path.join(git_repo.workdir, fn), 'w')
         f.write(data)
         f.close()

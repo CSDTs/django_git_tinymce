@@ -27,4 +27,4 @@ class MenuView(ListView):
 
 
 class TempView(TemplateView):
-    template_name = 'dashboard/tempview.html'
+    template_name = 'dashboard/ex.html'
