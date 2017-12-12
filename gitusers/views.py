@@ -212,7 +212,7 @@ class ReduxRepositoryDetailView(DetailView):
 
         # gets passed to react via window.props
         props = {
-            'repo_name': repo.name,
+            'repo_name': self.kwargs['slug'],
             'repo_owner': owner.username,
             'repo_owner_id': owner.id,
             'repo_id': repo.id,
@@ -321,7 +321,7 @@ class ReduxRepositoryFolderDetailView(DetailView):
             fork_owner = None
 
         props = {
-            'repo_name': repo.name,
+            'repo_name': self.kwargs['slug'],
             'repo_owner': owner.username,
             'repo_owner_id': owner.id,
             'repo_id': repo.id,
