@@ -25,3 +25,40 @@
   </div>
 </div>
 {% endblock %}
+
+{% block js %}
+<script>
+  var textinput = $('.textinput');
+  textinput.after('<p id="warning"></p>');
+  var warningP = $("#warning");
+
+  textinput.on( 'input', function() {
+    console.log($(this).val());
+    if ( foldername_check( $(this).val() )){
+      warningP.html("Your folder name will be: " + '<font color="red">' + slugify($(this).val()) + "</font>");
+      textinput.change(function() {
+        $(this).val(slugify($(this).val()));
+      });
+    }
+    
+    if ( !foldername_check( $(this).val() )){
+      warningP.html("");
+    }
+  });
+
+  function foldername_check(text){
+    return /\s+/g.test(text) || /[^\w\-!.]+/g.test(text) ||
+         /\-\-+/g.test(text) || /^-+/.test(text) || /-+$/.test(text)
+         ;
+  }
+
+  function slugify(text){
+    return text.toString().toLowerCase()
+      .replace(/\s+/g, '-')           // Replace spaces with -
+      .replace(/[^\w\-!.]+/g, '')       // Remove all non-word chars
+      .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+      .replace(/^-+/, '')             // Trim - from start of text
+      .replace(/-+$/, '');            // Trim - from end of text
+  }
+</script>
+{% endblock %}

@@ -1,25 +1,25 @@
-Back-end:
+**Back-end**:
   - ~~Modify tag and sub-tag of repo (ModelForm)~~
-  - Indication of owner in render mode/page
-  - Editable template
-  - Parse commit message
-  - Show only file changed in commit view
-    - use diff_to_tree()
-    - http://www.pygit2.org/diff.html
-    - current showing the file hex instead of the last commit hex that involves the file changed.
-
   - ~~Fix create file form - wrong editor~~
-  - Template nav image absolut url
+  - ~~Template nav image absolut url~~
   - ~~Prefill rename file form~~
-  - file rename should slug/protect (don't allow ' or " etc..)
-  - Base folder xxxx while in folder 
+  - ~~file rename should be slugified/protected (don't allow ' or " etc..)~~ 
   - ~~Move submit button down in repo settings page~~
   - ~~remove gitusers model~~
-  - Subfoder view, base folder link in CAP letters
   - ~~Configure CKEditor to allow script tag~~
 
+  - Parse commit message
+    - Show only file changed in commit view
+      - use diff_to_tree()
+      - http://www.pygit2.org/diff.html
+      - current showing the file hex instead of the last commit hex that involves the file changed.
 
-Front-end:
+  - Indication of owner in render mode/page
+  - Editable template
+
+
+**Front-end**:
+  - Folder detail view is asking for README.MD using relative URL causing 404
   - Link to subfolder should use repo.slug not repo.name.
     - example: Repo name = Quilting
                Repo slug = quilting
@@ -39,14 +39,15 @@ Front-end:
   - Download image corrupt (suspect extention in CAP letters) - file: layout.js(256:165)
     - This can be handled by backend, easier.
   - Commit Log page broken
+  - Subfoder view, base folder link in CAP letters
 
 
-Both:
+**Both**:
   - Delete folders
   - Hide .placeholder
   - Warn overwrite drag and drop upload
   - Static link change
 
 
-Enhancement:
+**Enhancement**:
   - Limit tags / auto-complete

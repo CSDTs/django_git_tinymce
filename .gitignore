@@ -7,7 +7,7 @@ eclipse/
 *.pyc
 *.sqlite3
 python/
-media/
+/media
 collected_static/
 _site/
 local_settings.py
@@ -18,6 +18,5 @@ local_settings.py
 node_modules/
 package-lock.json
 .coverage
-git_repos/
 flake8.txt
 to-do.txt

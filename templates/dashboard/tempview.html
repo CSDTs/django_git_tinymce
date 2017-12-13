@@ -4,12 +4,13 @@
 {% block extra_head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/muuri/0.5.1/muuri.min.js"></script>
-<link rel="stylesheet" href="{% static 'tempstatic/sidebar.css' %}">
-<script src="{% static 'tempstatic/sidebar.js' %}"></script>
+<link rel="stylesheet" href="{% static 'tempstatic/demo-kanban.css' %}">
+{% comment %}<script src="{% static 'tempstatic/sidebar.js' %}"></script>{% endcomment %}
+<script src="{% static 'tempstatic/demo-kanban.js' %}"></script>
 {% endblock %}
 
 {% block content %}
-
+{% comment %}
 <section class="sidebar">
 
       <h2 class="section-title"><span>Sidebar</span></h2>
@@ -25,6 +26,7 @@
             <div class="board-item"><div class="board-item-content"><span>Item #</span>5</div></div>
           </div>
         </div>
+        {% endcomment %}
         {% comment %}
         <div class="board-column working">
           <div class="board-column-header">Working</div>
@@ -53,6 +55,25 @@
     {% comment %}
 <button class="submit-btn">submit</button>
 {% endcomment %}
+
+<section class="kanban-demo">
+
+      <h2 class="section-title"><span>Kanban Demo</span></h2>
+
+      <div class="board">
+        <div class="board-column todo">
+          <div class="board-column-header">To do</div>
+          <div class="board-column-content">
+            <div class="board-item"><div class="board-item-content"><span>Item #</span>1</div></div>
+            <div class="board-item"><div class="board-item-content"><span>Item #</span>2</div></div>
+            <div class="board-item"><div class="board-item-content"><span>Item #</span>3</div></div>
+            <div class="board-item"><div class="board-item-content"><span>Item #</span>4</div></div>
+            <div class="board-item"><div class="board-item-content"><span>Item #</span>5</div></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
 
 {% endblock %}
 

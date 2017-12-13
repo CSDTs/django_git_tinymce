@@ -1,0 +1,52 @@
+{
+	"Background": {
+		"name": "Background",
+		"link": "./index.html",
+		"children": [{
+				"name": "Gee's Bend Quilts",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/geesbend.html"
+			},
+			{
+				"name": "Appalachian Quilts",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/appalachian.html"
+			},
+			{
+				"name": "Lakota Quilts",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/lakota.html"
+			},
+			{
+				"name": "Anishinaabe Quilts",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/anishinaabe.html"
+			}
+		]
+	},
+	"Tutorial": {
+		"name": "Tutorial",
+		"link": "http://127.0.0.1:8000/admin/quilting/render/tutorial.html"
+	},
+	"Software": {
+		"name": "Software",
+		"link": "http://127.0.0.1:8000/admin/quilting/render/software.html",
+		"children": [{
+				"name": "Gee's Bend Challenge",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/geesbendchallenge.html"
+			},
+			{
+				"name": "Appalachian Challenge",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/appalachianchallenge.html"
+			},
+			{
+				"name": "Lakota Star Challenge",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/lakotachallenge.html"
+			},
+			{
+				"name": "Tips",
+				"link": "http://127.0.0.1:8000/admin/quilting/render/tips.html"
+			}
+		]
+	},
+	"Teaching Materials": {
+		"name": "Teaching Materials",
+		"link": "http://127.0.0.1:8000/admin/quilting/render/teaching.html"
+	}
+}
