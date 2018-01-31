@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/CSnap/django_git_tinymce.svg?branch=master)](https://travis-ci.org/CSnap/django_git_tinymce)
+[![Build Status](https://travis-ci.org/CSDTs/django_git_tinymce.svg?branch=master)](https://travis-ci.org/CSnap/django_git_tinymce)
 
 # django_git_tinymce
 This is the main repo for controlling teacher contributions to the CSDT community website. It is still in development.
