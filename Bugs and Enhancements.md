@@ -19,7 +19,7 @@
 
 
 **Front-end**:
-  - Folder detail view is asking for README.MD using relative URL causing 404
+  - ~~Folder detail view is asking for README.MD using relative URL causing 404~~
   - Link to subfolder should use repo.slug not repo.name.
     - example: Repo name = Quilting
                Repo slug = quilting
