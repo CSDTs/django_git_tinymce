@@ -7,7 +7,7 @@ from .models import Repository
 class RepoAdmin(admin.ModelAdmin):
     list_display = ['dir', 'name', 'description', 'owner', 'timestamp']
     list_display_links = ['dir', 'name']
-    list_filter = ['timestamp']
+    list_filter = ['timestamp', 'subject', 'grade_level']
     search_fields = ['name', 'description']
 
     class Meta:
