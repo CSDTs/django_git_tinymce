@@ -941,19 +941,15 @@ class BlobRawView(View):
                 elif extension in ('.ppt'):
                     return HttpResponse(repo[blob_id].data, content_type="application/vnd.ms-powerpoint")
                 elif extension in ('.pptx'):
-                    return HttpResponse(
-                            repo[blob_id].data,
-                            content_type="application/vnd.openxmlformats-\
-                            officedocument.presentationml.presentation"
-                    )
+                    return HttpResponse(repo[blob_id].data,
+                                        content_type="application/vnd.openxmlformats-\
+                                        officedocument.presentationml.presentation")
                 elif extension in ('.doc'):
                     return HttpResponse(repo[blob_id].data, content_type="application/msword")
                 elif extension in ('.docx'):
-                    return HttpResponse(
-                            repo[blob_id].data,
-                            content_type="application/vnd.openxmlformats-\
-                            officedocument.wordprocessingml.document"
-                    )
+                    return HttpResponse(repo[blob_id].data,
+                                        content_type="application/vnd.openxmlformats-\
+                                        officedocument.wordprocessingml.document")
                 elif extension in ('.zip'):
                     return HttpResponse(repo[blob_id].data, content_type="application/zip")
                 elif extension in ('.rar'):
