@@ -125,7 +125,8 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 
         return valid_data
 
-
+# Replaced with ReduxRepositoryDetailView
+'''
 class RepositoryDetailView(DetailView):
     model = Repository
     template_name = 'repo/repo_detail.html'
@@ -167,7 +168,7 @@ class RepositoryDetailView(DetailView):
             raise Http404("Repository does not exist")
 
         return context
-
+'''
 
 class ReduxRepositoryDetailView(DetailView):
     model = Repository
