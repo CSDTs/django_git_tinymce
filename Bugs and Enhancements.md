@@ -38,7 +38,7 @@
   - Readme not embedded
   - Download image corrupt (suspect extention in CAP letters) - file: layout.js(256:165)
     - This can be handled by backend, easier.
-  - Commit Log page broken
+  - ~~Commit Log page broken~~
   - Subfoder view, base folder link in CAP letters
 
 

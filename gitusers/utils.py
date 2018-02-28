@@ -221,4 +221,5 @@ def get_files_changed(git_repo, commit):
     else:
         for e in commit.tree:
             files.append(e.name)
+            
     return files
