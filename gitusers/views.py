@@ -171,10 +171,7 @@ class ReduxRepositoryDetailView(DetailView):
 
     def get_last_commit_from_file(self, file):
         repo = self.get_object()
-        try:
-            git_repo = pygit2.Repository(repo.get_repo_path())
-        except IOError:
-            raise Http404("Repository does not exist")
+        git_repo = pygit2.Repository(repo.get_repo_path())
         for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TOPOLOGICAL):
             files = get_files_changed(git_repo, commit)
             for f in files:
@@ -212,9 +209,10 @@ class ReduxRepositoryDetailView(DetailView):
         file_names = []
         directories = []
         index = git_repo.index
+        directory_slash = directory + "/" * min(1, len(directory))
         for e in index:
             if e.path.startswith(directory):
-                path = e.path[len(directory)+min(len(directory), 1):]
+                path = e.path[len(directory_slash):]
                 is_directory = path.find("/")
                 if is_directory > -1 and not path[:is_directory] in file_names:
                     file_names.append(path[:is_directory])
@@ -224,11 +222,11 @@ class ReduxRepositoryDetailView(DetailView):
 
         files = {}
         for file in file_names:
-            c = self.get_last_commit_from_file(file)
+            c = self.get_last_commit_from_file(directory_slash+file)
             if c and not file in directories:
-               files[file] = [c.hex, datetime.datetime.utcfromtimestamp(c.commit_time).strftime('%m-%d-%Y')]
+                files[file] = [c.hex, datetime.datetime.utcfromtimestamp(c.commit_time).strftime('%m-%d-%Y')]
             else:
-               files[file] = ["", ""]
+                files[file] = ["", ""]
 
         # gets passed to react via window.props
         props = {
