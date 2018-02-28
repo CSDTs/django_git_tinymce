@@ -25,6 +25,7 @@ from .utils import (
     delete_commit,
     delete_commit_folders,
     find_file_oid_in_tree_using_index,
+    get_files_changed
 )
 
 from django_git.mixins import OwnerRequiredMixin, OwnerOnlyRequiredMixin
@@ -50,7 +51,6 @@ import datetime
 
 
 User = get_user_model()
-
 
 class IndexView(LoginRequiredMixin, ListView):
     model = Repository
@@ -180,6 +180,18 @@ class ReduxRepositoryDetailView(DetailView):
 
         return queryset.filter(owner__username=self.kwargs.get('username'))
 
+    def get_last_commit_from_file(self, file):
+        repo = self.get_object()
+        try:
+            git_repo = pygit2.Repository(repo.get_repo_path())
+        except IOError:
+            raise Http404("Repository does not exist")
+        for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TOPOLOGICAL):
+            files = get_files_changed(git_repo, commit)
+            for f in files:
+                if f == file:
+                    return commit
+
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
 
@@ -189,6 +201,7 @@ class ReduxRepositoryDetailView(DetailView):
             directory = self.kwargs['directories']
 
         repo = self.get_object()
+        git_repo = pygit2.Repository(repo.get_repo_path())
         owner = repo.owner
 
         # A count() call performs a SELECT COUNT(*) behind the scenes
@@ -211,6 +224,16 @@ class ReduxRepositoryDetailView(DetailView):
             fork_name = None
             fork_owner = None
 
+        file_names = []
+        commit = git_repo.revparse_single('HEAD').tree
+        for e in commit:
+            file_names.append(e.name)
+        files = {}
+        for file in file_names:
+            time = self.get_last_commit_from_file(file).commit_time
+            files[file] = [self.get_last_commit_from_file(file).hex, datetime.datetime.utcfromtimestamp(time).strftime('%m-%d-%Y')]
+        print(files)
+
         # gets passed to react via window.props
         props = {
             'repo_name': self.kwargs['slug'],
@@ -222,6 +245,7 @@ class ReduxRepositoryDetailView(DetailView):
             'is_fork': is_fork,
             'fork_name': fork_name,
             'fork_owner': fork_owner,
+            'commit_from_file': files
         }
 
         context['component'] = self.component
@@ -1380,11 +1404,7 @@ class CommitView(TemplateView):
             diff = None
             if commit.parents:
                 diff = git_repo.diff(commit.parents[0], commit).patch
-                for e in commit.tree.diff_to_tree(commit.parents[0].tree):
-                    files.append(e.delta.new_file.path)
-            else:
-                for e in commit.tree:
-                    files.append(e.name)
+            files = get_files_changed(git_repo, commit)
 
             context['commit'] = commit
             context['diff'] = diff
