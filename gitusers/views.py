@@ -1375,10 +1375,15 @@ class CommitView(TemplateView):
 
         try:
             commit = git_repo.revparse_single(commit_hex)
-            diff = git_repo.diff(commit.parents[0], commit).patch
             files = []
-            for e in commit.tree:
-                files.append(e.name)
+            diff = None
+            if commit.parents:
+                diff = git_repo.diff(commit.parents[0], commit).patch
+                for e in commit.tree.diff_to_tree(commit.parents[0].tree):
+                    files.append(e.delta.new_file.path)
+            else:
+                for e in commit.tree:
+                    files.append(e.name)
 
             context['commit'] = commit
             context['diff'] = diff

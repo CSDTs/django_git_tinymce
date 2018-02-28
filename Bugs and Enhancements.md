@@ -8,11 +8,11 @@
   - ~~remove gitusers model~~
   - ~~Configure CKEditor to allow script tag~~
 
-  - Parse commit message
-    - Show only file changed in commit view
-      - use diff_to_tree()
-      - http://www.pygit2.org/diff.html
-      - current showing the file hex instead of the last commit hex that involves the file changed.
+  - ~~Parse commit message~~
+    - ~~Show only file changed in commit view~~
+      - ~~use diff_to_tree()~~
+      - ~~http://www.pygit2.org/diff.html~~
+      - ~~current showing the file hex instead of the last commit hex that involves the file changed.~~
 
   - Indication of owner in render mode/page
   - Editable template
