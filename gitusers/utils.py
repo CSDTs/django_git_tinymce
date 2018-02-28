@@ -212,3 +212,13 @@ def delete_commit_folders(user, repo, message, filename, directory):
 
     sha = repo.create_commit(ref, author, committer, message, tree2, parents)
     return sha
+
+def get_files_changed(git_repo, commit):
+    files = []
+    if commit.parents:
+        for e in commit.tree.diff_to_tree(commit.parents[0].tree):
+            files.append(e.delta.new_file.path)
+    else:
+        for e in commit.tree:
+            files.append(e.name)
+    return files

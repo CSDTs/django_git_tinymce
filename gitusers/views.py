@@ -25,6 +25,7 @@ from .utils import (
     delete_commit,
     delete_commit_folders,
     find_file_oid_in_tree_using_index,
+    get_files_changed
 )
 
 from django_git.mixins import OwnerRequiredMixin, OwnerOnlyRequiredMixin
@@ -50,7 +51,6 @@ import datetime
 
 
 User = get_user_model()
-
 
 class IndexView(LoginRequiredMixin, ListView):
     model = Repository
@@ -130,43 +130,32 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 class RepositoryDetailView(DetailView):
     model = Repository
     template_name = 'repo/repo_detail.html'
-
     def get_queryset(self):
         queryset = super(RepositoryDetailView, self).get_queryset()
-
         return queryset.filter(owner__username=self.kwargs.get('username'))
-
     def get_context_data(self, **kwargs):
         context = super(RepositoryDetailView, self).get_context_data(**kwargs)
-
         repo_obj = self.get_object()
         user = self.request.user
-
         # open repo dir and display repo files
         try:
             git_repo = pygit2.Repository(repo_obj.get_repo_path())
-
             context['is_owner'] = True if repo_obj.owner == user else False
-
             if git_repo.is_empty:
                 context['empty'] = True
-
                 return context
             else:
                 # get last commit
                 commit = git_repo.revparse_single('HEAD')
                 tree = commit.tree
                 tree = sorted(tree, key=lambda entry: entry.filemode)
-
                 context['tree'] = tree
                 context['branches'] = list(git_repo.branches)
                 context['last_commit'] = commit
                 context['branch_name'] = "master"
                 context['tab'] = "files"
-
         except IOError:
             raise Http404("Repository does not exist")
-
         return context
 '''
 
@@ -180,29 +169,37 @@ class ReduxRepositoryDetailView(DetailView):
 
         return queryset.filter(owner__username=self.kwargs.get('username'))
 
+    def get_last_commit_from_file(self, file):
+        repo = self.get_object()
+        try:
+            git_repo = pygit2.Repository(repo.get_repo_path())
+        except IOError:
+            raise Http404("Repository does not exist")
+        for commit in git_repo.walk(git_repo.head.target, GIT_SORT_TOPOLOGICAL):
+            files = get_files_changed(git_repo, commit)
+            for f in files:
+                if f == file:
+                    return commit
+
     def get_context_data(self, **kwargs):
         context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
-
-        # gets passed to react via window.props
+        repo = self.get_object()
+        git_repo = pygit2.Repository(repo.get_repo_path())
+        owner = repo.owner
         directory = ""
         if 'directories' in self.kwargs:
             directory = self.kwargs['directories']
+        if 'directories_ext' in self.kwargs:
+            directory += "/" + self.kwargs['directories_ext']
 
-        repo = self.get_object()
-        owner = repo.owner
-
-        # A count() call performs a SELECT COUNT(*) behind the scenes
-        # Always use count() rather than loading all of the record into Python
-        # objects and calling len() on the result
-        # (unless need to load the objects into memory anyway, in which case len() will be faster).
-        fork_count = ForkedRepository.objects.filter(original=repo).count()
-
+        forked_repos = ForkedRepository.objects.filter(original=repo)
+        fork_count = len(forked_repos)
         try:
             orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
             if orig_fork:
                 is_fork = True
             orig = orig_fork.original
-            fork_name = orig.slug
+            fork_name = orig.name
             fork_owner = orig.owner.username
         except:
             orig_fork = None
@@ -210,6 +207,28 @@ class ReduxRepositoryDetailView(DetailView):
             orig = None
             fork_name = None
             fork_owner = None
+
+        # Gather all files in directory, and create links to last commits
+        file_names = []
+        directories = []
+        index = git_repo.index
+        for e in index:
+            if e.path.startswith(directory):
+                path = e.path[len(directory)+min(len(directory), 1):]
+                is_directory = path.find("/")
+                if is_directory > -1 and not path[:is_directory] in file_names:
+                    file_names.append(path[:is_directory])
+                    directories.append(path[:is_directory])
+                elif is_directory == -1:
+                    file_names.append(path)
+
+        files = {}
+        for file in file_names:
+            c = self.get_last_commit_from_file(file)
+            if c and not file in directories:
+               files[file] = [c.hex, datetime.datetime.utcfromtimestamp(c.commit_time).strftime('%m-%d-%Y')]
+            else:
+               files[file] = ["", ""]
 
         # gets passed to react via window.props
         props = {
@@ -222,6 +241,7 @@ class ReduxRepositoryDetailView(DetailView):
             'is_fork': is_fork,
             'fork_name': fork_name,
             'fork_owner': fork_owner,
+            'commit_from_file': files
         }
 
         context['component'] = self.component
@@ -279,72 +299,12 @@ class ReduxRepositoryDetailView(DetailView):
 #         return context
 
 
-class ReduxRepositoryFolderDetailView(DetailView):
-    model = Repository
-    template_name = 'repo/redux_repo.html'
-    component = 'js/repo/src/client.min.js'
-
-    def get_queryset(self):
-        queryset = super(ReduxRepositoryFolderDetailView, self).get_queryset()
-        return queryset.filter(owner__username=self.kwargs.get('username'))
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        queryset = queryset.filter(slug=self.kwargs.get('slug'))
-        # get the single obj in queryset
-        obj = queryset.get()
-        return obj
-
-    def get_context_data(self, **kwargs):
-        context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
-        repo = self.get_object()
-        owner = repo.owner
-        directory = ""
-        if 'directories' in self.kwargs:
-            directory = self.kwargs['directories']
-        if 'directories_ext' in self.kwargs:
-            directory += "/" + self.kwargs['directories_ext']
-
-        forked_repos = ForkedRepository.objects.filter(original=repo)
-        fork_count = len(forked_repos)
-        try:
-            orig_fork = ForkedRepository.objects.get(fork__id=repo.id)
-            if orig_fork:
-                is_fork = True
-            orig = orig_fork.original
-            fork_name = orig.name
-            fork_owner = orig.owner.username
-        except:
-            orig_fork = None
-            is_fork = False
-            orig = None
-            fork_name = None
-            fork_owner = None
-
-        props = {
-            'repo_name': self.kwargs['slug'],
-            'repo_owner': owner.username,
-            'repo_owner_id': owner.id,
-            'repo_id': repo.id,
-            'directory': directory,
-            'fork_count': fork_count,
-            'is_fork': is_fork,
-            'fork_name': fork_name,
-            'fork_owner': fork_owner,
-        }
-
-        context['component'] = self.component
-        context['props'] = props
-
-        return context
-
-
-# class ReduxRepositoryFolderDetailView(TemplateView):
+# class ReduxRepositoryDetailView(TemplateView):
 #     template_name = 'repo/redux_repo.html'
 #     component = 'js/repo/src/client.min.js'
 
 #     def get_context_data(self, **kwargs):
-#         context = super(ReduxRepositoryFolderDetailView, self).get_context_data(**kwargs)
+#         context = super(ReduxRepositoryDetailView, self).get_context_data(**kwargs)
 
 #         owner_name = self.kwargs['username']
 #         repo_name = self.kwargs['slug']
@@ -1380,11 +1340,7 @@ class CommitView(TemplateView):
             diff = None
             if commit.parents:
                 diff = git_repo.diff(commit.parents[0], commit).patch
-                for e in commit.tree.diff_to_tree(commit.parents[0].tree):
-                    files.append(e.delta.new_file.path)
-            else:
-                for e in commit.tree:
-                    files.append(e.name)
+            files = get_files_changed(git_repo, commit)
 
             context['commit'] = commit
             context['diff'] = diff
