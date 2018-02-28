@@ -42,8 +42,8 @@ class RepositoryModelForm(forms.ModelForm):
             )
 
         slugified = slugify(name)
-        if Repository.objects.filter(
-                        slug=slugified, owner=self.request.user).exists():
+        if Repository.objects.filter(slug=slugified,
+                                     owner=self.request.user).exists():
                 raise forms.ValidationError(
                     "Slugified repo named '{}' already exists".format(slugified)
                 )
@@ -87,8 +87,8 @@ class RepositoryUpdateModelForm(forms.ModelForm):
                 )
 
             slugified = slugify(name)
-            if Repository.objects.filter(
-                        slug=slugified, owner=self.request.user).exists():
+            if Repository.objects.filter(slug=slugified,
+                                         owner=self.request.user).exists():
                     raise forms.ValidationError(
                         "Slugified repo named '{}' already exists".format(slugified)
                     )
@@ -198,8 +198,8 @@ class RepoForkRenameForm(forms.Form):
             )
 
         slugified = slugify(new_reponame)
-        if Repository.objects.filter(
-                        slug=slugified, owner=self.request.user).exists():
+        if Repository.objects.filter(slug=slugified,
+                                     owner=self.request.user).exists():
             raise forms.ValidationError(
                 "Slugified repo named '{}' already exists".format(slugified)
             )
