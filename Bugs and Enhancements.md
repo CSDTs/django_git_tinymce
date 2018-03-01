@@ -1,3 +1,5 @@
+This file should be deleted and replaced with issues on the repository. I added the major issues that weren't already there.
+
 **Back-end**:
   - ~~Modify tag and sub-tag of repo (ModelForm)~~
   - ~~Fix create file form - wrong editor~~
@@ -39,7 +41,7 @@
   - Download image corrupt (suspect extention in CAP letters) - file: layout.js(256:165)
     - This can be handled by backend, easier.
   - ~~Commit Log page broken~~
-  - Subfoder view, base folder link in CAP letters
+  - ~~Subfoder view, base folder link in CAP letters~~
 
 
 **Both**:

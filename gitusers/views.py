@@ -196,7 +196,7 @@ class ReduxRepositoryDetailView(DetailView):
             if orig_fork:
                 is_fork = True
             orig = orig_fork.original
-            fork_name = orig.name
+            fork_name = orig.slug
             fork_owner = orig.owner.username
         except:
             orig_fork = None
