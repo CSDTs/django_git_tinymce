@@ -122,35 +122,31 @@ class FilesView(APIView):
             time2 = json.dumps(datetime.datetime.fromtimestamp(commit.commit_time), default=date_handler)
             dir_hier = directory
 
-            main_list = {
-                        'files': tuplet,
-                        'hex': commit.hex,
-                        'message': commit.message,
-                        'author': commit.author.name,
-                        'committer': commit.committer.name,
-                        'time': time2,
-                        'branches': list(this_repo.branches),
-                        'is_owner': is_owner,
-                        'is_empty': empty,
-                        'dir_hier': dir_hier,
-                        'is_editor': is_editor,
-            }
+            main_list = {'files': tuplet,
+                         'hex': commit.hex,
+                         'message': commit.message,
+                         'author': commit.author.name,
+                         'committer': commit.committer.name,
+                         'time': time2,
+                         'branches': list(this_repo.branches),
+                         'is_owner': is_owner,
+                         'is_empty': empty,
+                         'dir_hier': dir_hier,
+                         'is_editor': is_editor}
 
         except:
             # no files, no initial commit so no head hex
-            main_list = {
-                        'files': tuplet,
-                        'hex': None,
-                        'message': None,
-                        'author': None,
-                        'committer': None,
-                        'time': None,
-                        'branches': [],
-                        'is_owner': is_owner,
-                        'is_empty': empty,
-                        'is_editor': is_editor,
-                        'dir_hier': None,
-            }
+            main_list = {'files': tuplet,
+                         'hex': None,
+                         'message': None,
+                         'author': None,
+                         'committer': None,
+                         'time': None,
+                         'branches': [],
+                         'is_owner': is_owner,
+                         'is_empty': empty,
+                         'is_editor': is_editor,
+                         'dir_hier': None}
 
         return Response(main_list, status=status.HTTP_200_OK)
 
