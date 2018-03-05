@@ -113,8 +113,11 @@ def repo_setup(git_repo, repo_instance):
         # git_repo.index.add(fn)
         # git_repo.index.write()
 
-        # img/git_repo.png
-        with open(os.path.join(settings.STATIC_ROOT, '../img/default_image.png'), 'rb') as f:
+        # check for uploaded image, otherwise use default_repo
+        image_path = os.path.join(settings.STATIC_ROOT, '../img/default_repo.png')
+        if repo_instance.image and repo_instance.image.path:
+            image_path = os.path.join(repo_instance.image.path)
+        with open(image_path, 'rb') as f:
             data = f.read()
 
         fn = "{}.png".format(repo_instance.slug)
