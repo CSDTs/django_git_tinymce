@@ -217,6 +217,9 @@ class ReduxRepositoryDetailView(DetailView):
                 if is_directory > -1 and not path[:is_directory] in file_names:
                     file_names.append(path[:is_directory])
                     directories.append(path[:is_directory])
+                elif path == ".uplevel" and not ".uplevel" in file_names:
+                    file_names.append(path)
+                    directories.append(path)
                 elif is_directory == -1:
                     file_names.append(path)
 
@@ -645,7 +648,7 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
     def form_valid(self, form):
         git_repo = pygit2.Repository(self.repo_obj.get_repo_path())
 
-        filename = '.placeholder'
+        filename = '.uplevel'
         if "/" not in filename:
             url_directories = ""
             if 'directories' in self.kwargs:
