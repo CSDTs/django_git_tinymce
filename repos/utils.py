@@ -143,6 +143,16 @@ def repo_setup(git_repo, repo_instance):
         git_repo.index.read()
         git_repo.index.add(os.path.join('img', fn))
         git_repo.index.write()
+
+        # .uplevel
+        fn = "img/.uplevel"
+        f = open(os.path.join(git_repo.workdir, fn), 'w')
+        f.close()
+        git_repo.index.read()
+        git_repo.index.add(fn)
+        git_repo.index.write()
+
+        
         tree2 = git_repo.index.write_tree()
 
         git_repo.create_commit('HEAD', s, s, 'Initialized repo\

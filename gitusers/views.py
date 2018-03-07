@@ -969,7 +969,10 @@ class BlobDeleteView(TemplateView):
         try:
             os.remove(os.path.join(repo.workdir) + filename)
         except OSError:
-            raise Http404("Failed to delete file")
+            try: # Delete entire directory if filename points to a directory
+                shutil.rmtree(os.path.join(repo.workdir) + filename)
+            except OSError: # If filename points to neither a file nor a directory
+                raise Http404("Failed to delete file")
 
         return HttpResponseRedirect(reverse(
             'gitusers:repo_detail',
