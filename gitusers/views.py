@@ -135,7 +135,7 @@ class RepositoryDetailView(DetailView):
     def get_queryset(self):
         queryset = super(RepositoryDetailView, self).get_queryset()
         return queryset.filter(owner__username=self.kwargs.get('username'))
-    
+
     def get_context_data(self, **kwargs):
         context = super(RepositoryDetailView, self).get_context_data(**kwargs)
         repo_obj = self.get_object()
@@ -1533,4 +1533,3 @@ class SSIPreviewView(TemplateView):
         context['url'] = str(os.path.join(repo.get_repo_path(), directory, filename))
         print("**********************", context['url'])
         return context
-        
