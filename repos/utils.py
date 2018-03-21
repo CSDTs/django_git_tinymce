@@ -152,7 +152,6 @@ def repo_setup(git_repo, repo_instance):
         git_repo.index.add(fn)
         git_repo.index.write()
 
-        
         tree2 = git_repo.index.write_tree()
 
         git_repo.create_commit('HEAD', s, s, 'Initialized repo\

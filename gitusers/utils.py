@@ -3,6 +3,7 @@ from repos.models import Repository
 from pygit2 import Signature
 from os import path
 
+
 def owner_editor_check(repo, request_user):
     if not isinstance(repo, Repository):
         return False
@@ -208,6 +209,7 @@ def delete_commit_folders(user, repo, message, filename, directory):
     sha = repo.create_commit(ref, author, committer, message, tree2, parents)
     return sha
 
+
 def delete_item(repo, file):
     index_tree = repo.index
     index_tree.read()
@@ -215,13 +217,14 @@ def delete_item(repo, file):
     for e in index_tree:
         files.append(e.path)
     for f in files:
-        #if the target file is found, or it exists in a subdirectory called file
+        # if the target file is found, or it exists in a subdirectory called file
         if f == file or f.startswith(file + '/'):
             try:
                 index_tree.remove(f)
             except:
                 pass
     index_tree.write()
+
 
 def get_files_changed(git_repo, commit):
     files = []
@@ -231,5 +234,5 @@ def get_files_changed(git_repo, commit):
     else:
         for e in commit.tree:
             files.append(e.name)
-            
+
     return files

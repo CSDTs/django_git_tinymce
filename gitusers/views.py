@@ -52,6 +52,7 @@ import datetime
 
 User = get_user_model()
 
+
 class IndexView(LoginRequiredMixin, ListView):
     model = Repository
     template_name = 'gituser/index.html'
@@ -125,14 +126,16 @@ class RepositoryCreateView(LoginRequiredMixin, CreateView):
 
         return valid_data
 
-# Replaced with ReduxRepositoryDetailView
 
+# Replaced with ReduxRepositoryDetailView
 class RepositoryDetailView(DetailView):
     model = Repository
     template_name = 'repo/repo_detail.html'
+
     def get_queryset(self):
         queryset = super(RepositoryDetailView, self).get_queryset()
         return queryset.filter(owner__username=self.kwargs.get('username'))
+    
     def get_context_data(self, **kwargs):
         context = super(RepositoryDetailView, self).get_context_data(**kwargs)
         repo_obj = self.get_object()
@@ -214,10 +217,10 @@ class ReduxRepositoryDetailView(DetailView):
             if e.path.startswith(directory):
                 path = e.path[len(directory_slash):]
                 is_directory = path.find("/")
-                if is_directory > -1 and not path[:is_directory] in file_names:
+                if is_directory > -1 and path[:is_directory] not in file_names:
                     file_names.append(path[:is_directory])
                     directories.append(path[:is_directory])
-                elif path == ".uplevel" and not ".uplevel" in file_names:
+                elif path == ".uplevel" and ".uplevel" not in file_names:
                     file_names.append(path)
                     directories.append(path)
                 elif is_directory == -1:
@@ -225,8 +228,8 @@ class ReduxRepositoryDetailView(DetailView):
 
         files = {}
         for file in file_names:
-            c = self.get_last_commit_from_file(directory_slash+file)
-            if c and not file in directories:
+            c = self.get_last_commit_from_file(directory_slash + file)
+            if c and file not in directories:
                 files[file] = [c.hex, datetime.datetime.utcfromtimestamp(c.commit_time).strftime('%m-%d-%Y')]
             else:
                 files[file] = ["", ""]
@@ -969,9 +972,9 @@ class BlobDeleteView(TemplateView):
         try:
             os.remove(os.path.join(repo.workdir) + filename)
         except OSError:
-            try: # Delete entire directory if filename points to a directory
+            try:  # Delete entire directory if filename points to a directory
                 shutil.rmtree(os.path.join(repo.workdir) + filename)
-            except OSError: # If filename points to neither a file nor a directory
+            except OSError:  # If filename points to neither a file nor a directory
                 raise Http404("Failed to delete file")
 
         return HttpResponseRedirect(reverse(
@@ -1344,7 +1347,7 @@ class CommitView(TemplateView):
 
             context['commit'] = commit
             context['diff'] = diff
-            context['files'] = filesz
+            context['files'] = files
         except:
             context['commit'] = None
 
@@ -1530,3 +1533,4 @@ class SSIPreviewView(TemplateView):
         context['url'] = str(os.path.join(repo.get_repo_path(), directory, filename))
         print("**********************", context['url'])
         return context
+        
