@@ -152,8 +152,7 @@ def delete_commit(user, repo, message, filename):
         useremail = 'none@noemail.com'
     author = Signature(user.username, useremail)
     committer = Signature(user.username, useremail)
-    repo.index.remove(filename)
-    repo.index.write()
+    delete_item(repo, path.join(filename))
     tree = repo.index.write_tree()
     parent = None
     try:
@@ -193,10 +192,7 @@ def delete_commit_folders(user, repo, message, filename, directory):
         useremail = 'none@noemail.com'
     author = Signature(user.username, useremail)
     committer = Signature(user.username, useremail)
-    index_tree = repo.index
-    index_tree.read()
-    index_tree.remove(path.join(directory, filename))
-    index_tree.write()
+    delete_item(repo, path.join(directory, filename))
     index_tree = repo.index
 
     tree2 = index_tree.write_tree()
@@ -212,3 +208,31 @@ def delete_commit_folders(user, repo, message, filename, directory):
 
     sha = repo.create_commit(ref, author, committer, message, tree2, parents)
     return sha
+
+
+def delete_item(repo, file):
+    index_tree = repo.index
+    index_tree.read()
+    files = []
+    for e in index_tree:
+        files.append(e.path)
+    for f in files:
+        # if the target file is found, or it exists in a subdirectory called file
+        if f == file or f.startswith(file + '/'):
+            try:
+                index_tree.remove(f)
+            except:
+                pass
+    index_tree.write()
+
+
+def get_files_changed(git_repo, commit):
+    files = []
+    if commit.parents:
+        for e in commit.tree.diff_to_tree(commit.parents[0].tree):
+            files.append(e.delta.new_file.path)
+    else:
+        for e in commit.tree:
+            files.append(e.name)
+
+    return files

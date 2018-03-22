@@ -63,6 +63,8 @@ class Repository(models.Model):
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
 
+    class Meta:
+        verbose_name_plural = "repositories"
 
 # Django Signals
 # https://docs.djangoproject.com/en/1.11/ref/signals/#post-save

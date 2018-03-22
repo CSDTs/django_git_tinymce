@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Django-Git | {% block title %}{% endblock %}</title>
+	<title>CSDT OPENS | {% block title %}{% endblock %}</title>
 	<link rel="shortcut icon" href="/static/img/favicon.ico">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<!-- Optional theme -->
@@ -46,14 +46,6 @@
 	      		</form>
 				<ul class="nav navbar-nav navbar-right">
 				{% if request.user.is_authenticated %}
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dashboard <span class="caret"></span></a>
-					<ul class="dropdown-menu" role="menu">
-						<li><a href="{% url "gitusers:index" user %}">My Repositories</a></li>
-						<li class="divider"></li>
-						<li><a href="{% url 'gitusers:create' user %}">New Repository</a></li>
-					</ul>
-				</li>
 				<!-- <li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"title="You have 2 notifications">
 					<span class="glyphicon glyphicon-bell text-danger"></span>
@@ -66,6 +58,8 @@
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ request.user }} <span class="caret"></span></a>
 					<ul class="dropdown-menu" role="menu">
+						<li><a href="{% url 'gitusers:create' user %}">New Repository</a></li>
+						<li class="divider"></li>
 						<li><a href="{% url "gitusers:index" user %}">My account</a></li>
 						<li class="divider"></li>
 						<li><a href="{% url 'logout' %}">Logout</a></li>

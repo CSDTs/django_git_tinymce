@@ -12,7 +12,6 @@ from .views import (
     RepositoryForkView,
     RepositoryUpdateView,
     ReduxRepositoryDetailView,
-    ReduxRepositoryFolderDetailView,
     BlobDeleteView,
     BlobDeleteFolderView,
     RenameFileView,
@@ -66,7 +65,7 @@ urlpatterns = [
     url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/createfolder/$', RepositoryCreateFolderView.as_view(), name='create_folder_folder'),  # noqa: E501
 
 
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/$', ReduxRepositoryFolderDetailView.as_view(), name='repo_detail_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/$', ReduxRepositoryDetailView.as_view(), name='repo_detail_folder'),  # noqa: E501
 
 
     # blob ssi
@@ -116,5 +115,5 @@ urlpatterns = [
 
 
     # testing this out: (need to keep last in list)
-    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/$', ReduxRepositoryFolderDetailView.as_view(), name='repo_detail_folder'),  # noqa: E501
+    url(r'^(?P<slug>[-\w]+)/(?P<directories>[\w-]+)/(?P<directories_ext>.*)/$', ReduxRepositoryDetailView.as_view(), name='repo_detail_folder'),  # noqa: E501
 ]
