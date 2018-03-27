@@ -34,7 +34,7 @@
 
   textinput.on( 'input', function() {
     console.log($(this).val());
-    if ( foldername_check( $(this).val() )){
+    if ( this.name == "folder_name" && foldername_check( $(this).val() )){
       warningP.html("Your folder name will be: " + '<font color="red">' + slugify($(this).val()) + "</font>");
       textinput.change(function() {
         $(this).val(slugify($(this).val()));
@@ -47,7 +47,7 @@
   });
 
   function foldername_check(text){
-    return /\s+/g.test(text) || /[^\w\-!.]+/g.test(text) ||
+    return /[^\w\-!./\s]+/g.test(text) ||
          /\-\-+/g.test(text) || /^-+/.test(text) || /-+$/.test(text)
          ;
   }
