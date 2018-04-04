@@ -49,4 +49,8 @@ To access site admin:
 
 # React/Redux
 
-Frontend was created using React (Redux). To set up webpack for compiling the React JSX code into a client.min.js file, browse to ```/static/js/repo/``` (or /menu/ if you are working on the menu page) and type into the terminal ```npm install```. This will set up your NPM dependencies in a /node_modules folder (You will need Node installed). Remember not to upload /node_modules to github (it is .gitignore'd anyway). Use the command ```webpack``` to compile your React code into the client.min.js file, which you _do_ want to upload to github. You can of course use webpack-dev-server to autocompile on save, though you will still need to use the ```webpack``` command for the final compilation of client.min.js before uploading to github because of React warnings regarding production mode.
+Frontend was created using React (Redux). To set up webpack for compiling the React JSX code into a client.min.js file:
+* browse to ```/static/js/repo/``` (or /menu/ if you are working on the menu page) 
+* ```npm install```. This will set up your NPM dependencies in a /node_modules folder (You will need Node installed). Remember not to upload /node_modules to github (it is .gitignore'd anyway). 
+* ```webpack``` to compile your React code into the client.min.js file, which you _do_ want to upload to github. You can of course use webpack-dev-server to autocompile on save, though you will still need to use the ```webpack``` command for the final compilation of client.min.js before uploading to github because of React warnings regarding production mode.
+
