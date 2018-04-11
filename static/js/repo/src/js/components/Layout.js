@@ -186,6 +186,22 @@ export default class Layout extends React.Component {
     //   return
     // }
 
+    // Sort files by type first, then name
+    const type_sort = {"blob": 2, "uplevel": 0, "tree": 1};
+    this.props.files.files.sort(
+      function(x, y) {
+        if (x.name == ".uplevel")
+          x.type = "uplevel";
+        else if (y.name == "..")
+          y.type = "uplevel";
+        if (type_sort[x.type] == type_sort[y.type]) {
+          return y.name.toLowerCase() < x.name.toLowerCase();
+        }
+        else {
+          return type_sort[x.type] - type_sort[y.type];
+        }
+      }
+    );
 
     return <div>
       <Dropzone
@@ -233,7 +249,7 @@ export default class Layout extends React.Component {
           <p className="dir-tree"><a href={`/${window.props.repo_owner}/${window.props.repo_name}`}>{`${window.props.repo_name}`}</a> {folders()}</p>
 
           <div class="panel panel-success">
-            {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a><a className="pull-right" href={`/${window.props.repo_owner}/${window.props.repo_name}/commit`}>Commit Log</a></div> : <div class="panel-heading">No Files Yet</div> }
+            {(files.committer) ? <div class="panel-heading">Last commit message by <a href={`/${files.committer}`}>{files.committer}</a>: <a href={`/${window.props.repo_owner}/${window.props.repo_name}/commit/${files.hex}`}>{files.message} <font style={{color: '#999'}}><i>({this.timeFormat(files.time)})</i></font></a><a className="pull-right" href={`/${window.props.repo_owner}/${window.props.repo_name}/commit`}>Commit Log</a></div> : <div class="panel-heading">No Files Yet</div> }
             <table class="table">
               <thead>
                 <tr>
@@ -245,17 +261,27 @@ export default class Layout extends React.Component {
                 </tr>
               </thead>
               <tbody>
-
               {this.props.files.files.map((file) => {
                 const icon = this.getIcon(file.type)
-                const editLink = (files.is_owner || files.is_editor) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}edit/${file.name}`} style={{fontSize: '.75em', color: '#999'}}>edit</a>: null : null
-                const renameLink = (files.is_owner || files.is_editor) ? (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/rename`} style={{fontSize: '.75em', color: '#444'}}>rename</a>: null : null
-                const fileLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/render/${window.props.directory}/${file.name}`}>{ file.name }</a> : (file.type == 'blob') ? <a href={`render/${file.name}`}>{ file.name }</a> : <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}${file.name}`}>{ file.name }</a>
-                const deleteLink = ((files.is_owner || files.is_editor) && file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a> : null
-                const rawLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/blob/${window.props.directory}/${file.name}`}><font style={{fontSize: '.75em', color: '#333'}}>raw</font></a> : (file.type == 'blob') ? <a href={`blob/${file.name}`}><font style={{fontSize: '.75em', color: '#333'}}>raw</font></a> : null
-                const downloadLink = (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}`} download={`${file.name}`}><font style={{fontSize: '.75em', color: '#999'}}>download</font></a> : null
+                const editLink = (files.is_owner || files.is_editor) ? (file.type == 'blob') ?
+                  <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}edit/${file.name}`} style={{fontSize: '.75em', color: '#999'}}>edit</a>
+                  : null : null
+                const renameLink = (files.is_owner || files.is_editor) ? (file.type == 'blob') ?
+                  <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/rename`} style={{fontSize: '.75em', color: '#444'}}>rename</a>
+                  : null : null
+                const fileLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/render/${window.props.directory}/${file.name}`}>{ file.name }</a> : (file.type == 'blob') ? <a href={`render/${file.name}`}>{ file.name }</a>
+                  : (file.type == 'uplevel') ? <a href={'../'}>{ '..' }</a>
+                  : <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}${file.name}`}>{ file.name }</a>
+                const deleteLink = ((files.is_owner || files.is_editor) && (file.type !== 'uplevel')) ?
+                  <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}/delete`}><font style={{fontSize: '.75em', color: '#f33'}}>delete</font></a>
+                  : null
+                const rawLink = (file.type == 'blob' && window.props.directory !== "") ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/blob/${window.props.directory}/${file.name}`}><font style={{fontSize: '.75em', color: '#333'}}>raw</font></a>
+                  : (file.type == 'blob') ? <a href={`blob/${file.name}`}><font style={{fontSize: '.75em', color: '#333'}}>raw</font></a>
+                  : null
+                const downloadLink = (file.type == 'blob') ? <a href={`/${window.props.repo_owner}/${window.props.repo_name}/${(window.props.directory !== '') ? `${window.props.directory}/` : ``}blob/${file.name}`} download={`${file.name}`}><font style={{fontSize: '.75em', color: '#999'}}>download</font></a>
+                  : null
 
-                return <tr key={file.name + file.type + file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink} &nbsp;{renameLink}</th><td>{rawLink}</td><td>{downloadLink}</td><td>{deleteLink}</td><td><a href={`commit/${file.id}`}>{file.id}</a></td></tr>
+                return <tr key={file.name + file.type + file.id}><th scope="row">{icon} {fileLink} &nbsp;{editLink} &nbsp;{renameLink}</th><td>{rawLink}</td><td>{downloadLink}</td><td>{deleteLink}</td><td><a href={`/${window.props.repo_owner}/${window.props.repo_name}/commit/${window.props.commit_from_file[file.name][0]}`}>{`${window.props.commit_from_file[file.name][1]}`}</a></td></tr>
               })}
 
               </tbody>
