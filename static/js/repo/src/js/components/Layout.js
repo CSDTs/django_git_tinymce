@@ -225,7 +225,7 @@ export default class Layout extends React.Component {
           &nbsp;&nbsp;&nbsp;&nbsp;
           {(files.is_owner || files.is_editor) &&
           <div class="btn-group ">
-            <button type="button" class="btn btn-danger"><i className="glyphicon glyphicon-cog"/></button>
+            <button type="button" class="btn btn-danger"><a href={`setting/`}><font style={{color: '#fff'}}><i className="glyphicon glyphicon-cog"/></font></a></button>
             <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <span class="caret"></span>
               <span class="sr-only">Toggle Dropdown</span>
