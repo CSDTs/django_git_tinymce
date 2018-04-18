@@ -80,22 +80,19 @@ export default class Layout extends React.Component {
     var req=request
               .post(`/api/v1/files/${window.props.repo_id}/${(window.props.directory !== "") ? `${window.props.directory}/` : ""}`)
               .use(throttle.plugin())
+
     files.forEach((dropped_file) => {
-
-
-
-      req.attach('name', dropped_file);
-      //file.append('name',dropped_file)
-
-      });
-      req.send
-      req.end(function(err,response){
-        if (!err) {
-          window.location.reload();
-        }
+      if (!(this.props.files.files.some(e => e.name === dropped_file.name)) || window.confirm("Do you want to overwrite " + dropped_file.name + "?"))
+        req.attach('name', dropped_file);
+    });
+    req.send
+    req.end(function(err,response){
+      if (!err) {
+        window.location.reload();
+      }
     })
-
   }
+  
   onDragEnter() {
     this.setState({
       dropzoneActive: true

@@ -13,7 +13,10 @@ def repo_setup(git_repo, repo_instance):
         raise TypeError("git_object is not a pygit2 Repository object")
 
     if git_repo.head_is_unborn:
-        s = pygit2.Signature(repo_instance.owner.username, repo_instance.owner.email, int(time.time()), 0)
+        s_email = repo_instance.owner.email
+        if not s_email:
+            s_email = "csdtrpi@gmail.com"
+        s = pygit2.Signature(repo_instance.owner.username, s_email, int(time.time()), 0)
         data = '<p><h1>{}</h1></p>'.format(repo_instance)
         fn = 'README.html'
         f = open(os.path.join(git_repo.workdir, fn), 'w')
@@ -22,7 +25,6 @@ def repo_setup(git_repo, repo_instance):
         git_repo.index.read()
         git_repo.index.add(fn)
         git_repo.index.write()
-
         # data = preset_html.left_navbar
         # # fn = "nav_" + repo_instance.slug + ".html"
         # fn = "left_navbar"
