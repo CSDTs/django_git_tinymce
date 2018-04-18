@@ -689,7 +689,10 @@ class RepositoryCreateFolderView(OwnerRequiredMixin, FormView):
             except OSError:  # Guard against race condition
                 raise
         else:
-            if len(os.listdir(self.repo_obj.get_repo_path() + "/" + dirname)) > 0:
+            if find_file_oid_in_tree(dirname, tree) != 404:
+                form.add_error(None, "file exists with this name")
+                return self.form_invalid(form)
+            elif len(os.listdir(self.repo_obj.get_repo_path() + "/" + dirname)) > 0:
                 form.add_error(None, "path already exists")
                 return self.form_invalid(form)
 
