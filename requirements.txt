@@ -12,6 +12,6 @@ djangorestframework-jwt==1.11.0
 flake8==3.5.0
 Pillow==5.1.0
 pycparser==2.18
-pygit2==0.26.4
+pygit2==0.27.2
 pytz==2018.4
 six==1.11.0
