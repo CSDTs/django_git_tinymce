@@ -7,7 +7,7 @@ django-cleanup==2.1.0
 django-crispy-forms==1.7.2
 django-filter==1.1.0
 django-tinymce4-lite==1.7.3
-djangorestframework==3.8.2
+djangorestframework==3.9.0
 djangorestframework-jwt==1.11.0
 flake8==3.5.0
 Pillow==5.3.0
