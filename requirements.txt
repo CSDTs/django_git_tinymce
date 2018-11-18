@@ -3,7 +3,7 @@ cffi==1.11.4
 Django==1.11.16 # pyup: < 2.0.0 until 2020-04-01
 django-bootstrap3==11.0.0
 django-ckeditor==5.6.1
-django-cleanup==2.1.0
+django-cleanup==3.0.1
 django-crispy-forms==1.7.2
 django-filter==1.1.0
 django-tinymce4-lite==1.7.3
