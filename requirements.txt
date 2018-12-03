@@ -1,6 +1,6 @@
 bleach==3.0.2
 cffi==1.11.4
-Django==1.11.16 # pyup: < 2.0.0 until 2020-04-01
+Django==1.11.17 # pyup: < 2.0.0 until 2020-04-01
 django-bootstrap3==11.0.0
 django-ckeditor==5.6.1
 django-cleanup==2.1.0
